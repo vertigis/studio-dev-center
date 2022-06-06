@@ -1,0 +1,1 @@
+(globalThis.webpackChunkvertigis_studio_dev_center=globalThis.webpackChunkvertigis_studio_dev_center||[]).push([[5256],{5256:(e,i,s)=>{"use strict";s.r(i)}}]);

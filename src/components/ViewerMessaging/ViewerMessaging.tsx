@@ -121,7 +121,7 @@ function ViewerMessaging(props: ViewerMessagingProps) {
             };
 
             const actionOverrideDef: Definition = {
-                description: `An action to execute in the viewer; can be an action name, an action object, or a command chain (https://developers.geocortex.com/docs/${product}/configuration-commands-operations/#command-chains). The list of valid action names are the names of the commands and operations listed in this document`,
+                description: `An action to execute in the viewer; can be an action name, an action object, or a command chain (https://developers.vertigisstudio.com/docs/${product}/configuration-commands-operations/#command-chains). The list of valid action names are the names of the commands and operations listed in this document`,
                 // Basic definition of a command chain
                 anyOf: [
                     actionString,

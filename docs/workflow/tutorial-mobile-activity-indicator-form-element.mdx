@@ -9,7 +9,7 @@ import TabItem from "@theme/TabItem";
 import MobilePrereqs from "./snippets/prereqs-mobile.mdx";
 import WorkflowUrlSnippet from "../snippets/workflow-url.mdx";
 
-Implementing a custom [form element](key-concepts.mdx#form-elements) allows you to augment the existing [form elements that come with VertiGIS Studio Workflow](https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/form-elements/auto-complete.htm%3FTocPath%3DForms%7CForm%2520Element%2520Reference%7C_____0).
+Implementing a custom [form element](key-concepts.mdx#form-elements) allows you to augment the existing [form elements that come with VertiGIS Studio Workflow](https://docs.geocortex.com/workflow/latest/help/Default.htm#wf5/help/form-elements/auto-complete.htm%3FTocPath%3DForms%7CForm%2520Element%2520Reference%7C_____0).
 This article will walk you through creating a form element that displays a loading indicator.
 
 <img
@@ -32,31 +32,36 @@ Implementing a custom form element in VertiGIS Studio Mobile consists of three s
 
 ## Set up the Custom Form Element Skeleton
 
-1. Create a new file `LoadingIndicator.cs` in the platform agnostic project of the VertiGIS Studio Mobile [Quickstart](../mobile/sdk-overview.mdx).
-2. Add a new skeleton form element that implements `FormComponent`.
+1. Using Visual Studio, create a new file, using the Xamarin Forms: Content View template. Name the file `LoadingIndicator.xaml`, and place it in the platform agnostic project of the VertiGIS Studio Mobile [Quickstart](../mobile/sdk-overview.mdx).
+2. Change the base class to `ContentComponent` both in the xaml and in the code-behind.
 
-```cs title="App1/App1/workflow/LoadingIndicator.cs"
-using VertiGIS.Mobile.Workflow.Components;
-using Xamarin.Forms;
+```xml title="App1/App1/workflow/LoadingIndicator.xaml"
+<?xml version="1.0" encoding="UTF-8"?>
+// highlight-next-line
+<core:ContentComponent xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:core="clr-namespace:VertiGIS.Mobile.Workflow.Core;assembly=VertiGIS.Mobile.Workflow"
+                       x:Class="App1.Workflow.LoadingIndicator">
+    <ContentView.Content>
+        <Label Text="Hello Xamarin.Forms!" />
+    </ContentView.Content>
+</core:ContentComponent>
+```
+
+```cs title="App1/App1/workflow/LoadingIndicator.xaml.cs"
+using VertiGIS.Mobile.Workflow.Core;
+using Xamarin.Forms.Xaml;
 
 namespace App1.Workflow
 {
-    public class LoadingIndicator : FormComponent
+    [XamlCompilation(XamlCompilationOptions.Compile)]
+    // highlight-next-line
+    public partial class LoadingIndicator : ContentComponent
     {
-        private readonly View _view;
-
         public LoadingIndicator(Geocortex.Workflow.Runtime.Definition.Forms.Element element, string name)
             : base(element, name)
         {
-            _view = new Label() { Text = "I'm a custom form component!" };
-
-            Add(new GenericComponent(_view));
-        }
-
-        public override void Render()
-        {
-            base.Render();
-            _view.IsEnabled = IsEnabled;
+            InitializeComponent();
         }
     }
 }
@@ -164,40 +169,26 @@ namespace App1.Workflow
 
 ## Add the Loading Indicator
 
-Next we can add the loading indicator to the form element.
+Next we can add the loading indicator to the form element xaml.
 
-```cs title="App1/App1/workflow/LoadingIndicator.cs"
-using VertiGIS.Mobile.Infrastructure.UI;
-using VertiGIS.Mobile.Workflow.Components;
-
-namespace App1.Workflow
-{
-    public class LoadingIndicator : FormComponent
-    {
-        private readonly EnhancedActivityIndicator _view;
-
-        public LoadingIndicator(Geocortex.Workflow.Runtime.Definition.Forms.Element element, string name)
-            : base(element, name)
-        {
-            // highlight-start
-            _view = new EnhancedActivityIndicator()
-            {
-                IsRunning = true,
-                HeightRequest = 75,
-                WidthRequest = 75,
-                Margin = 10
-            };
-            // highlight-end
-
-            Add(new GenericComponent(_view));
-        }
-    }
-}
+```xml title="App1/App1/workflow/LoadingIndicator.xaml.cs"
+<?xml version="1.0" encoding="UTF-8"?>
+<core:ContentComponent xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:core="clr-namespace:VertiGIS.Mobile.Workflow.Core;assembly=VertiGIS.Mobile.Workflow"
+                       // highlight-next-line
+                       xmlns:views="clr-namespace:VertiGIS.Mobile.Toolkit.Views;assembly=VertiGIS.Mobile.Toolkit"
+                       x:Class="App1.Workflow.LoadingIndicator">
+    <ContentView.Content>
+        // highlight-next-line
+        <views:EnhancedActivityIndicator IsEnabled="{Binding IsEnabled}" IsRunning="True" HeightRequest="75" WidthRequest="75" Margin="10"/>
+    </ContentView.Content>
+</core:ContentComponent>
 ```
 
 ## Test your Activity
 
-Now you can [build a workflow for VertiGIS Studio Mobile](https://docs.vertigisstudio.com/mobileviewer/latest/admin-help/Default.htm#gmv/designer/add-a-workflow-to-an-app.htm) that uses your new custom form element! It is **essential** that this custom activity be run before the custom form element is used. It is best practice to run the form element registration activity at the start of a workflow.
+Now you can [build a workflow for VertiGIS Studio Mobile](https://docs.geocortex.com/mobileviewer/latest/admin-help/Default.htm#gmv/designer/add-a-workflow-to-an-app.htm) that uses your new custom form element! It is **essential** that this custom activity be run before the custom form element is used. It is best practice to run the form element registration activity at the start of a workflow.
 
 :::note
 
@@ -212,7 +203,7 @@ Now you can [build a workflow for VertiGIS Studio Mobile](https://docs.vertigiss
     </a>{" "}
     that registers and displays the custom form element and
     <a
-        href="https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/import-export-workflows.htm"
+        href="https://docs.geocortex.com/workflow/latest/help/Default.htm#wf5/help/import-export-workflows.htm"
         target="_blank"
     >
         {" "}

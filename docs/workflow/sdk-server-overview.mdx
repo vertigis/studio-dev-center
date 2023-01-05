@@ -40,7 +40,7 @@ Extending VertiGIS Studio Workflow Server requires you to produce a separate ass
 -   This will copy the referenced nuget assemblies to the build output folder, which will be important for later.
 
 1. [Add a reference](https://docs.microsoft.com/en-us/visualstudio/ide/how-to-add-or-remove-references-by-using-the-reference-manager?view=vs-2019) to the `VertiGIS.Workflow.Runtime` assembly.
-   By default, this is located in`C:\Program Files\Latitude Geographics\VertiGIS Studio Workflow\Deployment\service`
+   By default, this is located in`C:\Program Files\VertiGIS\VertiGIS Studio Workflow\Deployment\service`
 
 :::important
 .NET Standard projects **must** target .NET Standard 2.0, and .NET Core projects must target .NET Core 2.1, or else the assembly will be incompatible with VertiGIS Studio Workflow Server.
@@ -66,7 +66,7 @@ For VertiGIS Studio Workflow Server to find your custom activities, you need to 
 1. Find the `CustomAssemblies` folder on disk.
     1. VertiGIS Studio Workflow looks in a folder called `CustomAssemblies` for assemblies that contain custom activities.
        This is located in the folder that you chose when installing VertiGIS Studio Workflow. The default location is
-       `C:\Program Files\Latitude Geographics\VertiGIS Studio Workflow\CustomAssemblies`
+       `C:\Program Files\VertiGIS\VertiGIS Studio Workflow\CustomAssemblies`
 1. Copy the relevant files from the build output to the `CustomAssemblies` folder.
     1. Copy your project's assembly. (e.g. `AssemblyNamespace.dll`)
     1. Copy any third-party libraries that your project relies on (these should have been output to the build folder)
@@ -95,7 +95,7 @@ You can debug custom VertiGIS Studio Workflow Server activities by attaching to 
 
 To automate the deployment to VertiGIS Studio Workflow Server, we have to add a post build step to the project that copies the build output.
 
-1. Locate the `Custom Assemblies` folder in the VertiGIS Studio Workflow Server installation. The default location is `C:\Program Files\Latitude Geographics\VertiGIS Studio Workflow\CustomAssemblies`
+1. Locate the `Custom Assemblies` folder in the VertiGIS Studio Workflow Server installation. The default location is `C:\Program Files\VertiGIS\VertiGIS Studio Workflow\CustomAssemblies`
 2. Create a file `excluded_files.txt` at the root of the project that excludes the appropriate build output files as described in the [deployment section](#deploying-vertigis-studio-workflow-server-activities).
 
 ```
@@ -105,7 +105,7 @@ VertiGIS.Workflow.Runtime.xml
 
 2. Edit the post build event in the project properties.
     - Add a command which copies the build output to the `Custom Assemblies` folder.
-    - `xcopy "$(OutDir)*" "C:\Program Files\Latitude Geographics\VertiGIS Studio Workflow\CustomAssemblies" /Exclude:$(ProjectDir)excludedFiles.txt /y`
+    - `xcopy "$(OutDir)*" "C:\Program Files\VertiGIS\VertiGIS Studio Workflow\CustomAssemblies" /Exclude:$(ProjectDir)excludedFiles.txt /y`
 3. Run a rebuild and ensure all appropriate files are copied.
 
 :::important

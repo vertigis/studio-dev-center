@@ -46,7 +46,7 @@ First, let's change the inputs and outputs to properties that make sense for cal
 :::
 
 ```ts title="src/activities/CustomActivity.ts"
-import type { IActivityHandler } from "@geocortex/workflow/runtime/IActivityHandler";
+import type { IActivityHandler } from "@vertigis/workflow/runtime/IActivityHandler";
 
 // highlight-start
 export interface CalculateLogInputs {
@@ -89,7 +89,7 @@ export class CalculateLog implements IActivityHandler {
 Next, modify the `execute` method of the activity to calculate the logarithm of a number given an optional base
 
 ```ts title="src/activities/CustomActivity.cs"
-import type { IActivityHandler } from "@geocortex/workflow/runtime/IActivityHandler";
+import type { IActivityHandler } from "@vertigis/workflow/runtime/IActivityHandler";
 
 export interface CalculateLogInputs {
     /**

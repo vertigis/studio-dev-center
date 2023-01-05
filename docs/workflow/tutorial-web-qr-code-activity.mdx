@@ -45,7 +45,7 @@ To create a new activity:
 Modify the skeleton activity implementation in `src/activities/CreateQrCodeImage.ts` to match the following example which provides a minimal QR code implementation.
 
 ```tsx title="src/activities/CreateQrCodeImage.ts"
-import type { IActivityHandler } from "@geocortex/workflow/runtime/IActivityHandler";
+import type { IActivityHandler } from "@vertigis/workflow/runtime/IActivityHandler";
 import QRCode, { QRCodeToDataURLOptions } from "qrcode";
 
 /** An interface that defines the inputs of the activity. */
@@ -108,7 +108,7 @@ Once you've seen your activity in action you may want to take advantage of the m
 Modify the previous activity implementation in `src/activities/CreateQrCodeImage.ts` to match the following more complete example.
 
 ```tsx title="src/activities/CreateQrCodeImage.ts"
-import type { IActivityHandler } from "@geocortex/workflow/runtime/IActivityHandler";
+import type { IActivityHandler } from "@vertigis/workflow/runtime/IActivityHandler";
 import QRCode, { QRCodeToDataURLOptions } from "qrcode";
 
 /** An interface that defines the inputs of the activity. */

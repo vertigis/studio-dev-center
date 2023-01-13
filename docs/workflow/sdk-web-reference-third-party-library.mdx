@@ -17,7 +17,7 @@ You can reference third party JavaScript libraries to augment [custom activities
 You can install the dependency in your project using `npm`. For example, `npm install moment`. After your package has been installed you can import and use the library as you normally would. This example demonstrates a custom activity that uses the `moment` library to return the current date and time in a human readable format.
 
 ```ts
-import type { IActivityHandler } from "@geocortex/workflow/runtime/IActivityHandler";
+import type { IActivityHandler } from "@vertigis/workflow/runtime/IActivityHandler";
 // highlight-next-line
 import * as moment from "moment";
 
@@ -42,7 +42,7 @@ export class CurrentTime implements IActivityHandler {
 import {
     CustomFormElementProps,
     RegisterCustomFormElementBase,
-} from "@geocortex/workflow/runtime/app/RegisterCustomFormElementBase";
+} from "@vertigis/workflow/runtime/app/RegisterCustomFormElementBase";
 import React, { useEffect, useState } from "react";
 import { SketchPicker } from "react-color";
 

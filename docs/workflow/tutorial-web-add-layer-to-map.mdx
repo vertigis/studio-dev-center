@@ -24,13 +24,13 @@ This article will walk you through creating a custom activity that adds a new la
 ## Modify the Activity to Access App Properties
 
 1. Add an import for the `AppActivity` base class at the top of the `AddLayerToMap.ts` file.
-   `import { AppActivity } from "@geocortex/workflow/runtime/app/AppActivity";`
+   `import { AppActivity } from "@vertigis/workflow/runtime/app/AppActivity";`
 1. Modify the activity class declaration to extend the `AppActivity` base class.
    `export class AddLayerToMap extends AppActivity`
 
 ```ts title="src/activities/AddLayerToMap.ts"
 // highlight-next-line
-import { AppActivity } from "@geocortex/workflow/runtime/app/AppActivity";
+import { AppActivity } from "@vertigis/workflow/runtime/app/AppActivity";
 
 /**
  * @supportedApps GWV
@@ -55,7 +55,7 @@ This activity assumes that it will be running in VertiGIS Studio Web, and so [it
 :::
 
 ```ts title="src/activities/AddLayerToMap.ts"
-import { AppActivity } from "@geocortex/workflow/runtime/app/AppActivity";
+import { AppActivity } from "@vertigis/workflow/runtime/app/AppActivity";
 // highlight-start
 import * as Map from "esri/Map";
 import * as Graphic from "esri/Graphic";

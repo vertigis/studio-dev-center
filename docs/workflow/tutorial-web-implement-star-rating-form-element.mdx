@@ -35,7 +35,7 @@ Implementing a custom form element for web applications consists of three steps:
 
 ```tsx title="src/form-elements/StarRatingElement.tsx"
 import * as React from "react";
-import { CustomFormElementProps } from "@geocortex/workflow/runtime/app/RegisterCustomFormElementBase";
+import { CustomFormElementProps } from "@vertigis/workflow/runtime/app/RegisterCustomFormElementBase";
 
 function StarRatingElement(props: CustomFormElementProps) {
     return <div>Hello. Is it me you're looking for.</div>;
@@ -51,7 +51,7 @@ export default StarRatingElement;
 1. Remove unnecessary inputs and outputs and register your custom form element in the `execute` method.
 
 ```ts title="src/activities/CustomFormElementRegistration.tsx"
-import { RegisterCustomFormElementBase } from "@geocortex/workflow/runtime/app/RegisterCustomFormElementBase";
+import { RegisterCustomFormElementBase } from "@vertigis/workflow/runtime/app/RegisterCustomFormElementBase";
 import StarRatingElement from "../form-elements/StarRatingElement";
 
 /**
@@ -74,7 +74,7 @@ First, let's build the star DOM elements.
 ```tsx title="src/form-elements/StarRatingElement.tsx"
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { CustomFormElementProps } from "@geocortex/workflow/runtime/app/RegisterCustomFormElementBase";
+import { CustomFormElementProps } from "@vertigis/workflow/runtime/app/RegisterCustomFormElementBase";
 
 export default function StarRatingFormElement(
     props: CustomFormElementProps
@@ -126,7 +126,7 @@ Next, we are going to add interactivity to the form element to show how many sta
 ```tsx title="src/form-elements/StarRatingElement.tsx"
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { CustomFormElementProps } from "@geocortex/workflow/runtime/app/RegisterCustomFormElementBase";
+import { CustomFormElementProps } from "@vertigis/workflow/runtime/app/RegisterCustomFormElementBase";
 
 export default function StarRatingFormElement(
     props: CustomFormElementProps
@@ -192,7 +192,7 @@ Finally, we are going to expose the form elements value to the larger workflow. 
 ```tsx title="src/form-elements/StarRatingElement.tsx"
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { CustomFormElementProps } from "@geocortex/workflow/runtime/app/RegisterCustomFormElementBase";
+import { CustomFormElementProps } from "@vertigis/workflow/runtime/app/RegisterCustomFormElementBase";
 
 export default function StarRatingFormElement(
     props: CustomFormElementProps

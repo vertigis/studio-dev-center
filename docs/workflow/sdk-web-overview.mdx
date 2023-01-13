@@ -16,7 +16,8 @@ The VertiGIS Studio Workflow SDK provides a [development toolkit](https://github
 
 ## Requirements
 
--   VertiGIS Studio Workflow 5.21 or later if running on-premises.
+-   VertiGIS Studio Workflow 5.31 or later.
+    -   If you are using an older version of Workflow, refer to the [previous releases of the SDK](https://github.com/vertigis/vertigis-workflow-sdk/releases).
 -   The latest LTS version of [Node.js](https://nodejs.org/en/).
 -   A code editor of your choice. We recommend [Visual Studio Code](https://code.visualstudio.com/).
 
@@ -172,6 +173,13 @@ To share an activity pack with other workflow authors in your organization share
 :::note
 You do not need to share the activity pack Portal item with the end users of your applications that run workflows containing custom activities. It only affects the visibility of the activity pack in the VertiGIS Studio Workflow Designer.
 :::
+
+## Migrating to v3
+
+If you're migrating from v1 or v2 of the SDK to v3, you will need to perform the following changes:
+
+1. Run `npm update`.
+1. Find and replace all instances of `@geocortex/workflow` with `@vertigis/workflow`.
 
 ## Migrating from the Legacy SDK
 

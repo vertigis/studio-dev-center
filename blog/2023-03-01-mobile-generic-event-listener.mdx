@@ -1,0 +1,307 @@
+---
+title: Mobile Generic Event Listener
+author: Kenneth Walker
+authorTitle: Software Developer
+authorURL: https://github.com/kewalker
+authorImageURL: https://github.com/kewalker.png
+tags: [mobile, workflow]
+---
+
+import Link from "@docusaurus/Link";
+
+VertiGIS Studio Mobile `5.22` includes an exciting new capability for working with commands, operations and events. This capability allows app authors to execute custom, configured actions in response to events raised in Mobile. To opt in to this behavior, app authors register an event listener (subscriber) for any given Mobile event. When this event is raised in Mobile, the corresponding configured command or operation is invoked.
+
+<!--truncate-->
+
+:::note
+To use these new features, you will need the latest version of VertiGIS Studio Mobile.
+:::
+
+The new events capability can be exercised in a few ways:
+
+-   [Registering an event listener and action](#register-a-listener)
+-   [Command chaining](#command-chaining)
+-   [Specifying a sender](#specify-a-sender)
+-   [Workflow and context](#workflows-and-context)
+-   [Raise custom event](#raise-custom-events)
+
+:::tip Want a complete list of events?
+Check out the [Events](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations-events#events) for the complete list of eligible events that can be listened to.
+:::
+
+## Register a Listener
+
+To get started, you'll want to introduce a new item `$type` into your `app.json` configuration: the `event-listener`.
+
+```json
+{
+    "$type": "event-listener",
+    "id": "custom-event-listener",
+    "listeners": [
+        // ... to be populated with listeners ...
+    ]
+}
+```
+
+### Wire up a new `Listener`
+
+With the new `event-listener` app item, you register a listener to a given event and respond with a configured action. Below, we're taking advantage of the [map.viewpoint-changed](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations-events/#event-map.viewpoint-changed) event. In particular, it's configured with the [highlights.clear](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations-events#command-highlights.clear) command. When you pan the map, the `map.viewpoint-changed` event is raised, and in turn, our `highlights.clear` command is executed. No more highlights when we pan!
+
+```json
+{
+    "$type": "event-listener",
+    "id": "custom-event-listener",
+    "listeners": [
+        {
+            "event": "map.viewpoint-changed",
+            "action": "highlights.clear"
+        }
+        // ... more listeners ...
+    ]
+}
+```
+
+Of course, multiple listeners may be registered. They can listen to both distinct or duplicate events:
+
+```json
+{
+    "$type": "event-listener",
+    "id": "custom-event-listener",
+    "listeners": [
+        {
+            "event": "map.viewpoint-changed",
+            "action": "highlights.clear"
+        },
+        {
+            "event": "map.viewpoint-changed",
+            "action": "highlights.clear-focus"
+        },
+        {
+            "event": "layers.visibility-changed",
+            "action": "log-viewer.display"
+        }
+        // ... more listeners ...
+    ]
+}
+```
+
+## Command Chaining
+
+We can pair event listening with [Command Chains](https://developers.vertigisstudio.com/docs/mobile/configuration-commands-operations/#command-chains) to react with multiple actions chained together. In the example below, we'll react to a map pan by both clearing highlights and closing the panel. Notice that we can mix the use of simple syntax with the dictionary syntax that can optionally provide arguments.
+
+```json
+{
+    "$type": "event-listener",
+    "id": "custom-event-listener",
+    "listeners": [
+        {
+            "event": "map.viewpoint-changed",
+            "action": [
+                "highlights.clear",
+                {
+                    "name": "panel.close-host-panel",
+                    "arguments": {}
+                }
+            ]
+        }
+        // ... more listeners ...
+    ]
+}
+```
+
+## Specify A Sender
+
+Use the `sender` property to configure the listener such that it **only** reacts to those events that originate from the specified sender. A sender could correspond to a given component or service. Specifying the sender is optional.
+
+Take the example below where two `map-extension`s are configured. Since `sender` is specified as "map-config-1", viewpoint changed events raised from this map will result in highlights being cleared. Viewpoint changed events raised from "map-config-2" are effectively ignored.
+
+```json
+{
+    "$type": "map-extension",
+    "id": "map-config-1",
+    "webMap": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx1"
+    // ...
+},
+{
+    "$type": "map-extension",
+    "id": "map-config-2",
+    "webMap": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx2"
+    // ...
+},
+
+// ...
+
+{
+    "$type": "event-listener",
+    "id": "custom-event-listener",
+    "listeners": [
+        {
+            "event": "map.viewpoint-changed",
+            "sender": "item://map-extension/map-config-1",
+            "action": ["highlights.clear"]
+        },
+        // ... more listeners ...
+    ]
+}
+```
+
+:::note
+If the `sender` is omitted, any instance of the raised event will trigger the configured action.
+:::
+
+## Workflows and Context
+
+Using this new capability, you can also configure a Studio Workflow as an action to invoke in response to an event being raised.
+
+:::tip Want to learn more about Studio Workflow?
+Check out the overview to learn more about [Studio Workflow](https://developers.vertigisstudio.com/docs/workflow/overview).
+:::
+
+Below, we'll configure a [workflow.run](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations-events#command-workflow.run) action and listen to a [layers.visibility-changed](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations-events#event-layers.visibility-changed) event. Notice that we can specify arguments for our action, which in this case, will be the `id` of a `$type: "workflow"` item in `app.json` configuration.
+
+In this example, toggling an entry in the layer list will invoke the configured workflow.
+
+```json
+{
+    "$type": "event-listener",
+    "id": "custom-event-listener",
+    "listeners": [
+        {
+            "event": "layers.visibility-changed",
+            "action": {
+                "name": "workflow.run",
+                "arguments": {
+                    "id": "visibility-workflow" // this id corresponds to the id of the workflow item that we want to invoke
+                }
+            }
+        },
+        // ... more listeners ...
+    ]
+},
+
+// ...
+
+{
+    // The corresponding Workflow that we want to invoke in response to an event.
+    "$type": "workflow",
+    "id": "visibility-workflow",
+    "title": "My Visibility Workflow",
+    "target": "auto",
+    "portalItem": "https://www.arcgis.com/sharing/rest/content/items/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "commandArgumentInput": "context"
+},
+```
+
+### A Workflow with Context
+
+Running a Workflow is a powerful way to react to events raised during an app session. Pairing a Workflow with the `context` capability gives us an opportunity to use an input from the event in the Workflow activity.
+
+Notice below that the configured Workflow is configured with a `commandArgumentInput` value of `context`:
+
+```json
+{
+    "$type": "workflow",
+    "commandArgumentInput": "context"
+    // ...
+},
+```
+
+Using the `layers.visibility-changed` event, we configure a Workflow as an action, being mindful of the `commandArgumentInput`.
+
+```json
+{
+    "$type": "event-listener",
+    "id": "custom-event-listener",
+    "listeners": [
+        {
+            "event": "layers.visibility-changed",
+            "action": {
+                "name": "workflow.run",
+                "arguments": {
+                    "id": "visibility-workflow" // this id corresponds to the id of the workflow item that we want to invoke
+                }
+            }
+        },
+        // ... more listeners ...
+    ]
+},
+
+// ...
+
+{
+    // The corresponding Workflow that we want to invoke in response to an event.
+    "$type": "workflow",
+    "id": "visibility-workflow",
+    "title": "My Visibility Workflow",
+    "target": "auto",
+    "portalItem": "https://www.arcgis.com/sharing/rest/content/items/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "commandArgumentInput": "context"
+},
+```
+
+By specifying the `context`, we're able to retrieve an input value within a Workflow using the [Get Workflow Inputs](https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/activities/get-workflow-inputs.htm#Get_Workflow_Inputs_Activity) activity.
+
+In our Workflow, we would want to run the `Get Workflow Inputs` activity as our first activity retrieve the input. Once we have the input as an object in our Workflow, we can access the `context` to start working with the input.
+
+In the case of the `layers.visibility-changed` event, we're able to retrieve and work with the `LayerContent` as an input to our Workflow. Below is an example of how to access the `LayerContent` from the `context` and get at the `id`, which could then be used in any subsequent activity, for example an alert or a query:
+
+```javascript
+=$getWorkflowInputs1.inputs.context.LayerContent.id.toString()
+```
+
+:::important
+The value provided to `commandArgumentInput` and the accessor used within the `Get Workflow Inputs` activity object **must** match to correctly access an input (i.e. both `context` in this example).
+:::
+
+## Raise Custom Events
+
+While Mobile exposes a number of events that may be listened to, there are times where it would be beneficial to respond to events that _aren't_ raised. Fortunately, there are also capabilities that allow app authors to raise custom events.
+
+### Raise Event through Action
+
+Using the new [viewer.publish-event](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations-events#command-viewer.publish-event), a custom event can be raised. This action can be configured anywhere in the app that supports actions, like buttons, hooks, command chains, etc. Below is an example of a configured button action:
+
+```json
+"action": {
+    "name": "viewer.publish-event",
+    "arguments": {
+        "name": "custom.raised-event",
+        "arguments": {}
+    }
+}
+```
+
+### Raise Event through Workflow
+
+But what if we want to raise a custom event during execution of a Workflow? Using the [Publish Event](https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/activities/publish-event.htm) activity, it's possible to raise a custom event from anywhere in your Workflow logic. Simply provide the same custom event name to the `Event Name` input in the `Publish Event` activity. Arguments may also be provided. For the above example, that would be:
+
+```json
+custom.raised-event;
+```
+
+:::note
+Although not recommended, it's also possible to use the `viewer.publish-event` command and the `Publish Event` activity to manually publish well-known Mobile events, i.e. `map.viewpoint-changed`.
+:::
+
+### Subscribe to Custom Event
+
+Of course, publishing these events is only one side of the capabilities. Using the same mechanism introduced above, these custom raised events can be listened to, and configured with an action to invoke.
+
+```json
+{
+    "$type": "event-listener",
+    "id": "custom-event-listener",
+    "listeners": [
+        {
+            "event": "custom.raised-event",
+            "action": "..."
+        }
+    ]
+}
+```
+
+Custom events could in turn raise more events with the `viewer.publish-event`, which could in turn be listened to. Together, the publishing and listening capabilities offer flexibility to respond to custom events with configured actions.
+
+## In Closing
+
+We're excited to showcase these new capabilities for commands, operations and events. We hope app authors can take advantage of them to create more responsive and exciting applications. Happy building!

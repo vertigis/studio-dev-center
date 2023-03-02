@@ -172,6 +172,43 @@ VertiGIS Studio Mobile screenshots should be roughly taken with a certain window
 <img src={useBaseUrl("img/layout-multi-component-config.png")}/>
 ```
 
+## Blog
+
+### Adding new Blog Posts
+
+New blog posts can be created under the `blog` folder. To add a new page:
+
+1. Create a new `.mdx` file under the `blog` folder. When naming the file, prefix with the date (using the existing international pattern yyyy-mm-dd) followed by a relevant title. The name of the file is important as it will become the name in the URL. For example, `docs/web/overview.mdx` becomes https://developers.vertigisstudio.com/docs/web/overview
+2. Add the appropriate boilerplate at the top of the file in the following format:
+
+```
+---
+title: New Generic Event Listener
+author: Kenneth Walker
+authorTitle: Software Developer
+authorURL: https://github.com/kewalker
+authorImageURL: https://github.com/kewalker.png
+tags: [mobile, workflow]
+---
+
+import Link from "@docusaurus/Link";
+
+A short description that will be visible in the list of blog posts. Anything below the <!--truncate--> tag will be revealed when the user clicks `Read More` on the blog entry.
+
+<!--truncate-->
+```
+
+-   `title` becomes the prefix of the window title. For example `New Generic Event Listener`
+-   `author` is the name of the person who wrote the blog post
+-   `authorTitle` is the position of the person who wrote the blog post
+-   `authorUrl` is a link to the author's github
+-   `authorImageUrl` is a link to the author's github image
+-   `tags` is a comma separated list of tags to apply to the post - blog posts can be filtered by clicking on one of these links
+
+The remaining blog content should follow the `<!--truncate-->` tag.
+
+Be sure to refer to existing blog posts, or the content above, for tips and tricks related to styling, links, images, etc.
+
 #### Prettier
 
 If you've added a file or made non-trivial changes, run `npm prettier:write` in the root of this directory. This will fix the formatting of the file(s) in case there are any issues. Forgetting to do this could result in your PR build failing the linting check.

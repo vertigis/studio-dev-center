@@ -14,7 +14,7 @@ VertiGIS Studio Mobile `5.22` includes an exciting new capability for working wi
 <!--truncate-->
 
 :::note
-To use these new features, you will need the latest version of VertiGIS Studio Mobile.
+To use these new features, you will need a `5.22+` version of VertiGIS Studio Mobile.
 :::
 
 The new events capability can be exercised in a few ways:
@@ -31,7 +31,7 @@ Check out the [Events](https://developers.vertigisstudio.com/docs/mobile/api-com
 
 ## Register a Listener
 
-To get started, you'll want to introduce a new item `$type` into your `app.json` configuration: the `event-listener`.
+To get started, you'll want to introduce a new item `$type` into your `app.json` configuration: the `event-listener`. Today, you'll need to manually configure this app item and any respective listeners. Support for configuring listeners through Designer will be coming soon.
 
 ```json
 {
@@ -84,6 +84,10 @@ Of course, multiple listeners may be registered. They can listen to both distinc
     ]
 }
 ```
+
+:::warning
+The event listener capability is only available after the map has begun initializing. Listeners for events that fire _before_ the `map.initializing` event will not trigger any actions.
+:::
 
 ## Command Chaining
 

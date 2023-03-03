@@ -9,7 +9,7 @@ tags: [mobile, workflow]
 
 import Link from "@docusaurus/Link";
 
-VertiGIS Studio Mobile `5.22` includes an exciting new capability for working with commands, operations and events. This capability allows app authors to execute custom, configured actions in response to events raised in Mobile. To opt in to this behavior, app authors register an event listener (subscriber) for any given Mobile event. When this event is raised in Mobile, the corresponding configured command or operation is invoked.
+VertiGIS Studio Mobile `5.22` includes an exciting new capability for working with commands, operations, and events. This capability allows app authors to execute custom, configured actions in response to events raised in Mobile. To opt in to this behavior, app authors register an event listener (subscriber) for any given Mobile event. When this event is raised in Mobile, the corresponding configured command or operation is invoked.
 
 <!--truncate-->
 
@@ -196,7 +196,7 @@ In this example, toggling an entry in the layer list will invoke the configured 
 
 Running a Workflow is a powerful way to react to events raised during an app session. Pairing a Workflow with the `context` capability gives us an opportunity to use an input from the event in the Workflow activity.
 
-Notice below that the configured Workflow is configured with a `commandArgumentInput` value of `context`:
+Notice below that the Workflow item specifies a `commandArgumentInput` value of `context`:
 
 ```json
 {
@@ -241,7 +241,7 @@ Using the `layers.visibility-changed` event, we configure a Workflow as an actio
 
 By specifying the `context`, we're able to retrieve an input value within a Workflow using the [Get Workflow Inputs](https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/activities/get-workflow-inputs.htm#Get_Workflow_Inputs_Activity) activity.
 
-In our Workflow, we would want to run the `Get Workflow Inputs` activity as our first activity retrieve the input. Once we have the input as an object in our Workflow, we can access the `context` to start working with the input.
+In our Workflow, we would want to run `Get Workflow Inputs` as our first activity to retrieve the input. Once we have the input as an object in our Workflow, we can access the `context` to start working with the input.
 
 In the case of the `layers.visibility-changed` event, we're able to retrieve and work with the `LayerContent` as an input to our Workflow. Below is an example of how to access the `LayerContent` from the `context` and get at the `id`, which could then be used in any subsequent activity, for example an alert or a query:
 
@@ -259,7 +259,7 @@ While Mobile exposes a number of events that may be listened to, there are times
 
 ### Raise Event through Action
 
-Using the new [viewer.publish-event](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations-events#command-viewer.publish-event), a custom event can be raised. This action can be configured anywhere in the app that supports actions, like buttons, hooks, command chains, etc. Below is an example of a configured button action:
+Using the new [viewer.publish-event](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations-events#command-viewer.publish-event) command, a custom event can be raised. This action can be configured anywhere in the app that supports actions, like buttons, hooks, command chains, etc. Below is an example of a configured button action:
 
 ```json
 "action": {
@@ -276,7 +276,7 @@ Using the new [viewer.publish-event](https://developers.vertigisstudio.com/docs/
 But what if we want to raise a custom event during execution of a Workflow? Using the [Publish Event](https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/activities/publish-event.htm) activity, it's possible to raise a custom event from anywhere in your Workflow logic. Simply provide the same custom event name to the `Event Name` input in the `Publish Event` activity. Arguments may also be provided. For the above example, that would be:
 
 ```json
-custom.raised-event;
+custom.raised-event
 ```
 
 :::note
@@ -304,4 +304,4 @@ Custom events could in turn raise more events with the `viewer.publish-event`, w
 
 ## In Closing
 
-We're excited to showcase these new capabilities for commands, operations and events. We hope app authors can take advantage of them to create more responsive and exciting applications. Happy building!
+We're excited to showcase these new capabilities for commands, operations, and events. We hope app authors can take advantage of them to create more responsive and exciting applications. Happy building!

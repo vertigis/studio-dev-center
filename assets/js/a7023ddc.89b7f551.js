@@ -1,1 +1,0 @@
-(globalThis.webpackChunkvertigis_studio_dev_center=globalThis.webpackChunkvertigis_studio_dev_center||[]).push([[1713],{7485:o=>{"use strict";o.exports=JSON.parse('{"workflow":{"allTagsPath":"/blog/tags","slug":"workflow","name":"workflow","count":1,"permalink":"/blog/tags/workflow"}}')}}]);

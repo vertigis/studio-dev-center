@@ -1,0 +1,1 @@
+(globalThis.webpackChunkvertigis_studio_dev_center=globalThis.webpackChunkvertigis_studio_dev_center||[]).push([[3825],{8137:e=>{"use strict";e.exports=JSON.parse('{"allTagsPath":"/blog/tags","slug":"mobile","name":"mobile","count":1,"permalink":"/blog/tags/mobile"}')}}]);

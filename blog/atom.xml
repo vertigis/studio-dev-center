@@ -2,11 +2,18 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://developers.vertigisstudio.com/blog</id>
     <title>VertiGIS Studio Developer Center Blog</title>
-    <updated>2021-03-22T00:00:00.000Z</updated>
+    <updated>2023-03-01T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://developers.vertigisstudio.com/blog"/>
     <subtitle>VertiGIS Studio Developer Center Blog</subtitle>
     <icon>https://developers.vertigisstudio.com/img/favicon.ico</icon>
+    <entry>
+        <title type="html"><![CDATA[Mobile Generic Event Listener]]></title>
+        <id>Mobile Generic Event Listener</id>
+        <link href="https://developers.vertigisstudio.com/blog/2023/03/01/mobile-generic-event-listener"/>
+        <updated>2023-03-01T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[VertiGIS Studio Mobile 5.22 includes an exciting new capability for working with commands, operations, and events. This capability allows app authors to execute custom, configured actions in response to events raised in Mobile. To opt in to this behavior, app authors register an event listener (subscriber) for any given Mobile event. When this event is raised in Mobile, the corresponding configured command or operation is invoked.]]></summary>
+    </entry>
     <entry>
         <title type="html"><![CDATA[New Workflow Form Element API]]></title>
         <id>New Workflow Form Element API</id>

@@ -41,24 +41,25 @@ To create a new form element:
 1. Run `npm run generate` in the terminal.
 1. When prompted, select `Form Element`.
 1. Enter the name of the form element you would like to create and press `Enter`. For example, `QrCode`.
-1. Open the newly created `src/activities/QrCode.tsx` file.
+1. Open the newly created `src/elements/QrCode.tsx` file.
 
 ## Implement the Custom Form Element
 
-Modify the skeleton form element implementation in `src/activities/QrCode.tsx` to match the following example.
+Modify the skeleton form element implementation in `src/elements/QrCode.tsx` to match the following example.
 
-```tsx title="src/activities/QrCode.tsx"
-import React, { useEffect, useState } from "react";
+```tsx title="src/elements/QrCode.tsx"
+import * as React from "react";
+import { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import type { CustomFormElementProps } from "@vertigis/workflow/runtime/app/RegisterCustomFormElementBase";
-import { RegisterCustomFormElementBase } from "@vertigis/workflow/runtime/app/RegisterCustomFormElementBase";
+import {
+    FormElementProps,
+    FormElementRegistration,
+} from "@vertigis/workflow/runtime";
 
-/**
- * A simple React Component that displays a QR code.
- * @param props The props that will be provided by the Workflow runtime.
- */
-const QrCode = (props: CustomFormElementProps) => {
-    const value = props.element.value as string;
+interface QrCodeProps extends FormElementProps<string> {}
+
+function QrCode(props: QrCodeProps): React.ReactElement | null {
+    const { value } = props;
     const [qrCodeUrl, setQrCodeUrl] = useState("");
 
     // Update the QR code when the value changes
@@ -83,18 +84,16 @@ const QrCode = (props: CustomFormElementProps) => {
 
     // Render the QR code as an image
     return qrCodeUrl ? <img src={qrCodeUrl} /> : null;
-};
-
-/**
- * @displayName Register QrCode Form Element
- * @category Custom Activities
- * @description Registers a QR Code form element.
- */
-export class RegisterQrCodeElement extends RegisterCustomFormElementBase {
-    execute() {
-        this.register("QrCode", QrCode);
-    }
 }
+
+const QrCodeElementRegistration: FormElementRegistration<QrCodeProps> =
+    {
+        component: QrCode,
+        getInitialProperties: () => ({ value: "" }),
+        id: "QrCode",
+    };
+
+export default QrCodeElementRegistration;
 ```
 
 ## Deploy the Form Element
@@ -103,14 +102,15 @@ Follow the instructions to [build and deploy the activity pack](sdk-web-overview
 
 ## Test the Form Element
 
-Once your activity pack is hosted and registered, your `Register QrCode Form Element` custom activity should appear in the activity toolbox in VertiGIS Studio Workflow Designer alongside the built-in activities.
+Once your activity pack is hosted and registered, your `QrCode` custom form element should appear in the form element toolbox in VertiGIS Studio Workflow Designer alongside the built-in form elements.
 
 To use your custom form element in a workflow:
 
-1. Add your `Register QrCode Form Element` custom activity to your workflow so that it runs **before** any `Display Form` activities that will use the custom form element.
 1. Select the `Display Form` activity that you want to include your form element in.
-1. Add a `Custom` form element to the form.
-1. Set the `Custom Type` property of the `Custom` form element to `QrCode`.
+1. Locate the `QrCode` form element in the toolbox and drag it onto the form.
+1. Alternatively:
+    1. Add a `Custom` form element to the form.
+    1. Set the `Custom Type` property of the `Custom` form element to `QrCode`.
 1. Add a `load` event subworkflow to the form element.
 1. Add a `Set Form Element Property` activity to the subworkflow.
 1. Set the `Property Name` input to `value`.

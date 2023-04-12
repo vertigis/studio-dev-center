@@ -36,62 +36,53 @@ To create a new form element:
 1. Run `npm run generate` in the terminal.
 1. When prompted, select `Form Element`.
 1. Enter the name of the form element you would like to create and press `Enter`. For example, `StarRating`.
-1. Open the newly created `src/activities/StarRating.tsx` file.
+1. Open the newly created `src/elements/StarRating.tsx` file.
 
 ## Implement the Custom Form Element
 
-Modify the skeleton form element implementation in `src/activities/StarRating.tsx` to match the following example.
+Modify the skeleton form element implementation in `src/elements/StarRating.tsx` to match the following example.
 
-```tsx title="src/activities/StarRating.tsx"
-import React, { useEffect, useState } from "react";
+```tsx title="src/elements/StarRating.tsx"
+import * as React from "react";
 import StarRatings from "react-star-ratings";
 import {
-    CustomFormElementProps,
-    RegisterCustomFormElementBase,
-} from "@vertigis/workflow/runtime/app/RegisterCustomFormElementBase";
+    FormElementProps,
+    FormElementRegistration,
+} from "@vertigis/workflow/runtime";
+
+interface StarRatingProps extends FormElementProps<number> {}
 
 /**
  * A simple React Component that displays a star rating input.
  * @param props The props that will be provided by the Workflow runtime.
  */
-const StarRating = (props: CustomFormElementProps) => {
-    const [rating, setRating] = useState(props.element.value);
+function StarRating(props: StarRatingProps): React.ReactElement {
+    const { setValue, value } = props;
 
     // Update the form state when the rating value changes.
-    const handleRatingChange = (newRating) => {
-        setRating(newRating);
-        props.element.value = newRating;
-        props.raiseEvent("changed", newRating);
+    const handleRatingChange = (newRating: number) => {
+        setValue(newRating);
     };
-
-    // Set local state when the form state changes.
-    useEffect(() => {
-        // Provide a default value if no value exists.
-        setRating(props.element.value ?? 0);
-    }, [props.element.value]);
 
     return (
         <StarRatings
             changeRating={handleRatingChange}
-            rating={rating}
+            rating={value}
             starDimension="1.5em"
             starHoverColor="#ffb400"
             starRatedColor="#ffb400"
         />
     );
-};
-
-/**
- * @displayName Register StarRating Form Element
- * @category Custom Activities
- * @description Registers a Star Rating form element
- */
-export class RegisterStarRatingElement extends RegisterCustomFormElementBase {
-    /** Perform the execution logic of the activity. */
-    execute() {
-        this.register("StarRating", StarRating);
-    }
 }
+
+const StarRatingElementRegistration: FormElementRegistration<StarRatingProps> =
+    {
+        component: StarRating,
+        getInitialProperties: () => ({ value: 0 }),
+        id: "StarRating",
+    };
+
+export default StarRatingElementRegistration;
 ```
 
 ## Deploy the Form Element
@@ -100,12 +91,13 @@ Follow the instructions to [build and deploy the activity pack](sdk-web-overview
 
 ## Test the Form Element
 
-Once your activity pack is hosted and registered, your `Register StarRating Form Element` custom activity should appear in the activity toolbox in VertiGIS Studio Workflow Designer alongside the built-in activities.
+Once your activity pack is hosted and registered, your `StarRating` custom form element should appear in the form element toolbox in VertiGIS Studio Workflow Designer alongside the built-in form elements.
 
 To use your custom form element in a workflow:
 
-1. Add your `Register StarRating Form Element` custom activity to your workflow so that it runs **before** any `Display Form` activities that will use the custom form element.
 1. Select the `Display Form` activity that you want to include your form element in.
-1. Add a `Custom` form element to the form.
-1. Set the `Custom Type` property of the `Custom` form element to `StarRating`.
+1. Locate the `StarRating` form element in the toolbox and drag it onto the form.
+1. Alternatively:
+    1. Add a `Custom` form element to the form.
+    1. Set the `Custom Type` property of the `Custom` form element to `StarRating`.
 1. Test your workflow.

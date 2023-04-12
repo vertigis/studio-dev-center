@@ -39,48 +39,34 @@ export class CurrentTime implements IActivityHandler {
 2. Follow the instructions above to create and register a new custom form element `ColorPicker.tsx` React component that just returns a single color picker.
 
 ```ts
-import {
-    CustomFormElementProps,
-    RegisterCustomFormElementBase,
-} from "@vertigis/workflow/runtime/app/RegisterCustomFormElementBase";
-import React, { useEffect, useState } from "react";
+import * as React from "react";
 import { SketchPicker } from "react-color";
+import {
+    FormElementProps,
+    FormElementRegistration,
+} from "@vertigis/workflow/runtime";
 
-/**
- * A simple React Component that displays a color picker.
- * @param props The props that will be provided by the Workflow runtime.
- */
-const ColorPicker = (props: CustomFormElementProps) => {
-    const [color, setColor] = useState(props.element.value);
+interface ColorPickerProps extends FormElementProps<string> {}
 
-    // Update the form state when the color picker value changes.
+function ColorPicker(props: ColorPickerProps): React.ReactElement {
+    const { setValue, value } = props;
+
     const handleColorChange = (newColor) => {
         const newValue = newColor.hex;
-        props.element.value = newValue;
-        props.raiseEvent("changed", newValue);
-        setColor(newValue);
+        setValue(newValue);
     };
 
-    // Set local state when the form state changes.
-    useEffect(() => {
-        // Provide a default value if no value exists.
-        setColor(props.element.value ?? "#ff0000");
-    }, [props.element.value]);
-
     return (
-        <SketchPicker color={color} onChange={handleColorChange} />
+        <SketchPicker color={value} onChange={handleColorChange} />
     );
-};
-
-/**
- * @displayName Register ColorPicker Form Element
- * @category Custom Activities
- * @description Registers a ColorPicker form element.
- */
-export class RegisterColorPickerElement extends RegisterCustomFormElementBase {
-    /** Perform the execution logic of the activity. */
-    execute() {
-        this.register("ColorPicker", ColorPicker);
-    }
 }
+
+const ColorPickerElementRegistration: FormElementRegistration<ColorPickerProps> =
+    {
+        component: ColorPicker,
+        getInitialProperties: () => ({ value: "#ff0000" }),
+        id: "ColorPicker",
+    };
+
+export default ColorPickerElementRegistration;
 ```

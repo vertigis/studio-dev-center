@@ -52,35 +52,36 @@ To create a new form element:
 1. Run `npm run generate` in the terminal.
 1. When prompted, select `Form Element`.
 1. Enter the name of the form element you would like to create and press `Enter`. For example, `Captcha`.
-1. Open the newly created `src/activities/Captcha.tsx` file.
+1. Open the newly created `src/elements/Captcha.tsx` file.
 
 ## Implement the Custom Form Element
 
-Modify the skeleton form element implementation in `src/activities/Captcha.tsx` to match the following example.
+Modify the skeleton form element implementation in `src/elements/Captcha.tsx` to match the following example.
 
-```tsx title="src/activities/Captcha.tsx"
+```tsx title="src/elements/Captcha.tsx"
 import * as React from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import {
-    CustomFormElementProps,
-    RegisterCustomFormElementBase,
-} from "@vertigis/workflow/runtime/app/RegisterCustomFormElementBase";
+    FormElementProps,
+    FormElementRegistration,
+} from "@vertigis/workflow/runtime";
+
+interface CaptchaProps extends FormElementProps<string | undefined> {}
 
 /**
- * A simple React Component that displays a captcha input.
+ * @displayName Captcha
+ * @description A simple React Component that displays a captcha input.
  * @param props The props that will be provided by the Workflow runtime.
  */
-const Captcha = (props: CustomFormElementProps) => {
+function Captcha(props: CaptchaProps): React.ReactElement {
+    const { setValue } = props;
+
     const handleChange = (token: string | null) => {
-        // Set the value and raise the changed event.
-        props.element.value = token ?? undefined;
-        props.raiseEvent("changed", token);
+        setValue(token || undefined);
     };
 
     const handleExpired = () => {
-        // Clear the value and raise the changed event.
-        props.element.value = undefined;
-        props.raiseEvent("changed", undefined);
+        setValue(undefined);
     };
 
     return (
@@ -90,19 +91,16 @@ const Captcha = (props: CustomFormElementProps) => {
             onExpired={handleExpired}
         />
     );
-};
-
-/**
- * @displayName Register Captcha Form Element
- * @category Custom Activities
- * @description Registers a Captcha form element.
- */
-export class RegisterCaptchaElement extends RegisterCustomFormElementBase {
-    /** Perform the execution logic of the activity. */
-    execute() {
-        this.register("Captcha", Captcha);
-    }
 }
+
+const CaptchaElementRegistration: FormElementRegistration<CaptchaProps> =
+    {
+        component: Captcha,
+        getInitialProperties: () => ({ value: undefined }),
+        id: "Captcha",
+    };
+
+export default CaptchaElementRegistration;
 ```
 
 Update the `sitekey` on the `<ReCAPTCHA>` element to use your own site key.
@@ -128,12 +126,13 @@ Follow the instructions to [build and deploy the activity pack](sdk-web-overview
 
 ## Test the Form Element
 
-Once your activity pack is hosted and registered, your `Register Captcha Form Element` custom activity should appear in the activity toolbox in VertiGIS Studio Workflow Designer alongside the built-in activities.
+Once your activity pack is hosted and registered, your `Captcha` custom form element should appear in the form element toolbox in VertiGIS Studio Workflow Designer alongside the built-in form elements.
 
 To use your custom form element in a workflow:
 
-1. Add your `Register Captcha Form Element` custom activity to your workflow so that it runs **before** any `Display Form` activities that will use the custom form element.
 1. Select the `Display Form` activity that you want to include your form element in.
-1. Add a `Custom` form element to the form.
-1. Set the `Custom Type` property of the `Custom` form element to `Captcha`.
+1. Locate the `Captcha` form element in the toolbox and drag it onto the form.
+1. Alternatively:
+    1. Add a `Custom` form element to the form.
+    1. Set the `Custom Type` property of the `Custom` form element to `Captcha`.
 1. Test your workflow.

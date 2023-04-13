@@ -22,47 +22,42 @@ Custom workflow form elements are built in TypeScript and [React](https://reactj
 
 ## Overview
 
-Implementing a custom form element for web applications consists of three steps:
-
-1. Creating the custom form element and implementing the UI.
-2. Creating an activity which will register this form component with VertiGIS Studio Workflow.
-3. Registering the activity with VertiGIS Studio Workflow and running it **before** using the custom form element.
+Implementing a custom form element for web applications just involves creating the custom form element and implementing the UI.
 
 ## Set up the Custom Form Element Skeleton
 
-1. Create a new file `StarRatingElement.tsx` in the activity SDK.
-2. Create a skeleton React form element.
+To create a new form element:
 
-```tsx title="src/form-elements/StarRatingElement.tsx"
+1. Open the Workflow activity SDK in Visual Studio Code.
+1. Run `npm run generate` in the terminal.
+1. When prompted, select `Form Element`.
+1. Enter the name of the form element you would like to create and press `Enter`. For example, `StarRating`.
+1. Open the newly created `src/elements/StarRating.tsx` file.
+
+1. Create a new file `StarRating.tsx` in the activity SDK.
+1. Create a skeleton React form element.
+
+```tsx title="src/elements/StarRating.tsx"
 import * as React from "react";
-import { CustomFormElementProps } from "@vertigis/workflow/runtime/app/RegisterCustomFormElementBase";
+import {
+    FormElementProps,
+    FormElementRegistration,
+} from "@vertigis/workflow/runtime";
 
-function StarRatingElement(props: CustomFormElementProps) {
+interface StarRatingProps extends FormElementProps<number> {}
+
+function StarRating(props: StarRatingProps): React.ReactElement {
     return <div>Hello. Is it me you're looking for.</div>;
 }
 
-export default StarRatingElement;
-```
+const StarRatingElementRegistration: FormElementRegistration<StarRatingProps> =
+    {
+        component: StarRating,
+        getInitialProperties: () => ({ value: 0 }),
+        id: "StarRating",
+    };
 
-## Set up a Form Element Registration Activity
-
-1. Run the command `npm run generate` and name the activity `RegisterCustomFormElements`.
-1. Modify the activity class declaration to extend the `RegisterCustomFormElementBase` base class.
-1. Remove unnecessary inputs and outputs and register your custom form element in the `execute` method.
-
-```ts title="src/activities/CustomFormElementRegistration.tsx"
-import { RegisterCustomFormElementBase } from "@vertigis/workflow/runtime/app/RegisterCustomFormElementBase";
-import StarRatingElement from "../form-elements/StarRatingElement";
-
-/**
- * @category Custom Activities
- * @description Registers custom form elements for the application
- */
-export class RegisterCustomFormElements extends RegisterCustomFormElementBase {
-    async execute(): Promise<void> {
-        this.register("StarRatingElement", StarRatingElement);
-    }
-}
+export default StarRatingElementRegistration;
 ```
 
 ## Build the Star Rating UI
@@ -71,14 +66,16 @@ Next, we are going to build the form element to display the five stars the user 
 
 First, let's build the star DOM elements.
 
-```tsx title="src/form-elements/StarRatingElement.tsx"
+```tsx title="src/elements/StarRating.tsx"
 import * as React from "react";
-import { useState, useEffect } from "react";
-import { CustomFormElementProps } from "@vertigis/workflow/runtime/app/RegisterCustomFormElementBase";
+import {
+    FormElementProps,
+    FormElementRegistration,
+} from "@vertigis/workflow/runtime";
 
-export default function StarRatingFormElement(
-    props: CustomFormElementProps
-) {
+interface StarRatingProps extends FormElementProps<number> {}
+
+function StarRating(props: StarRatingProps): React.ReactElement {
     const rating = 5;
 
     // Button style to show only the button content.
@@ -95,7 +92,7 @@ export default function StarRatingFormElement(
     const unselectedStyle = { ...baseStyle, ...{ color: "#c6c6c6" } };
 
     // Create 5 buttons
-    const buttons = [];
+    const buttons: JSX.Element[] = [];
     for (let i = 1; i <= 5; i++) {
         buttons.push(
             <button
@@ -109,9 +106,18 @@ export default function StarRatingFormElement(
 
     return <div>{buttons}</div>;
 }
+
+const StarRatingElementRegistration: FormElementRegistration<StarRatingProps> =
+    {
+        component: StarRating,
+        getInitialProperties: () => ({ value: 0 }),
+        id: "StarRating",
+    };
+
+export default StarRatingElementRegistration;
 ```
 
-## Add Interactivity
+## Add Interactivity and Expose the Form Element's Value
 
 Next, we are going to add interactivity to the form element to show how many stars the user has selected.
 
@@ -123,26 +129,25 @@ Next, we are going to add interactivity to the form element to show how many sta
   ]}>
 <TabItem value="custom-form-element">
 
-```tsx title="src/form-elements/StarRatingElement.tsx"
+```tsx title="src/elements/StarRating.tsx"
 import * as React from "react";
-import { useState, useEffect } from "react";
-import { CustomFormElementProps } from "@vertigis/workflow/runtime/app/RegisterCustomFormElementBase";
+import {
+    FormElementProps,
+    FormElementRegistration,
+} from "@vertigis/workflow/runtime";
 
-export default function StarRatingFormElement(
-    props: CustomFormElementProps
-) {
-    // highlight-next-line
-    let [rating, setRating] = useState(0);
-
+interface StarRatingProps extends FormElementProps<number> {}
     // highlight-start
+    const { setValue, value } = props;
+
     const handleClick = (event) => {
         // Get the value from the button.
-        // Parse as an integer because the value will be a string.
-        const value = parseInt(event.target.value);
+        // Parse as an integer because the value is a string in the event.
+        const newValue = parseInt(event.target.value);
 
-        if (rating !== value) {
-            // Update the component state.
-            setRating(value);
+        if (value !== newValue) {
+            // Update the element's value.
+            setValue(newValue);
         }
     };
     // highlight-end
@@ -161,14 +166,15 @@ export default function StarRatingFormElement(
     const unselectedStyle = { ...baseStyle, ...{ color: "#c6c6c6" } };
 
     // Create 5 buttons
-    const buttons = [];
+    const buttons: JSX.Element[] = [];
     for (let i = 1; i <= 5; i++) {
         buttons.push(
             <button
-                // highlight-next-line
+                // highlight-start
                 onClick={handleClick}
+                // highlight-end
                 value={i}
-                style={rating < i ? unselectedStyle : selectedStyle}
+                style={value < i ? unselectedStyle : selectedStyle}
             >
                 ★
             </button>
@@ -177,6 +183,15 @@ export default function StarRatingFormElement(
 
     return <div>{buttons}</div>;
 }
+
+const StarRatingElementRegistration: FormElementRegistration<StarRatingProps> =
+    {
+        component: StarRating,
+        getInitialProperties: () => ({ value: 0 }),
+        id: "StarRating",
+    };
+
+export default StarRatingElementRegistration;
 ```
 
 </TabItem>
@@ -185,101 +200,13 @@ export default function StarRatingFormElement(
 </TabItem>
 </Tabs>
 
-## Expose the Form Elements Value
-
-Finally, we are going to expose the form elements value to the larger workflow. For more information on this, check out the [form element reference](sdk-web-form-reference.mdx#properties-of-form-elements).
-
-```tsx title="src/form-elements/StarRatingElement.tsx"
-import * as React from "react";
-import { useState, useEffect } from "react";
-import { CustomFormElementProps } from "@vertigis/workflow/runtime/app/RegisterCustomFormElementBase";
-
-export default function StarRatingFormElement(
-    props: CustomFormElementProps
-) {
-    // Set the default state of the component.
-    let [rating, setRating] = useState(0);
-
-    // highlight-start
-    useEffect(() => {
-        const { element } = props;
-
-        if (element.value === undefined) {
-            element.value = 0;
-        }
-
-        // Set the state from the element's value when the props change.
-        // This could happen as the result of a form event subworkflow that uses
-        // the "Set Form Element Property" activity to set the value property of
-        // the element.
-        if (element.value !== undefined && element.value != rating) {
-            setRating(element.value);
-        }
-    }, [props.element.value]);
-    // highlight-end
-
-    const handleClick = (event) => {
-        // highlight-next-line
-        const { element, raiseEvent } = props;
-
-        // Get the value from the button.
-        // Parse as an integer because the value will be a string.
-        const value = parseInt(event.target.value);
-
-        if (rating !== value) {
-            // Update the component state.
-            setRating(value);
-            // highlight-start
-            // Update the element's value.
-            element.value = value;
-
-            // Raise the changed event
-            raiseEvent("changed", value);
-            // highlight-end
-        }
-    };
-
-    // Button style to show only the button content.
-    const baseStyle: React.CSSProperties = {
-        background: "none",
-        border: "none",
-        outline: "none",
-        fontSize: "2em",
-        padding: 0,
-    };
-
-    // Button styles to show selected and unselected states.
-    const selectedStyle = { ...baseStyle, ...{ color: "#ffa91b" } };
-    const unselectedStyle = { ...baseStyle, ...{ color: "#c6c6c6" } };
-
-    // Create 5 buttons
-    const buttons = [];
-    for (let i = 1; i <= 5; i++) {
-        buttons.push(
-            <button
-                onClick={handleClick}
-                value={i}
-                style={rating < i ? unselectedStyle : selectedStyle}
-                disabled={disabled}
-            >
-                ★
-            </button>
-        );
-    }
-
-    return <div>{buttons}</div>;
-}
-```
-
 ## Deploy the Activity
 
 Follow the instructions to [build and deploy the activity pack](sdk-web-overview.mdx#deployment).
 
 ## Test the Activity
 
-Once your activity pack is hosted and registered, your custom activity should appear in the activity toolbox in VertiGIS Studio Workflow Designer alongside the built-in activities, and can be used in the graphical interface like any other activity.
-
-Now you can build a workflow that uses your new custom form element! It is essential that the register form elements custom activity be run before the custom form element is used, and for that reason, it is best practice to run the form element registration activity at the start of a workflow.
+Once your activity pack is hosted and registered, your custom form element should appear in the form element toolbox in VertiGIS Studio Workflow Designer alongside the built-in form elements, and can be used in the graphical interface like any other form element.
 
 :::note
 

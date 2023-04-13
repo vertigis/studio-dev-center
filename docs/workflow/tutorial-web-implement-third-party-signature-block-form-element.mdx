@@ -39,42 +39,46 @@ To create a new form element:
 1. Run `npm run generate` in the terminal.
 1. When prompted, select `Form Element`.
 1. Enter the name of the form element you would like to create and press `Enter`. For example, `SignatureBlock`.
-1. Open the newly created `src/activities/SignatureBlock.tsx` file.
+1. Open the newly created `src/elements/SignatureBlock.tsx` file.
 
 ## Implement the Custom Form Element
 
-Modify the skeleton form element implementation in `src/activities/SignatureBlock.tsx` to match the following example.
+Modify the skeleton form element implementation in `src/elements/SignatureBlock.tsx` to match the following example.
 
-```tsx title="src/activities/SignatureBlock.tsx"
+```tsx title="src/elements/SignatureBlock.tsx"
 import React, { useRef } from "react";
 import SignaturePadWrapper from "react-signature-pad-wrapper";
 import SignaturePad, { SignaturePadOptions } from "signature_pad";
 import {
-    CustomFormElementProps,
-    RegisterCustomFormElementBase,
-} from "@vertigis/workflow/runtime/app/RegisterCustomFormElementBase";
+    FormElementProps,
+    FormElementRegistration,
+} from "@vertigis/workflow/runtime";
+
+interface SignatureBlockProps
+    extends FormElementProps<string | undefined> {}
 
 /**
  * A simple React Component that displays a signature input.
  * @param props The props that will be provided by the Workflow runtime.
  */
-const SignatureBlock = (props: CustomFormElementProps) => {
-    const signaturePad = useRef<SignaturePad>(null);
+function SignatureBlock(
+    props: SignatureBlockProps
+): React.ReactElement {
+    const signaturePad = React.createRef<SignaturePadWrapper>();
+    const { setValue } = props;
 
     const handleClear = () => {
         // Clear the signature.
         signaturePad.current?.clear();
         // Clear the value of the element and raise the changed event.
-        props.element.value = undefined;
-        props.raiseEvent("changed", undefined);
+        setValue(undefined);
     };
 
     const handleEnd = () => {
         // Get the signature from the SignaturePad component as a data URL.
         const dataUrl = signaturePad.current?.toDataURL();
         // Update the value of the element and raise the changed event.
-        props.element.value = dataUrl;
-        props.raiseEvent("changed", dataUrl);
+        setValue(dataUrl);
     };
 
     const options: SignaturePadOptions = {
@@ -93,19 +97,16 @@ const SignatureBlock = (props: CustomFormElementProps) => {
             <button onClick={handleClear}>↺</button>
         </>
     );
-};
-
-/**
- * @displayName Register SignatureBlock Form Element
- * @category Custom Activities
- * @description Registers a Signature Block form element
- */
-export class RegisterSignatureBlockElement extends RegisterCustomFormElementBase {
-    /** Perform the execution logic of the activity. */
-    execute() {
-        this.register("SignatureBlock", SignatureBlock);
-    }
 }
+
+const SignatureBlockElementRegistration: FormElementRegistration<SignatureBlockProps> =
+    {
+        component: SignatureBlock,
+        getInitialProperties: () => ({ value: undefined }),
+        id: "SignatureBlock",
+    };
+
+export default SignatureBlockElementRegistration;
 ```
 
 ## Deploy the Form Element
@@ -114,12 +115,13 @@ Follow the instructions to [build and deploy the activity pack](sdk-web-overview
 
 ## Test the Form Element
 
-Once your activity pack is hosted and registered, your `Register SignatureBlock Form Element` custom activity should appear in the activity toolbox in VertiGIS Studio Workflow Designer alongside the built-in activities.
+Once your activity pack is hosted and registered, your `SignatureBlock` custom form element should appear in the form element toolbox in VertiGIS Studio Workflow Designer alongside the built-in form elements.
 
 To use your custom form element in a workflow:
 
-1. Add your `Register SignatureBlock Form Element` custom activity to your workflow so that it runs **before** any `Display Form` activities that will use the custom form element.
 1. Select the `Display Form` activity that you want to include your form element in.
-1. Add a `Custom` form element to the form.
-1. Set the `Custom Type` property of the `Custom` form element to `SignatureBlock`.
+1. Locate the `SignatureBlock` form element in the toolbox and drag it onto the form.
+1. Alternatively:
+    1. Add a `Custom` form element to the form.
+    1. Set the `Custom Type` property of the `Custom` form element to `SignatureBlock`.
 1. Test your workflow.

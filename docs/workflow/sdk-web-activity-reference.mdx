@@ -9,7 +9,7 @@ description: VertiGIS Studio Workflow - Reference for workflow activities for we
 The `execute` method of an activity class has typed inputs and outputs. These inputs and outputs are decorated with [block tags](sdk-web-activity-block-tags.mdx) to provide display hints in VertiGIS Studio Workflow Designer.
 
 ```ts title="src/activities/CustomActivity.ts"
-import type { IActivityHandler } from "@vertigis/workflow/runtime/IActivityHandler";
+import type { IActivityHandler } from "@vertigis/workflow/IActivityHandler";
 
 /** An interface that defines the inputs of the activity. */
 export interface CustomActivityInputs {
@@ -65,7 +65,7 @@ Depending on the type of host application, different resources will be available
 
 ```ts
 // highlight-next-line
-import { AppActivity } from "@vertigis/workflow/runtime/app/AppActivity";
+import { AppActivity } from "@vertigis/workflow/app/AppActivity";
 
 /**
  * @supportedApps GWV

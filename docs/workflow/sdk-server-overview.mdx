@@ -17,20 +17,20 @@ Extending VertiGIS Studio Workflow Server requires administrative access to your
 
 ## Development Environment
 
-Visual Studio 2019 is the only officially supported development environment for extending VertiGIS Studio Workflow Server.
+Visual Studio 2022 is the only officially supported development environment for extending VertiGIS Studio Workflow Server.
 
 ## Setting up a VertiGIS Studio Workflow Server Extension Project
 
 Extending VertiGIS Studio Workflow Server requires you to produce a separate assembly with your custom activities, and copy that into your on-premises deployment of VertiGIS Studio Workflow. We first need to set up a project using Visual Studio that references the [workflow runtime](key-concepts.mdx#vertigis-studio-workflow-designer-and-runtime).
 
-1. Launch Microsoft Visual Studio 2019.
+1. Launch Microsoft Visual Studio 2022.
 1. Create a new project of type _Class Library_ (.NET Standard)
-    - You can also create a project of type [.NET Core](https://dotnet.microsoft.com/learn/dotnet/what-is-dotnet) to take advantage of its larger feature set. If so, you need to go into the project settings and change the output type to `Class Library`
+    - You can also create a project of type [.NET](https://dotnet.microsoft.com/learn/dotnet/what-is-dotnet) to take advantage of its larger feature set. If so, you need to go into the project settings and change the output type to `Class Library`
 1. Edit the `.csproj` file in a text editor and add the `CopyLocalLockFileAssemblies` attribute to the `PropertyGroup`.
 
 ```xml
 <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <RootNamespace>CustomWorkflow</RootNamespace>
     // highlight-next-line
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -43,7 +43,7 @@ Extending VertiGIS Studio Workflow Server requires you to produce a separate ass
    By default, this is located in`C:\Program Files\VertiGIS\VertiGIS Studio Workflow\Deployment\service`
 
 :::important
-.NET Standard projects **must** target .NET Standard 2.0, and .NET Core projects must target .NET Core 2.1, or else the assembly will be incompatible with VertiGIS Studio Workflow Server.
+.NET Standard projects **must** target .NET Standard 2.1, and .NET projects must target .NET 6.0, or else the assembly will be incompatible with VertiGIS Studio Workflow Server.
 :::
 
 <SdkLimitationsWarning />
@@ -60,8 +60,8 @@ For VertiGIS Studio Workflow Server to find your custom activities, you need to 
     1. Open the `bin` folder.
        If you do not see a`bin` folder, it is possible you right-clicked on the solution instead of the project.
     1. In the `bin` folder, open either `Debug` or `Release`, depending on which build configuration you used.
-    1. In the `bin\Debug` or `bin\Release` folder, there will be one final sub-directory which will be `netstandard2.0`
-       or `netcore2.1`. Open this folder.
+    1. In the `bin\Debug` or `bin\Release` folder, there will be one final sub-directory which will be `netstandard2.1`
+       or `net6.0`. Open this folder.
     1. You should now see a number of files including `VertiGIS.Workflow.Runtime.dll` and your own project, such as `AssemblyNamespace.dll`.
 1. Find the `CustomAssemblies` folder on disk.
     1. VertiGIS Studio Workflow looks in a folder called `CustomAssemblies` for assemblies that contain custom activities.
@@ -74,7 +74,7 @@ For VertiGIS Studio Workflow Server to find your custom activities, you need to 
     1. **Do not** copy any files that start with `VertiGIS.Workflow.` They are not required in this folder.
 
 :::note
-If you created a .NET Core Project and see `AssemblyNamespace.exe`, you need to change the project output type to `Class Library`.
+If you created a .NET Project and see `AssemblyNamespace.exe`, you need to change the project output type to `Class Library`.
 :::
 
 :::important
@@ -85,7 +85,7 @@ You may need to stop VertiGIS Studio Workflow Server in IIS in order to copy you
 
 You can debug custom VertiGIS Studio Workflow Server activities by attaching to the VertiGIS Studio Workflow Server process from the VertiGIS Studio Workflow extension project you created.
 
-1. Start Visual Studio 2019 with administrator privileges.
+1. Start Visual Studio 2022 with administrator privileges.
 2. [Attach the debugger](https://docs.microsoft.com/en-us/visualstudio/debugger/debug-multiple-processes?view=vs-2019#BKMK_Attach_to_a_process) to the running `GeocortexWorkflowServer.exe` process.
     - You may need to check 'show processes from all users' to see it.
 3. Set a breakpoint in your custom activity.

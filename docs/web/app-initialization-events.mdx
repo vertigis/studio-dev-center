@@ -1,0 +1,100 @@
+---
+title: App Initialization Events
+description: VertiGIS Studio Web - Key event hooks during app initialization and how to use them
+---
+
+import useBaseUrl from "@docusaurus/useBaseUrl";
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import PrereqsCustomCodeSnippet from "./snippets/prereqs-custom-code.mdx";
+import FrameworkComponentsSnippet from "./snippets/framework-components.mdx";
+
+Several different events occurs when an app is initializing. Understanding when these events happen, what has already loaded, and what has not is key to using them effectively.
+
+## App and Layout Initialization Events
+
+### onInitializing
+
+`onInitializing` is called _during_ the initialization process at a time when Web has been initialized in code but has not yet loaded the current layout. Use this to perform startup tasks that do not require interaction with the UI or maps.
+
+-   Custom libraries and all startup services have been loaded at this point. The message bus has been created and initialized.
+-   Other services, components, icons, tools and language resources have been registered and instances may be created. The locale has been set.
+-   The application state has been created and security/licensing has been validated.
+-   The layout has not been loaded yet. This is an ideal event to use to gather client information and choose an appropriate layout.
+-   Maps have not been initialized yet and no layers are available.
+
+:::important
+If your command chain or workflow attempt to reference UI elements or the map, your application will fail to load in Designer. Modify the workflow, or use Item Manager to remove the command chain to regain access to the Designer interface.
+:::
+
+### onLayoutLoading
+
+The `onLayoutLoading` events are similar to `onInitializing` but at this point the layout has also been loaded in code.
+
+-   Nothing has been rendered yet.
+-   All `onIntializing` tasks have now been run.
+-   In a multi-layout app, each layout event can be configured separately.
+-   This will also fire on its own when switching layouts.
+
+### onLayoutLoaded
+
+`onLayoutLoaded` is called after the layout has now been loaded in the DOM.
+
+-   `onLayoutLoaded` is the very last thing to execute before the `onInitialized` tasks are run.
+-   In a multi-layout app, each layout event can be configured separately.
+-   This will also fire on its own when switching layouts.
+
+### onInitialized
+
+`onInitialized` is CCalled after the layout is loaded. Tasks which require interaction with maps, layers, or any other UI element may now begin to execute.
+
+-   The initial layout is loaded and present in the DOM. All startup components are visible to the user.
+-   The map and layers are initialized but the map view is not yet loaded.
+-   Use the `onInitialized` supplied by the Map component if you need to wait for the view.
+
+:::tip
+Although the map and layers have been initialized, some map-based commands will fail if they rely upon the map view. Consider using the Map Initialized event to ensure all aspects of hte map are loaded and ready.
+:::
+
+### Startup Action
+
+The configured `startupAction` will be executed directly after `onInitialized`. If a startup workflow is configured, this is when it will be run.
+
+## Startup Services
+
+Most services are lazily loaded, but any service with `loadOnStartup` set will be loaded and ready before `onInitializing` fires. This includes custom services.
+
+By default, the following services are loaded at startup in Web:
+
+-   Authentication Service
+-   Branding Service
+-   Landmark Service
+-   Licensing Service
+-   Message Bus Service
+-   UI Service
+-   User Preferences Service
+-   Workflow Service
+
+## Configuration Locations in Designer
+
+### App and Layout Event Locations
+
+-   The onInitializing app event is configured from the App Service as "Application Initializing"
+-   The onInitialized app event is configured from the App Service as "Application Initialized"
+-   The onLayoutLoading event is configured per layout from the App Service as "Layout Loading"
+-   The onLayoutLoaded event is configured per layout from the App Service as "Layout Loaded"
+
+### Startup Workflow Locations
+
+Startup Workflows are configured in the Launch Link Workflows Service
+
+Startup workflows are invoked directly in the app URL using `&workflow=` and `&workflowParams=`.
+
+```
+e.g. https://apps.vertigisstudio.com/web/?app=918287c900564701b5a414c506fc405e&workflow=g4904c61-6532-4b0d-a231-5ba441782704&workflowParams={}
+```
+
+The correct URL parameters for a startup workflow can be generated using the Get Links action in the three-dot menu on any Deploy environment in Designer.
+
+<img src={useBaseUrl("img/web-get-links-menu.png")} />
+<img src={useBaseUrl("img/web-get-links-dialog.png")} />

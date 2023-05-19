@@ -32,6 +32,7 @@ module.exports = {
                     ],
                 },
                 "web/configuration-commands-operations",
+                "web/app-initialization-events",
                 {
                     type: "category",
                     label: "Tutorials",

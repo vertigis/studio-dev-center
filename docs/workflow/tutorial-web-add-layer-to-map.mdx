@@ -23,12 +23,13 @@ This article will walk you through creating a custom activity that adds a new la
 
 ## Modify the Activity to Access App Properties
 
-1. Add imports for the `MapProvider`, `activate`, and `IActivityContext` at the top of the `AddLayerToMap.ts` file.
+1. Add imports for `MapProvider`, `activate`, and `IActivityContext`.
 1. Add the `@activate(MapProvider)` decorator to the `execute` method.
-1. Modify the activity `execute` method to mark it as `async` (and return a `Promise`).
-1. Modify the activity `execute` method to include the `context` and `type` parameters.
+1. Modify the `execute` method to mark it as `async` and return a `Promise`.
+1. Modify the `execute` method to include the `context` and `type` parameters.
 
 ```ts title="src/activities/AddLayerToMap.ts"
+import type { IActivityHandler } from "@geocortex/workflow/runtime";
 // highlight-start
 import { MapProvider } from "@geocortex/workflow/runtime/activities/arcgis/MapProvider";
 import { activate } from "@geocortex/workflow/runtime/Hooks";
@@ -44,12 +45,13 @@ import type { IActivityContext } from "@geocortex/workflow/runtime/IActivityHand
 @activate(MapProvider)
 export class AddLayerToMap implements IActivityHandler {
     /** Perform the execution logic of the activity. */
-    // highlight-next-line
+    // highlight-start
     async execute(
         inputs: object,
         context: IActivityContext,
         type: typeof MapProvider
     ): Promise<void> {
+        // highlight-end
         return;
     }
 }
@@ -57,9 +59,10 @@ export class AddLayerToMap implements IActivityHandler {
 
 ## Use the MapProvider to get the map
 
-Next, we can use the `MapProvider` to get the map.
+Next, we create the `MapProvider`, load it asynchronously, and use it to get the map.
 
 ```ts title="src/activities/AddLayerToMap.ts"
+import type { IActivityHandler } from "@geocortex/workflow/runtime";
 import { MapProvider } from "@geocortex/workflow/runtime/activities/arcgis/MapProvider";
 import { activate } from "@geocortex/workflow/runtime/Hooks";
 import type { IActivityContext } from "@geocortex/workflow/runtime/IActivityHandler";
@@ -94,18 +97,18 @@ export class AddLayerToMap implements IActivityHandler {
 
 ## Add a New Map Layer with the Activity
 
-Next, we can use the [ArcGIS API for JavaScript](sdk-web-integrating-the-arcgis-api.mdx) to create a graphics layer and add it to the map.
+Next, we use the [ArcGIS API for JavaScript](sdk-web-integrating-the-arcgis-api.mdx) to create a graphics layer and add it to the map.
 
 :::note
 This activity assumes that it will be running in VertiGIS Studio Web, and so [it uses the 4.x ArcGIS API for JavaScript](sdk-web-integrating-the-arcgis-api.mdx#add-arcgis-api-for-javascript-typings).
 :::
 
 ```ts title="src/activities/AddLayerToMap.ts"
+import type { IActivityHandler } from "@geocortex/workflow/runtime";
 import { MapProvider } from "@geocortex/workflow/runtime/activities/arcgis/MapProvider";
 import { activate } from "@geocortex/workflow/runtime/Hooks";
 import type { IActivityContext } from "@geocortex/workflow/runtime/IActivityHandler";
 // highlight-start
-import * as Map from "esri/Map";
 import * as Graphic from "esri/Graphic";
 import * as GraphicsLayer from "esri/layers/GraphicsLayer";
 import * as Polyline from "esri/geometry/Polyline";

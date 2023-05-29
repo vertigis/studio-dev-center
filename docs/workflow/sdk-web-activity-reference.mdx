@@ -52,35 +52,3 @@ export class CustomActivity implements IActivityHandler {
     }
 }
 ```
-
-## App Activities
-
-The VertiGIS Studio Workflow TypeScript SDK has a concept of an `AppActivity`, which is an activity that needs access to its [host](key-concepts.mdx#vertigis-studio-workflow-hosts).
-
-Activities that extend the `AppActivity` gain access to the `map`, `app`, or `widget` properties.
-
-:::note
-Depending on the type of host application, different resources will be available. For example, Web AppBuilder for ArcGIS is the only platform which has access to the `widget` property.
-:::
-
-```ts
-// highlight-next-line
-import { AppActivity } from "@vertigis/workflow/runtime/app/AppActivity";
-
-/**
- * @supportedApps GWV
- * @category Custom Activities
- * @description An activity which adds a graphics layer to a map.
- */
-// highlight-next-line
-export class CustomAppActivity extends AppActivity {
-    /** Perform the execution logic of the activity. */
-    async execute(inputs: object): Promise<void> {
-        // highlight-next-line
-        // This function has access to the this.map, this.app, and this.widget properties.
-        // ...
-    }
-}
-```
-
-For a complete example, check out the [Add Layer to Map](tutorial-web-add-layer-to-map.mdx) custom activity tutorial.

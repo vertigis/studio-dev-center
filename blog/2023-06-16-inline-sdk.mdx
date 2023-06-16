@@ -42,7 +42,7 @@ There are a few key parts of the SDK that you can use to build your own custom b
 Custom bands are registered in Inline using a custom VertiGIS web service. This service is found in `src/services/CustomBandRegistry/CustomBandRegistry.ts`. This file loads any available custom bands and registers them with Inline when it is added to an app. It can register any number of custom bands at the same time.
 
 :::warning
-Modifying this service is not recommended. It can result in the unexpected behaviour including causing your app to crash. Do so at your own risk.
+Modifying this service is not recommended. It can result in unexpected behaviour including causing your app to crash. Do so at your own risk.
 :::
 
 ### Types
@@ -60,7 +60,7 @@ The Inline SDK comes preinstalled with a sample band that you can use for refere
 
 ## Creating a new band
 
-The band we will be creating today will be able to display a video and seek to times in the video based on the location of the crosshair on the map and on other inline charts.
+The band we will be creating today will be able to display a video and seek to any point in the video based on the location of the crosshair on the map and on other inline charts.
 
 To create a new band run
 
@@ -72,7 +72,7 @@ npx @vertigis/inline-sdk generate VideoBand
 The `generate` command must be run from within the custom band project folder.
 :::
 
-### `designer.ts`
+### Add settings for the Inline Designer
 
 The `designer.ts` file provides the Inline designer with a settings schema to display configurable settings for a custom band. These settings can be any combination of:
 
@@ -139,11 +139,11 @@ Without a video player, this band will not do much. Lets create one using a cust
 
 Create a new file the the `VideoBand` folder called `useVideoPlayer.ts`. In this file we will include all the tools we need to create an interactive video player in a custom band.
 
-Set up the hook as a function that takes a single parameter, `videoElement`.
+Set up the hook as a function that takes a single parameter, `videoElement`. This is a reference to a video HTML element.
 
 ```ts title="src/bands/VideoBand/useVideoPlayer.ts"
 const useVideoPlayer = (
-    vidoeElement: React.MutableRefObject<HTMLVideoElement>
+    videoElement: React.MutableRefObject<HTMLVideoElement>
 ) => {};
 
 export default useVideoPlayer;
@@ -245,7 +245,7 @@ const useVideoPlayer = (videoElement: React.MutableRefObject<HTMLVideoElement>) 
 }
 ```
 
-Add useEffect hooks that will update the muted state of the video player, the playback speed, and the current play/pause state of the video player when their respective states have been changed.
+Add `useEffect` hooks that will update the muted state of the video player, the playback speed, and the current play/pause state of the video player when their respective states have been changed.
 
 ```ts title="src/bands/VideoBand/useVideoPlayer.ts"
 // highlight-next-line
@@ -387,6 +387,7 @@ Now, add the hook to your custom band. Open `src/bands/VideoBand/Band.tsx`. Here
 import React, { useRef } from "react";
 import { BandProps } from "inline";
 import "./Band.css";
+import useVideoPlayer from "./useVideoPlayer";
 
 export const Band: React.FC<BandProps> = (props) => {
     const player = useRef<HTMLVideoElement>();
@@ -406,10 +407,10 @@ export const Band: React.FC<BandProps> = (props) => {
 Add a video player and controls in a wrapper in the return statement of the component. The video player will take the url to your video, player ref and the handleOnTimeUpdate function as props to the video player. The url will be accessed using the `band.customBandSettings` prop passed in to the custom band.
 
 :::note
-This custom band only works with hosted videos, not embedded video players.
+This custom video band only works with hosted videos, not embedded video players.
 :::
 
-:::
+:::note
 Using local video files will require modifications to the SDK. Remember to save your work before making any changes to the SDK.
 :::
 
@@ -627,8 +628,6 @@ export const Band: React.FC<BandProps> = (props) => {
         </div>
     );
 };
-
-export default Band;
 ```
 
 With the band created lets add some styling. Add this to the `src/bands/VideoBand/Band.css` file:
@@ -771,7 +770,7 @@ Click the `Add Library` button beside the library link input. Click Save Changes
 
 With this done you can close App Designer and open the Inline Designer.
 
-### Using custom Web App in Inline
+### Using a custom Web App in Inline
 
 In the Inline designer, open the view you want to add the band to.
 
@@ -945,8 +944,6 @@ import useVideoPlayer from "./useVideoPlayer";
 import "./Band.css";
 import { BandProps, StationInfoEventArg } from "inline";
 
-type StationInfoEventHandler = (arg: StationInfoEventArg) => void;
-
 export const Band: React.FC<BandProps> = (props) => {
     const player = useRef<HTMLVideoElement>();
     const {
@@ -1101,3 +1098,7 @@ Save your changes before uploading another library. Loading two libraries with t
 After saving the changes and reloading your app, Open the Update Library panel again. Instead of adding a url, upload a file. Browse to your `<Inline SDK folder>/build/main.js`. Upload the file and save the changes.
 
 Return to your Inline Designer. Reload the page. The custom band should work as expected.
+
+## Conclusion
+
+With the information learned in this post you should be able to create your own custom Inline band. The sample band can be a great place to start and explore everything the Inline SDK can do. Using Inline events and the InlineManager can give you even more powerful tools to use in your custom bands, including running VertiGIS Studio Web Commands and Operations and even VertiGIS Studio Workflows!

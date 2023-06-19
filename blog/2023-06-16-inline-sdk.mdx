@@ -10,7 +10,7 @@ tags: [inline, web]
 import Link from "@docusaurus/Link";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 
-With VertiGIS Inline `2.3` and later, users now have the ability to create their own custom bands that run right in Inline using the VertiGIS Inline SDK. These custom bands are made with React and Typescript, giving authors total control over what the band can do. Today, we will run through the steps to build, deploy and use a custom band in an Inline view.
+With VertiGIS Inline `2.3` and later, users now have the ability to create their own custom bands that run right in Inline using the VertiGIS Inline SDK. These custom bands are made with React and TypeScript, giving authors total control over what the band can do. Today, we will run through the steps to build, deploy and use a custom band in an Inline view.
 
 <!--truncate-->
 
@@ -22,8 +22,8 @@ To use these new features, you will need the latest versions of VertiGIS Inline,
 
 You will need a few tools to build a custom band:
 
--   [Download and install node](https://nodejs.org/en)
--   [Download and install VS Code](https://code.visualstudio.com/download)
+-   [Download and install Node.js](https://nodejs.org/en)
+-   [Download and install Visual Studio Code](https://code.visualstudio.com/download)
 
 Once you are set up with those you can create a folder with everything you need to build a custom band. With the terminal of your choice, create instance of inline sdk with
 
@@ -39,7 +39,7 @@ There are a few key parts of the SDK that you can use to build your own custom b
 
 ### Registry Service
 
-Custom bands are registered in Inline using a custom VertiGIS web service. This service is found in `src/services/CustomBandRegistry/CustomBandRegistry.ts`. This file loads any available custom bands and registers them with Inline when it is added to an app. It can register any number of custom bands at the same time.
+Custom bands are registered in Inline using a custom VertiGIS Web service. This service is found in `src/services/CustomBandRegistry/CustomBandRegistry.ts`. This file loads any available custom bands and registers them with Inline when it is added to an app. It can register any number of custom bands at the same time.
 
 :::warning
 Modifying this service is not recommended. It can result in unexpected behaviour including causing your app to crash. Do so at your own risk.
@@ -100,13 +100,13 @@ export const getDesignerConfig = (): InlineDesignerConfig => {
 
 The `InlineDesignerConfig` is a list of settings sections. Each section has a name and list of fields that can be configured by users in the Inline designer.
 
-Next, add an input field for the video url.
+Next, add an input field for the video URL.
 
 ```ts title="src/bands/VideoBand/designer.ts"
 // highlight-next-line
 import { InlineDesignerConfig, InputDesignerConfig } from "inline";
 
-export function getDesignerConfig() {
+export const getDesignerConfig = () => {
     const config: InlineDesignerConfig = [
         {
             title: "Video Band Settings",
@@ -128,14 +128,14 @@ export function getDesignerConfig() {
     // highlight-end
 
     return config;
-}
+};
 ```
 
 This pattern can be repeated to create any other settings that are necessary for the band.
 
 ### Creating a Video Player React Hook
 
-Without a video player, this band will not do much. Lets create one using a custom React Hook.
+Without a video player, this band will not do much. Let's create one using a custom React Hook.
 
 Create a new file the the `VideoBand` folder called `useVideoPlayer.ts`. In this file we will include all the tools we need to create an interactive video player in a custom band.
 
@@ -404,7 +404,7 @@ export const Band: React.FC<BandProps> = (props) => {
 };
 ```
 
-Add a video player and controls in a wrapper in the return statement of the component. The video player will take the url to your video, player ref and the handleOnTimeUpdate function as props to the video player. The url will be accessed using the `band.customBandSettings` prop passed in to the custom band.
+Add a video player and controls in a wrapper in the return statement of the component. The video player will take the URL to your video, player ref and the `handleOnTimeUpdate` function as props to the video player. The URL will be accessed using the `band.customBandSettings` prop passed in to the custom band.
 
 :::note
 This custom video band only works with hosted videos, not embedded video players.
@@ -752,23 +752,23 @@ This will start up a development server and create a temporary build of your cus
 
 ### Adding the band to your app
 
-Open VertiGIS Studio App Designer. In App Designer, open your Inline app.
+Open VertiGIS Studio Web Designer. In Web Designer, open your Inline app.
 
 :::note
-If you do not have an existing Inline App you can create a new app using the VertiGIS Inline template.
+If you do not have an existing Inline app you can create a new app using the VertiGIS Inline template.
 :::
 
 In your app, open the File menu. Open the Upload Library settings:
 
 <img src={useBaseUrl("img/app-designer-upload-library.png")} />
 
-In the popup, add `http://localhost:4444/main.js` as a library url:
+In the popup, add `http://localhost:4444/main.js` as a library URL:
 
 <img src={useBaseUrl("img/app-designer-upload-library-modal.png")} />
 
 Click the `Add Library` button beside the library link input. Click Save Changes. Your app will be saved and be refreshed.
 
-With this done you can close App Designer and open the Inline Designer.
+With this done you can close Web Designer and open the Inline Designer.
 
 ### Using a custom Web App in Inline
 
@@ -796,7 +796,7 @@ In the `Custom Band Name` dropdown, choose "VideoBand".
 
 <img src={useBaseUrl("img/inline-band-name-dropdown.png")} />
 
-You should see a new settings section with the option to add a Video URL. Add a url to a `Video URL` setting.
+You should see a new settings section with the option to add a Video URL. Add a URL to a `Video URL` setting.
 
 :::note
 Custom bands will sometimes require a refresh of the Inline sandbox before you can see them reflected in the charts. Click the `Refresh Sandbox` button in the top left of the Inline designer if you are not seeing your custom band in your view.
@@ -1085,17 +1085,17 @@ npm run build
 
 This will create a `build` folder with a `main.js` file. We can replace the library link we previously added with the `main.js` file and your custom band will be accessible to anyone who uses your app.
 
-In App Designer, open the Upload Library panel. Remove the custom library url. Save the changes.
+In Web Designer, open the Upload Library panel. Remove the custom library URL. Save the changes.
 
 :::warning
-Only remove the custom library url, `http://localhost:4444/main.js`. Removing the Inline library can break your app and cause unexpected behaviour.
+Only remove the custom library URL, `http://localhost:4444/main.js`. Removing the Inline library can break your app and cause unexpected behaviour.
 :::
 
 :::warning
-Save your changes before uploading another library. Loading two libraries with the same service can cause unexpected behaviour in App Designer, including losing access to your app.
+Save your changes before uploading another library. Loading two libraries with the same service can cause unexpected behaviour in Web Designer, including losing access to your app.
 :::
 
-After saving the changes and reloading your app, Open the Update Library panel again. Instead of adding a url, upload a file. Browse to your `<Inline SDK folder>/build/main.js`. Upload the file and save the changes.
+After saving the changes and reloading your app, Open the Update Library panel again. Instead of adding a URL, upload a file. Browse to your `<Inline SDK folder>/build/main.js`. Upload the file and save the changes.
 
 Return to your Inline Designer. Reload the page. The custom band should work as expected.
 

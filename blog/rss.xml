@@ -4,9 +4,16 @@
         <title>VertiGIS Studio Developer Center Blog</title>
         <link>https://developers.vertigisstudio.com/blog</link>
         <description>VertiGIS Studio Developer Center Blog</description>
-        <lastBuildDate>Wed, 01 Mar 2023 00:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 20 Jun 2023 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
+        <item>
+            <title><![CDATA[Creating Custom Bands with the Inline SDK]]></title>
+            <link>https://developers.vertigisstudio.com/blog/2023/06/20/inline-sdk</link>
+            <guid>Creating Custom Bands with the Inline SDK</guid>
+            <pubDate>Tue, 20 Jun 2023 00:00:00 GMT</pubDate>
+            <description><![CDATA[With VertiGIS Inline 2.3 and later, users now have the ability to create their own custom bands that run right in Inline using the VertiGIS Inline SDK. These custom bands are made with React and TypeScript, giving authors total control over what the band can do. Today, we will run through the steps to build, deploy and use a custom band in an Inline view.]]></description>
+        </item>
         <item>
             <title><![CDATA[Mobile Generic Event Listener]]></title>
             <link>https://developers.vertigisstudio.com/blog/2023/03/01/mobile-generic-event-listener</link>

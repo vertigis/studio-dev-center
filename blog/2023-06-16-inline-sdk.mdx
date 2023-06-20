@@ -115,7 +115,7 @@ export const getDesignerConfig = () => {
     ];
 
     // highlight-start
-    const titleField: InputDesignerConfig = {
+    const urlField: InputDesignerConfig = {
         id: "url",
         type: "input",
         default: "",
@@ -124,7 +124,7 @@ export const getDesignerConfig = () => {
             "The URL of the video. This must be a valid URL to a video file.",
     };
 
-    config[0].fields.push(titleField);
+    config[0].fields.push(urlField);
     // highlight-end
 
     return config;
@@ -163,7 +163,7 @@ const useVideoPlayer = (
         isPlaying: false,
         progress: 0,
         speed: 1,
-        isMuted,
+        isMuted: false,
     });
     //highlight-end
 };
@@ -910,17 +910,20 @@ The last thing we want to do is add a debounce to the handler to prevent any per
 npm install lodash.debounce
 ```
 
-Wrap the `handleCrosshairPositionChangeEvent` in a debounce higher order function. Give the debounce a 100ms refresh argument.
+Wrap the `handleCrosshairPositionChangeEvent` in a debounce higher order function. Give the debounce a 100ms refresh argument. Create and add a type, `StationInfoEventHandler`, to the function.
 
 ```tsx title="src/bands/VideoBand/Band.tsx"
 // highlight-next-line
 import debounce from "lodash.debounce";
 ...
+// highlight-next-line
+type StationInfoEventHandler = (arg: StationInfoEventArg) => void;
+
 export const Band: React.FC<BandProps> = (props) => {
     ...
 
     // highlight-start
-    const handleCrosshairPositionChangeEvent = debounce((arg: StationInfoEventArg) => {
+    const handleCrosshairPositionChangeEvent: StationInfoEventHandler = debounce((arg: StationInfoEventArg) => {
         ...
     }, [100])
     // highlight-end

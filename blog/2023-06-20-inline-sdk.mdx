@@ -410,10 +410,6 @@ Add a video player and controls in a wrapper in the return statement of the comp
 This custom video band only works with hosted videos, not embedded video players.
 :::
 
-:::note
-Using local video files will require modifications to the SDK. Remember to save your work before making any changes to the SDK.
-:::
-
 ```tsx title="src/bands/VideoBand/Band.tsx"
 return (
     <div className="video-band">
@@ -630,7 +626,9 @@ export const Band: React.FC<BandProps> = (props) => {
 };
 ```
 
-With the band created lets add some styling. Add this to the `src/bands/VideoBand/Band.css` file:
+### Styling the band
+
+With the band created let's add some styling. Add this to the `src/bands/VideoBand/Band.css` file:
 
 ```css title="src/bands/VideoBand/Band.css"
 .video-band.container {

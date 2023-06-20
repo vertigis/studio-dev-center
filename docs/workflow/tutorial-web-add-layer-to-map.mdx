@@ -1,12 +1,12 @@
 ---
 title: Add a Layer to a Map with an Activity
-description: VertiGIS Studio Workflow - Learn how to use special activity properties to access and mutate the application map
+description: VertiGIS Studio Workflow - Learn how to access and mutate the application map
 ---
 
 import WebPrereqs from "./snippets/prereqs-web.mdx";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 
-Some activities may need access to resources like the map, the host application or host widget. The `AppActivity` base class can be used to extend an existing activity to access these resources.
+Some activities may need access to resources like the map. The `@activate(MapProvider)` pattern can be used to get the current map during the execution of your activity.
 
 This article will walk you through creating a custom activity that adds a new layer to the map.
 
@@ -23,14 +23,18 @@ This article will walk you through creating a custom activity that adds a new la
 
 ## Modify the Activity to Access App Properties
 
-1. Add an import for the `AppActivity` base class at the top of the `AddLayerToMap.ts` file.
-   `import { AppActivity } from "@vertigis/workflow/app/AppActivity";`
-1. Modify the activity class declaration to extend the `AppActivity` base class.
-   `export class AddLayerToMap extends AppActivity`
+1. Add imports for `MapProvider`, `activate`, and `IActivityContext`.
+1. Add the `@activate(MapProvider)` decorator to the `execute` method.
+1. Modify the `execute` method to mark it as `async` and return a `Promise`.
+1. Modify the `execute` method to include the `context` and `type` parameters.
 
 ```ts title="src/activities/AddLayerToMap.ts"
-// highlight-next-line
-import { AppActivity } from "@vertigis/workflow/app/AppActivity";
+import type { IActivityHandler } from "@geocortex/workflow";
+// highlight-start
+import { MapProvider } from "@geocortex/workflow/activities/arcgis/MapProvider";
+import { activate } from "@geocortex/workflow/Hooks";
+import type { IActivityContext } from "@geocortex/workflow/IActivityHandler";
+// highlight-end
 
 /**
  * @supportedApps GWV
@@ -38,9 +42,54 @@ import { AppActivity } from "@vertigis/workflow/app/AppActivity";
  * @description An activity which adds a graphics layer to a map.
  */
 // highlight-next-line
-export class AddLayerToMap extends AppActivity {
+@activate(MapProvider)
+export class AddLayerToMap implements IActivityHandler {
     /** Perform the execution logic of the activity. */
-    async execute(inputs: object): Promise<void> {
+    // highlight-start
+    async execute(
+        inputs: object,
+        context: IActivityContext,
+        type: typeof MapProvider
+    ): Promise<void> {
+        // highlight-end
+        return;
+    }
+}
+```
+
+## Use the MapProvider to get the map
+
+Next, we create the `MapProvider`, load it asynchronously, and use it to get the map.
+
+```ts title="src/activities/AddLayerToMap.ts"
+import type { IActivityHandler } from "@geocortex/workflow";
+import { MapProvider } from "@geocortex/workflow/activities/arcgis/MapProvider";
+import { activate } from "@geocortex/workflow/Hooks";
+import type { IActivityContext } from "@geocortex/workflow/IActivityHandler";
+
+/**
+ * @supportedApps GWV
+ * @category Custom Activities
+ * @description An activity which adds a graphics layer to a map.
+ */
+@activate(MapProvider)
+export class AddLayerToMap implements IActivityHandler {
+    /** Perform the execution logic of the activity. */
+    async execute(
+        inputs: object,
+        context: IActivityContext,
+        type: typeof MapProvider
+    ): Promise<void> {
+        // highlight-start
+        const mapProvider = type.create();
+        await mapProvider.load();
+
+        const map = mapProvider.map;
+        if (!map) {
+            throw new Error("map is required");
+        }
+        // highlight-end
+
         return;
     }
 }
@@ -48,16 +97,18 @@ export class AddLayerToMap extends AppActivity {
 
 ## Add a New Map Layer with the Activity
 
-Next, we can use the [ArcGIS API for JavaScript](sdk-web-integrating-the-arcgis-api.mdx) and the `AppActivity` class to create a graphics layer and add it to the host's map through the `this.map` property.
+Next, we use the [ArcGIS API for JavaScript](sdk-web-integrating-the-arcgis-api.mdx) to create a graphics layer and add it to the map.
 
 :::note
 This activity assumes that it will be running in VertiGIS Studio Web, and so [it uses the 4.x ArcGIS API for JavaScript](sdk-web-integrating-the-arcgis-api.mdx#add-arcgis-api-for-javascript-typings).
 :::
 
 ```ts title="src/activities/AddLayerToMap.ts"
-import { AppActivity } from "@vertigis/workflow/app/AppActivity";
+import type { IActivityHandler } from "@geocortex/workflow";
+import { MapProvider } from "@geocortex/workflow/activities/arcgis/MapProvider";
+import { activate } from "@geocortex/workflow/Hooks";
+import type { IActivityContext } from "@geocortex/workflow/IActivityHandler";
 // highlight-start
-import * as Map from "esri/Map";
 import * as Graphic from "esri/Graphic";
 import * as GraphicsLayer from "esri/layers/GraphicsLayer";
 import * as Polyline from "esri/geometry/Polyline";
@@ -69,9 +120,23 @@ import * as LineSymbol from "esri/symbols/LineSymbol";
  * @category Custom Activities
  * @description An activity which adds a graphics layer to a map.
  */
-export class AddLayerToMap extends AppActivity {
+@activate(MapProvider)
+export class AddLayerToMap implements IActivityHandler {
     /** Perform the execution logic of the activity. */
-    async execute(inputs: object): Promise<void> {
+    async execute(
+        inputs: object,
+        context: IActivityContext,
+        type: typeof MapProvider
+    ): Promise<void> {
+        const mapProvider = type.create();
+        await mapProvider.load();
+
+        const map = mapProvider.map;
+        if (!map) {
+            throw new Error("map is required");
+        }
+
+        // highlight-start
         var polylineGraphic = new Graphic({
             geometry: new Polyline({
                 paths: [
@@ -92,8 +157,8 @@ export class AddLayerToMap extends AppActivity {
             graphics: [polylineGraphic],
         });
 
-        // highlight-next-line
-        (this.map as Map).add(graphicsLayer);
+        map.add(graphicsLayer);
+        // highlight-end
     }
 }
 ```
@@ -107,39 +172,5 @@ Follow the instructions to [build and deploy the activity pack](sdk-web-overview
 Once your activity pack is hosted and registered, your custom activity should appear in the activity toolbox in VertiGIS Studio Workflow Designer alongside the built-in activities, and can be used in the graphical interface like any other activity.
 
 Now you can build a workflow that uses your new custom activity!
-
-:::note
-
-<p>
-    You can
-    <a
-        href={useBaseUrl("workflows/web-add-layer-activity.json")}
-        download="add-layer-workflow.json"
-        target="_blank"
-    >
-        {" "}
-        download this demo workflow{" "}
-    </a>
-    that uses the custom activity and then
-    <a
-        href="https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/import-export-workflows.htm"
-        target="_blank"
-    >
-        {" "}
-        import it into the VertiGIS Studio Workflow Designer.{" "}
-    </a>
-    You will have to{" "}
-    <a
-        href={useBaseUrl(
-            "docs/workflow/sdk-web-overview#host-the-activity-pack"
-        )}
-    >
-        {" "}
-        deploy the custom activity and form element
-    </a>{" "}
-    for it to function. This workflow assumes you are hosting the
-    activity pack with the dev server on https://localhost:57999/.
-</p>
-:::
 
 <img src={useBaseUrl("img/workflow-web-add-layer.png")} />

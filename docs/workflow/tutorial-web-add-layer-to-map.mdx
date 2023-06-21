@@ -29,11 +29,11 @@ This article will walk you through creating a custom activity that adds a new la
 1. Modify the `execute` method to include the `context` and `type` parameters.
 
 ```ts title="src/activities/AddLayerToMap.ts"
-import type { IActivityHandler } from "@geocortex/workflow/runtime";
+import type { IActivityHandler } from "@geocortex/workflow";
 // highlight-start
-import { MapProvider } from "@geocortex/workflow/runtime/activities/arcgis/MapProvider";
-import { activate } from "@geocortex/workflow/runtime/Hooks";
-import type { IActivityContext } from "@geocortex/workflow/runtime/IActivityHandler";
+import { MapProvider } from "@geocortex/workflow/activities/arcgis/MapProvider";
+import { activate } from "@geocortex/workflow/Hooks";
+import type { IActivityContext } from "@geocortex/workflow/IActivityHandler";
 // highlight-end
 
 /**
@@ -62,10 +62,10 @@ export class AddLayerToMap implements IActivityHandler {
 Next, we create the `MapProvider`, load it asynchronously, and use it to get the map.
 
 ```ts title="src/activities/AddLayerToMap.ts"
-import type { IActivityHandler } from "@geocortex/workflow/runtime";
-import { MapProvider } from "@geocortex/workflow/runtime/activities/arcgis/MapProvider";
-import { activate } from "@geocortex/workflow/runtime/Hooks";
-import type { IActivityContext } from "@geocortex/workflow/runtime/IActivityHandler";
+import type { IActivityHandler } from "@geocortex/workflow";
+import { MapProvider } from "@geocortex/workflow/activities/arcgis/MapProvider";
+import { activate } from "@geocortex/workflow/Hooks";
+import type { IActivityContext } from "@geocortex/workflow/IActivityHandler";
 
 /**
  * @supportedApps GWV
@@ -104,10 +104,10 @@ This activity assumes that it will be running in VertiGIS Studio Web, and so [it
 :::
 
 ```ts title="src/activities/AddLayerToMap.ts"
-import type { IActivityHandler } from "@geocortex/workflow/runtime";
-import { MapProvider } from "@geocortex/workflow/runtime/activities/arcgis/MapProvider";
-import { activate } from "@geocortex/workflow/runtime/Hooks";
-import type { IActivityContext } from "@geocortex/workflow/runtime/IActivityHandler";
+import type { IActivityHandler } from "@geocortex/workflow";
+import { MapProvider } from "@geocortex/workflow/activities/arcgis/MapProvider";
+import { activate } from "@geocortex/workflow/Hooks";
+import type { IActivityContext } from "@geocortex/workflow/IActivityHandler";
 // highlight-start
 import * as Graphic from "esri/Graphic";
 import * as GraphicsLayer from "esri/layers/GraphicsLayer";

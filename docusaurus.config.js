@@ -130,7 +130,7 @@ module.exports = {
             additionalLanguages: ["csharp"],
         },
         gtag: {
-            trackingID: "UA-103604191-6",
+            trackingID: "G-2ZXTZT5M0F",
             anonymizeIP: true,
         },
     },

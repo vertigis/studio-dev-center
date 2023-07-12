@@ -42,7 +42,7 @@ There are a few key parts of the SDK that you can use to build your own custom b
 Custom bands are registered in Inline using a custom VertiGIS Web service. This service is found in `src/services/CustomBandRegistry/CustomBandRegistry.ts`. This file loads any available custom bands and registers them with Inline when it is added to an app. It can register any number of custom bands at the same time.
 
 :::warning
-Modifying this service is not recommended. It can result in unexpected behaviour including causing your app to crash. Do so at your own risk.
+Modifying this service is not recommended. It can result in unexpected behavior including causing your app to crash. Do so at your own risk.
 :::
 
 ### Types
@@ -68,7 +68,7 @@ To create a new band run
 npx @vertigis/inline-sdk generate VideoBand
 ```
 
-:::important
+:::info Important
 The `generate` command must be run from within the custom band project folder.
 :::
 
@@ -1088,12 +1088,12 @@ This will create a `build` folder with a `main.js` file. We can replace the libr
 
 In Web Designer, open the Upload Library panel. Remove the custom library URL. Save the changes.
 
-:::warning
-Only remove the custom library URL, `http://localhost:4444/main.js`. Removing the Inline library can break your app and cause unexpected behaviour.
+:::danger Warning
+Only remove the custom library URL, `http://localhost:4444/main.js`. Removing the Inline library can break your app and cause unexpected behavior.
 :::
 
-:::warning
-Save your changes before uploading another library. Loading two libraries with the same service can cause unexpected behaviour in Web Designer, including losing access to your app.
+:::danger Warning
+Save your changes before uploading another library. Loading two libraries with the same service can cause unexpected behavior in Web Designer, including losing access to your app.
 :::
 
 After saving the changes and reloading your app, Open the Update Library panel again. Instead of adding a URL, upload a file. Browse to your `<Inline SDK folder>/build/main.js`. Upload the file and save the changes.

@@ -14,6 +14,6 @@ Any nuget package can be added to the project and used in custom activities.
 
 Build the project to output the project assemblies. Follow the instructions to [Deploy the Activity](sdk-server-overview.mdx#deploying-vertigis-studio-workflow-server-activities). Ensure that you locate and copy the third party assemblies. If you don't see them in the build output folder, [review the instructions](sdk-server-overview.mdx#setting-up-a-vertigis-studio-workflow-server-extension-project) and ensure you have followed all the steps.
 
-:::important
+:::info Important
 An important step not to miss is adding the `CopyLocalLockFileAssemblies` attribute to the `.csproj` file if you created a .NET Standard class library. Without this attribute, your nuget package reference assemblies will not be output to the build folder.
 :::

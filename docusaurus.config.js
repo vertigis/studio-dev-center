@@ -12,6 +12,7 @@ module.exports = {
             apiKey: "fcdd20750dc409ec43b89e692fcbb72c",
             appId: "BH4D9OD16A",
             indexName: "geocortex",
+            contextualSearch: false,
         },
         navbar: {
             title: "Developer Center",

@@ -18,7 +18,7 @@ module.exports = {
             title: "Developer Center",
             logo: {
                 alt: "VertiGIS Logo",
-                src: "img/logo.png",
+                src: "img/vertigis-studio.svg",
             },
             items: [
                 {

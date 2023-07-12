@@ -10,6 +10,7 @@ module.exports = {
         // Config lives at https://github.com/algolia/docsearch-configs/blob/master/configs/geocortex.json
         algolia: {
             apiKey: "fcdd20750dc409ec43b89e692fcbb72c",
+            appId: "BH4D9OD16A",
             indexName: "geocortex",
         },
         navbar: {
@@ -129,19 +130,19 @@ module.exports = {
         prism: {
             additionalLanguages: ["csharp"],
         },
-        gtag: {
-            trackingID: "UA-103604191-6",
-            anonymizeIP: true,
-        },
     },
     presets: [
         [
-            require.resolve("@docusaurus/preset-classic"),
+            "@docusaurus/preset-classic",
             {
                 docs: {
                     editUrl:
                         "https://github.com/vertigis/studio-dev-center/edit/master/",
                     sidebarPath: require.resolve("./sidebars.js"),
+                },
+                gtag: {
+                    trackingID: "UA-103604191-6",
+                    anonymizeIP: true,
                 },
                 theme: {
                     customCss: require.resolve("./src/css/custom.css"),

@@ -1,10 +1,7 @@
-import Heading from "@theme/Heading";
 import React from "react";
 import MessagingArgument, { getDescription } from "./MessagingArgument";
 import { MessageSchema, Definition } from "./schema";
 import { getActionOrEventDefinitionLinkId, trimDefinitionsName } from "./utils";
-
-const H3 = Heading("h3");
 
 type RefDefinition = Required<Pick<Definition, "$ref">>;
 
@@ -58,7 +55,7 @@ export default function MessagingTypeSummary(props: MessagingTypeSummaryProps) {
 
                 return (
                     <div key={key} className="margin-bottom--lg">
-                        <H3 id={linkId}>{key}</H3>
+                        <h3 id={linkId}>{key}</h3>
                         {getDescription(item, schema, "margin-bottom--md")}
                         <div className="margin-bottom--md">
                             <div>{`Argument ${

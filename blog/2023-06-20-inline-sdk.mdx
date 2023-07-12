@@ -41,7 +41,7 @@ There are a few key parts of the SDK that you can use to build your own custom b
 
 Custom bands are registered in Inline using a custom VertiGIS Web service. This service is found in `src/services/CustomBandRegistry/CustomBandRegistry.ts`. This file loads any available custom bands and registers them with Inline when it is added to an app. It can register any number of custom bands at the same time.
 
-:::warning
+:::danger Warning
 Modifying this service is not recommended. It can result in unexpected behavior including causing your app to crash. Do so at your own risk.
 :::
 

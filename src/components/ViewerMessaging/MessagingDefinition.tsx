@@ -1,4 +1,3 @@
-import Heading from "@theme/Heading";
 import React from "react";
 import { getDescription, listProperties } from "./MessagingArgument";
 import { MessageSchema } from "./schema";
@@ -7,8 +6,6 @@ import {
     getArgumentDefinitionLinkId,
     getReferencedDefinition,
 } from "./utils";
-
-const H3 = Heading("h3");
 
 interface MessagingDefinitionProps {
     definitionName: string;
@@ -36,7 +33,7 @@ export default function MessagingDefinition(props: MessagingDefinitionProps) {
 
     return (
         <div className="margin-bottom--lg">
-            <H3 id={id}>{trimmedName}</H3>
+            <h3 id={id}>{trimmedName}</h3>
             {getDescription(definition, schema, "margin-bottom--md")}
             <div>Properties</div>
             {(!definition.properties ||

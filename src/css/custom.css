@@ -28,23 +28,11 @@
 }
 
 .navbar .navbar__logo {
-    height: 50%;
+    height: 20px;
 }
 
-.navbar__brand strong {
-    font-weight: var(--ifm-font-weight-light) !important;
-}
-
-.alert.alert--success a {
-    --ifm-link-color: var(--ifm-color-secondary);
-}
-
-.alert.alert--success a:hover {
-    color: var(--ifm-color-secondary-darker);
-}
-
-.alert.alert--success a code {
-    --ifm-code-background: var(--ifm-color-success-darkest);
+.navbar__brand .navbar__title {
+    font-weight: var(--ifm-font-weight-light);
 }
 
 .stackSplitImage {
@@ -52,7 +40,7 @@
     height: auto;
 }
 
-.admonition-heading {
+.admonitionHeading_node_modules-\@docusaurus-theme-classic-lib-theme-Admonition-styles-module {
     --ifm-heading-font-weight: bold;
 }
 

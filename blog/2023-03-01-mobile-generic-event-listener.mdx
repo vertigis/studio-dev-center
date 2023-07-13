@@ -85,7 +85,7 @@ Of course, multiple listeners may be registered. They can listen to both distinc
 }
 ```
 
-:::warning
+:::danger Warning
 The event listener capability is only available after the map has begun initializing. Listeners for events that fire _before_ the `map.initializing` event will not trigger any actions.
 :::
 
@@ -253,7 +253,7 @@ In the case of the `layers.visibility-changed` event, we're able to retrieve and
 =$getWorkflowInputs1.inputs.context.LayerContent.id.toString()
 ```
 
-:::important
+:::info Important
 The value provided to `commandArgumentInput` and the accessor used within the `Get Workflow Inputs` activity object **must** match to correctly access an input (i.e. both `context` in this example).
 :::
 

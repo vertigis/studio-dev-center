@@ -1,1 +1,0 @@
-"use strict";(globalThis.webpackChunkvertigis_studio_dev_center=globalThis.webpackChunkvertigis_studio_dev_center||[]).push([[489],{9159:e=>{e.exports=JSON.parse('{"allTagsPath":"/blog/tags","slug":"web","name":"web","count":1,"permalink":"/blog/tags/web"}')}}]);

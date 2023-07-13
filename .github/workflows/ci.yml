@@ -13,11 +13,11 @@ jobs:
     build:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
-            - name: Use Node.js 16
-              uses: actions/setup-node@v1
+            - uses: actions/checkout@v3
+            - name: Use Node.js 18
+              uses: actions/setup-node@v3
               with:
-                  node-version: 16.x
+                  node-version: 18.x
             - run: npm install
             - run: npm run build
             - run: npm run lint
@@ -27,23 +27,23 @@ jobs:
         needs: [build]
         if: github.ref == 'refs/heads/master'
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
               with:
                   persist-credentials: false
-            - name: Use Node.js 16
-              uses: actions/setup-node@v1
+            - name: Use Node.js 18
+              uses: actions/setup-node@v3
               with:
-                  node-version: 16.x
+                  node-version: 18.x
             - run: npm install
             - run: npm run build
             - name: Deploy 🚀
-              uses: JamesIves/github-pages-deploy-action@releases/v3
+              uses: JamesIves/github-pages-deploy-action@v4
               with:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  token: ${{ secrets.GITHUB_TOKEN }}
                   # The branch the action should deploy to.
-                  BRANCH: gh-pages
+                  branch: gh-pages
                   # The folder the action should deploy.
-                  FOLDER: build
+                  folder: build
                   # Remove old hashed files
-                  CLEAN: true
-                  CLEAN_EXCLUDE: '["CNAME"]'
+                  clean: true
+                  clean-exclude: '["CNAME"]'

@@ -42,7 +42,7 @@ Extending VertiGIS Studio Workflow Server requires you to produce a separate ass
 1. [Add a reference](https://docs.microsoft.com/en-us/visualstudio/ide/how-to-add-or-remove-references-by-using-the-reference-manager?view=vs-2019) to the `VertiGIS.Workflow.Runtime` assembly.
    By default, this is located in`C:\Program Files\VertiGIS\VertiGIS Studio Workflow\Deployment\service`
 
-:::important
+:::info Important
 .NET Standard projects **must** target .NET Standard 2.1, and .NET projects must target .NET 6.0, or else the assembly will be incompatible with VertiGIS Studio Workflow Server.
 :::
 
@@ -77,7 +77,7 @@ For VertiGIS Studio Workflow Server to find your custom activities, you need to 
 If you created a .NET Project and see `AssemblyNamespace.exe`, you need to change the project output type to `Class Library`.
 :::
 
-:::important
+:::info Important
 You may need to stop VertiGIS Studio Workflow Server in IIS in order to copy your copy your custom code.
 :::
 
@@ -108,7 +108,7 @@ VertiGIS.Workflow.Runtime.xml
     - `xcopy "$(OutDir)*" "C:\Program Files\VertiGIS\VertiGIS Studio Workflow\CustomAssemblies" /Exclude:$(ProjectDir)excludedFiles.txt /y`
 3. Run a rebuild and ensure all appropriate files are copied.
 
-:::important
+:::info Important
 You may need to stop then restart VertiGIS Studio Workflow Server in order for the post build step to copy your custom code.
 :::
 

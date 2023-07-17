@@ -142,7 +142,7 @@ module.exports = {
                     sidebarPath: require.resolve("./sidebars.js"),
                 },
                 gtag: {
-                    trackingID: "UA-103604191-6",
+                    trackingID: "G-2ZXTZT5M0F",
                     anonymizeIP: true,
                 },
                 theme: {

@@ -18,6 +18,7 @@
         "configitemtype",
         "configurability",
         "cors",
+        "cref",
         "customizability",
         "deps",
         "deserialization",

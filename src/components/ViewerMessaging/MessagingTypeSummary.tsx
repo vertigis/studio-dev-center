@@ -58,11 +58,11 @@ export default function MessagingTypeSummary(props: MessagingTypeSummaryProps) {
                         <h3 id={linkId}>{key}</h3>
                         {getDescription(item, schema, "margin-bottom--md")}
                         <div className="margin-bottom--md">
-                            <div>{`Argument ${
+                            <h4>{`Argument ${
                                 typeIsOptional(inputItem) === true
                                     ? "(optional)"
                                     : ""
-                            }`}</div>
+                            }`}</h4>
                             <div className="margin-left--sm">
                                 <MessagingArgument
                                     definition={inputItem}

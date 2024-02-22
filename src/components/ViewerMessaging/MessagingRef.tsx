@@ -14,7 +14,6 @@ interface MessagingRefProps {
 
 export default function MessagingRef(props: MessagingRefProps) {
     const { isArray, name, schema } = props;
-
     const trimmedName = trimDefinitionsName(name);
     const parts = trimmedName.replace("/", ".").split(".");
     const shortName = parts[parts.length - 1];
@@ -30,7 +29,9 @@ export default function MessagingRef(props: MessagingRefProps) {
                         {isArray && "[]"}
                     </a>
                 </code>
-                {shortName !== trimmedName && <small>{`${trimmedName}`}</small>}
+                {shortName !== trimmedName && (
+                    <small>{` ${trimmedName}`}</small>
+                )}
             </span>
         );
     }
@@ -52,7 +53,7 @@ export default function MessagingRef(props: MessagingRefProps) {
                         {isArray && "[]"}
                     </span>
                 </code>
-                <small>{`@arcgis.core.${parts.splice(1).join(".")}`}</small>
+                <small>{` @arcgis.core.${parts.splice(1).join(".")}`}</small>
             </span>
         );
     }
@@ -63,7 +64,7 @@ export default function MessagingRef(props: MessagingRefProps) {
                 {shortName}
                 {isArray && "[]"}
             </code>
-            {shortName !== trimmedName && <small>{`${trimmedName}`}</small>}
+            {shortName !== trimmedName && <small>{` ${trimmedName}`}</small>}
         </span>
     );
 }

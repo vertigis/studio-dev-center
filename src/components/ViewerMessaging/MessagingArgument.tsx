@@ -18,11 +18,11 @@ export function getDescription(
         return undefined;
     }
 
-    const parts = description.match(/{@link ([a-zA-Z\.\s]*?)}|`(.*?)`/g);
+    const parts = description.match(/{@link ([a-zA-Z\.\s\/!]*?)}|`(.*?)`/g);
     if (!parts) {
         return <div className={className}>{description}</div>;
     }
-    const getDefinition = (text: string): Definition => {
+    const getDefinition = (text: string | undefined): Definition => {
         const key = text?.split(".")[0];
         const property = text?.split(".")[1];
         return (key &&
@@ -37,18 +37,13 @@ export function getDescription(
     ) {
         const linkText = description
             .toLocaleLowerCase()
-            .match(/(see {@link )([a-zA-Z\.]*)/)?.[2];
+            .match(/(see {@link )([a-zA-Z\.\/!\s]*?)}/)?.[2];
         const referencedDef = definition.$ref
             ? getReferencedDefinition(definition.$ref, schema)
-            : getDefinition(linkText ?? "");
-        return referencedDef ? (
-            getDescription(referencedDef, schema, className)
-        ) : (
-            <div className={className}>
-                <span>See: </span>
-                <code>linkText</code>
-            </div>
-        );
+            : getDefinition(linkText);
+        return referencedDef
+            ? getDescription(referencedDef, schema, className)
+            : undefined;
     }
 
     // Link to any references found in the description.
@@ -56,10 +51,15 @@ export function getDescription(
         const linkIndex = description?.indexOf(link) ?? 0;
         const start = description?.slice(0, linkIndex);
         const remaining = description?.slice(linkIndex);
-        const linkMatch = link?.match(/{@link ([a-zA-Z\.\s]*?)}|`(.*?)`/);
+        const linkMatch = link?.match(/{@link ([a-zA-Z\.\s\/!]*?)}|`(.*?)`/);
         const linkText = (linkMatch?.[1] ?? linkMatch?.[2])?.trim();
         const refLink = getDefinition(linkText ?? "")?.$ref;
-        const linkElement = refLink ? <a href={refLink}>linkText</a> : linkText;
+        const shortText = linkText?.split("!")[1] ?? linkText;
+        const linkElement = refLink ? (
+            <a href={refLink}>shortText</a>
+        ) : (
+            shortText
+        );
 
         description = remaining?.slice(link.length);
 
@@ -121,7 +121,7 @@ export function listProperties(definition: Definition, schema: MessageSchema) {
                     return (
                         <div key={propName} className="margin-bottom--md">
                             <div className="margin-bottom--sm">
-                                <code>{propName}</code>
+                                <h4>{propName}</h4>
                                 {definition.required?.includes(propName) && (
                                     <span className="badge badge--secondary">
                                         Required

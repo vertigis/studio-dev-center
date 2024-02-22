@@ -48,6 +48,12 @@
     --ifm-heading-font-weight: bold;
 }
 
+.monospaceHeader {
+    font-family: monospace;
+    font-size: large;
+    font-weight: bold;
+}
+
 .footer .footer__links {
     margin-bottom: 3rem;
 }

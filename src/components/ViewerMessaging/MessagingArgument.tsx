@@ -121,7 +121,13 @@ export function listProperties(definition: Definition, schema: MessageSchema) {
                     return (
                         <div key={propName} className="margin-bottom--md">
                             <div className="margin-bottom--sm">
-                                <h4>{propName}</h4>
+                                <div
+                                    role="heading"
+                                    aria-level={4}
+                                    className="monospaceHeader"
+                                >
+                                    {propName}
+                                </div>
                                 {definition.required?.includes(propName) && (
                                     <span className="badge badge--secondary">
                                         Required

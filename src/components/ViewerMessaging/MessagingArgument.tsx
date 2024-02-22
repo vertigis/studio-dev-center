@@ -12,52 +12,100 @@ export function getDescription(
     definition: Definition,
     schema: MessageSchema,
     className: string
-) {
-    let definitionToUse = definition;
-    if (!definitionToUse.description) {
-        return null;
+): JSX.Element | undefined {
+    let { description } = definition;
+    if (!description) {
+        return undefined;
     }
+
+    const parts = description.match(/{@link ([a-zA-Z\.\s\/!]*?)}|`(.*?)`/g);
+    if (!parts) {
+        return <div className={className}>{description}</div>;
+    }
+    const getDefinition = (text: string | undefined): Definition => {
+        const key = text?.split(".")[0];
+        const property = text?.split(".")[1];
+        return (key &&
+            property &&
+            schema.definitions[key]?.properties?.[property]) as Definition;
+    };
+
+    // Descriptions consisting only of a link can be replaced.
     if (
-        definitionToUse.description.toLocaleLowerCase().startsWith("see {@link")
+        parts.length === 1 &&
+        description.toLocaleLowerCase().startsWith("see {@link")
     ) {
-        let referencedDef;
-        if (definitionToUse.$ref) {
-            referencedDef = getReferencedDefinition(
-                definitionToUse.$ref,
-                schema
-            );
-        } else {
-            // See if we can just find the description
-            const result = definitionToUse.description
-                .toLocaleLowerCase()
-                .match(/(see {@link )([a-zA-Z\.]*)/);
-            const key = result?.[2].split(".")[0];
-            const property = result?.[2].split(".")[1];
-            if (key && property) {
-                referencedDef = schema.definitions[key]?.properties?.[property];
-            }
-        }
-
-        if (referencedDef) {
-            definitionToUse = referencedDef;
-        }
-
-        // Get rid of "See {@link example.Example}" as not helpful if there is
-        // no link.
-        const link = definitionToUse.description
-            ?.toLocaleLowerCase()
-            .match(/see \{\@link [a-zA-Z\.}.]*/)?.[0];
-        if (link) {
-            definitionToUse.description = definitionToUse.description!.replace(
-                link,
-                ""
-            );
-        }
+        const linkText = description
+            .toLocaleLowerCase()
+            .match(/(see {@link )([a-zA-Z\.\/!\s]*?)}/)?.[2];
+        const referencedDef = definition.$ref
+            ? getReferencedDefinition(definition.$ref, schema)
+            : getDefinition(linkText);
+        return referencedDef
+            ? getDescription(referencedDef, schema, className)
+            : undefined;
     }
+
+    // Link to any references found in the description.
+    const formatPart = (link: string, index: number): JSX.Element[] => {
+        const linkIndex = description?.indexOf(link) ?? 0;
+        const start = description?.slice(0, linkIndex);
+        const remaining = description?.slice(linkIndex);
+        const linkMatch = link?.match(/{@link ([a-zA-Z\.\s\/!]*?)}|`(.*?)`/);
+        const linkText = (linkMatch?.[1] ?? linkMatch?.[2])?.trim();
+        const refLink = getDefinition(linkText ?? "")?.$ref;
+        const shortText = linkText?.split("!")[1] ?? linkText;
+        const linkElement = refLink ? (
+            <a href={refLink}>shortText</a>
+        ) : (
+            shortText
+        );
+
+        description = remaining?.slice(link.length);
+
+        if (index === 0) {
+            if (parts.length === 1) {
+                return [
+                    <span>{start}</span>,
+                    <code>{linkElement}</code>,
+                    <span>{remaining?.slice(link.length)}</span>,
+                ];
+            }
+            return [
+                <span>{start}</span>,
+                <code>{linkElement}</code>,
+                <span>
+                    {description?.slice(
+                        0,
+                        description?.indexOf(parts[index + 1])
+                    )}
+                </span>,
+            ];
+        }
+        if (description?.length ?? 0 > 0) {
+            if (index < parts.length - 1) {
+                return [
+                    <code>{linkElement}</code>,
+                    <span>
+                        {description?.slice(
+                            0,
+                            description?.indexOf(parts[index + 1])
+                        )}
+                    </span>,
+                ];
+            }
+            return [
+                <code>{linkElement}</code>,
+                <span>{remaining?.slice(link.length)}</span>,
+            ];
+        }
+        return [<code>{linkElement}</code>];
+    };
+
     return (
-        definitionToUse.description && (
-            <div className={className}>{definitionToUse.description}</div>
-        )
+        <div className={className}>
+            {parts.flatMap((link, i) => formatPart(link, i))}
+        </div>
     );
 }
 
@@ -73,7 +121,13 @@ export function listProperties(definition: Definition, schema: MessageSchema) {
                     return (
                         <div key={propName} className="margin-bottom--md">
                             <div className="margin-bottom--sm">
-                                <code>{propName}</code>
+                                <div
+                                    role="heading"
+                                    aria-level={4}
+                                    className="monospaceHeader"
+                                >
+                                    {propName}
+                                </div>
                                 {definition.required?.includes(propName) && (
                                     <span className="badge badge--secondary">
                                         Required
@@ -153,11 +207,11 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
                         {items.map((option, index) => (
                             // There's not a guaranteed safe identifier we can use for the key prop, fall back to index.
                             <div key={`${option.$ref}-${index}` || index}>
-                                <MessagingArgument
-                                    definition={option}
+                                <MessagingRef
+                                    isArray
+                                    name={option.$ref ?? ""}
                                     schema={schema}
                                 />
-                                []
                             </div>
                         ))}
                     </>

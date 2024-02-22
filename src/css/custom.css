@@ -35,6 +35,10 @@
     font-weight: var(--ifm-font-weight-light);
 }
 
+.container [id] {
+    scroll-margin-top: var(--ifm-navbar-height);
+}
+
 .stackSplitImage {
     max-width: 30em;
     height: auto;
@@ -42,6 +46,12 @@
 
 .admonitionHeading_node_modules-\@docusaurus-theme-classic-lib-theme-Admonition-styles-module {
     --ifm-heading-font-weight: bold;
+}
+
+.monospaceHeader {
+    font-family: monospace;
+    font-size: large;
+    font-weight: bold;
 }
 
 .footer .footer__links {

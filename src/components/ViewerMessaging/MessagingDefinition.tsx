@@ -16,6 +16,8 @@ export default function MessagingDefinition(props: MessagingDefinitionProps) {
     const { definitionName, schema } = props;
 
     const trimmedName = trimDefinitionsName(definitionName);
+    const parts = trimmedName.replace("/", ".").split(".");
+    const shortName = parts[parts.length - 1];
     const definition = getReferencedDefinition(definitionName, schema);
     if (!definition) {
         return null;
@@ -33,9 +35,12 @@ export default function MessagingDefinition(props: MessagingDefinitionProps) {
 
     return (
         <div className="margin-bottom--lg">
-            <h3 id={id}>{trimmedName}</h3>
+            <span>
+                <h2 id={id}>{shortName}</h2>
+                {shortName !== trimmedName && <h5>{`${trimmedName}`}</h5>}
+            </span>
             {getDescription(definition, schema, "margin-bottom--md")}
-            <div>Properties</div>
+            <h3>Properties</h3>
             {(!definition.properties ||
                 Object.keys(definition.properties).length === 0) && (
                 <em>This object doesn't currently contain any properties.</em>

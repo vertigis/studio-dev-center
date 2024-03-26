@@ -200,11 +200,11 @@ export default StarRatingElementRegistration;
 </TabItem>
 </Tabs>
 
-## Deploy the Activity
+## Deploy the Form Element
 
 Follow the instructions to [build and deploy the activity pack](sdk-web-overview.mdx#deployment).
 
-## Test the Activity
+## Test the Form Element
 
 Once your activity pack is hosted and registered, your custom form element should appear in the form element toolbox in VertiGIS Studio Workflow Designer alongside the built-in form elements, and can be used in the graphical interface like any other form element.
 
@@ -242,6 +242,25 @@ Once your activity pack is hosted and registered, your custom form element shoul
 </p>
 :::
 
-<img
-    src={useBaseUrl("img/workflow-web-custom-form-element-basic.png")}
-/>
+<img src={useBaseUrl("img/workflow-web-custom-star-rating.png")} />
+
+## Set the Form Element's Value at Runtime
+
+Depending on the use case for the custom form element you may want to display it with an initial value that that is provided at runtime by the workflow. In the case of the Star Rating form element we may want to initially select four stars, or some number computed by the workflow.
+
+To assign a `value` to a custom form element at runtime:
+
+1. Open your workflow in VertiGIS Studio Workflow Designer.
+1. Double-click the `Display Form` activity that contains the custom form element.
+1. Select the custom form element.
+1. Expand the `Events` section of the `Properties` panel.
+1. On the `load` event click `Add` or `Edit`.
+1. Add a `Set Form Element Property` activity from the toolbox to the subworkflow.
+1. Set the `Property Name` input to `value`
+1. Set the `Property Value` input to an expression that assigns the desired value. For example:
+    - Literal value: `=4`
+    - Variable value: `=$numberOfStars.result`
+
+:::note
+You can use the `Set Form Element Property` activity to assign a value to any prop of a custom form element React component.
+:::

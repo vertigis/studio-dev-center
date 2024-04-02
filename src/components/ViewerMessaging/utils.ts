@@ -32,3 +32,111 @@ export function getReferencedDefinition(
     }
     return schema.definitions[trimmedName];
 }
+
+/**
+ * This follows the `FeaturesLike` type defined in viewer-spec:
+ *
+ * ```
+ * export type FeaturesLike =
+ *   | Feature
+ *   | FeatureSet
+ *   | FeatureList
+ *   | FeatureStream
+ *   | (Feature | FeatureProperties)[];
+ * ```
+ *
+ * Of these, only FeatureProperties[] is documented in the schema. The rest will
+ * be redirected to a custom page in the docs instead.
+ */
+export function isFeaturesLike(defs: Definition[] | undefined): boolean {
+    if (!defs) {
+        return false;
+    }
+    const refs = defs.map((def) => def.$ref);
+    if (
+        refs.includes("@vertigis.arcgis-extensions.data.Feature.Feature") ||
+        refs.includes(
+            "@vertigis.arcgis-extensions.data.FeatureSet.FeatureSet"
+        ) ||
+        refs.includes(
+            "@vertigis.arcgis-extensions.data.FeatureList.FeatureList"
+        ) ||
+        refs.includes(
+            "@vertigis.arcgis-extensions.data.FeatureStream.FeatureStream"
+        )
+    ) {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Given a collection of defs, replace undocumented API feature objects with
+ * something we can use to link to a custom page.
+ */
+export function replaceFeaturesLike(defs: Definition[]): Definition[] {
+    console.log(defs);
+    const newDefs = defs.slice();
+    const featureTypes: string[] = [];
+
+    const featureIndex = newDefs.findIndex(
+        (def) => def.$ref === "@vertigis.arcgis-extensions.data.Feature.Feature"
+    );
+    if (featureIndex >= 0) {
+        newDefs.splice(featureIndex, 1);
+        featureTypes.push("Feature");
+    }
+
+    const featureSetIndex = newDefs.findIndex(
+        (def) =>
+            def.$ref ===
+            "@vertigis.arcgis-extensions.data.FeatureSet.FeatureSet"
+    );
+    if (featureSetIndex >= -1) {
+        newDefs.splice(featureSetIndex, 1);
+        featureTypes.push("FeatureSet");
+    }
+
+    const featureListIndex = newDefs.findIndex(
+        (def) =>
+            def.$ref ===
+            "@vertigis.arcgis-extensions.data.FeatureList.FeatureList"
+    );
+    if (featureListIndex >= 0) {
+        newDefs.splice(featureListIndex, 1);
+        featureTypes.push("FeatureList");
+    }
+
+    const featureStreamIndex = newDefs.findIndex(
+        (def) =>
+            def.$ref ===
+            "@vertigis.arcgis-extensions.data.FeatureStream.FeatureStream"
+    );
+    if (featureStreamIndex >= 0) {
+        newDefs.splice(featureStreamIndex, 1);
+        featureTypes.push("FeatureStream");
+    }
+
+    const arrayDefs = newDefs.filter((def) => def.type === "array");
+    arrayDefs.forEach((arrayDef) => {
+        const newArrayDefs = (arrayDef?.items as Definition)?.anyOf?.slice();
+        if (newArrayDefs) {
+            const featureArrayIndex = newArrayDefs.findIndex(
+                (def) =>
+                    def.$ref ===
+                    "@vertigis.arcgis-extensions.data.Feature.Feature"
+            );
+            if (featureArrayIndex >= 0) {
+                newArrayDefs?.splice(featureArrayIndex, 1);
+                featureTypes.push("Feature[]");
+            }
+            (arrayDef.items as Definition).anyOf = newArrayDefs;
+        }
+    });
+
+    newDefs.splice(featureIndex >= 0 ? featureIndex : 0, 0, {
+        $ref: `@vertigis.api-docs.Features (${featureTypes.join(", ")})`,
+    });
+
+    return newDefs;
+}

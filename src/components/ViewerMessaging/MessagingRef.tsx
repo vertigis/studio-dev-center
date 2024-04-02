@@ -14,8 +14,11 @@ interface MessagingRefProps {
 
 export default function MessagingRef(props: MessagingRefProps) {
     const { isArray, name, schema } = props;
-    const trimmedName = trimDefinitionsName(name);
-    const parts = trimmedName.replace("/", ".").split(".");
+    const fullName = trimDefinitionsName(name);
+    const trimmedName = fullName.includes(" ")
+        ? fullName.split(/\s(.*)/)[1]
+        : fullName;
+    const parts = fullName.split(" ")[0].replace("/", ".").split(".");
     const shortName = parts[parts.length - 1];
     const referencedDefinition = getReferencedDefinition(name, schema);
 

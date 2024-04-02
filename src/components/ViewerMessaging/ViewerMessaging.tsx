@@ -2,6 +2,7 @@ import BrowserOnly from "@docusaurus/BrowserOnly";
 import React, { useEffect, useState } from "react";
 import MessagingContent from "./MessagingContent";
 import { MessageSchema, Definition } from "./schema";
+import { isFeaturesLike, replaceFeaturesLike } from "./utils";
 
 interface ViewerMessagingProps {
     product: "mobile" | "web" | "common";
@@ -9,7 +10,7 @@ interface ViewerMessagingProps {
 }
 
 export default function ViewerMessagingWrapper(props: ViewerMessagingProps) {
-    return BrowserOnly({ children: () => <ViewerMessaging {...props} /> });
+    return <BrowserOnly>{() => <ViewerMessaging {...props} />}</BrowserOnly>;
 }
 
 // Cache the requests to allow this component to be rendered
@@ -147,7 +148,17 @@ function ViewerMessaging(props: ViewerMessagingProps) {
 
             messageSchemas.forEach((messageSchema) => {
                 Object.keys(messageSchema.definitions).forEach((key) => {
-                    schema.definitions[key] = messageSchema.definitions[key];
+                    schema.definitions[key] = isFeaturesLike(
+                        messageSchema.definitions[key].anyOf
+                    )
+                        ? {
+                              ...messageSchema.definitions[key],
+                              anyOf: replaceFeaturesLike(
+                                  messageSchema.definitions[key]
+                                      .anyOf as Definition[]
+                              ),
+                          }
+                        : messageSchema.definitions[key];
                 });
             });
 

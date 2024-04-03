@@ -83,7 +83,6 @@ export function isFeaturesLike(defs: Definition[] | undefined): boolean {
  * something we can use to link to a custom page.
  */
 export function replaceFeaturesLike(defs: Definition[]): Definition[] {
-    console.log(defs);
     const newDefs = defs.slice();
     const featureTypes: string[] = [];
 

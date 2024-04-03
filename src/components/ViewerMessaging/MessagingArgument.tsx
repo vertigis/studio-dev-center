@@ -19,7 +19,7 @@ export function getDescription(
         return undefined;
     }
 
-    const parts = description.match(/{@link ([a-zA-Z\.\s\/!]*?)}|`(.*?)`/g);
+    const parts = description.match(/{@link ([a-zA-Z\.\s\/!:\-_]*?)}|`(.*?)`/g);
     if (!parts) {
         return <div className={className}>{description}</div>;
     }
@@ -38,7 +38,7 @@ export function getDescription(
     ) {
         const linkText = description
             .toLocaleLowerCase()
-            .match(/(see {@link )([a-zA-Z\.\/!\s]*?)}/)?.[2];
+            .match(/(see {@link )([a-zA-Z\.\s\/!]*?)}/)?.[2];
         const referencedDef = definition.$ref
             ? getReferencedDefinition(definition.$ref, schema)
             : getDefinition(linkText);
@@ -52,12 +52,19 @@ export function getDescription(
         const linkIndex = description?.indexOf(link) ?? 0;
         const start = description?.slice(0, linkIndex);
         const remaining = description?.slice(linkIndex);
-        const linkMatch = link?.match(/{@link ([a-zA-Z\.\s\/!]*?)}|`(.*?)`/);
+        const linkMatch = link?.match(
+            /{@link ([a-zA-Z\.\s\/!:\-_]*?)}|`(.*?)`/
+        );
         const linkText = (linkMatch?.[1] ?? linkMatch?.[2])?.trim();
         const refLink = getDefinition(linkText ?? "")?.$ref;
-        const shortText = linkText?.split("!")[1] ?? linkText;
-        const linkElement = refLink ? (
-            <a href={refLink}>shortText</a>
+        const isExternalLink = linkText?.startsWith("http");
+        const shortText = isExternalLink ? linkText : linkText?.split("!")[1];
+        const href = refLink ?? (isExternalLink ? linkText : undefined);
+
+        const linkElement = href ? (
+            <a href={href} target={isExternalLink ? "_blank" : "_self"}>
+                {shortText}
+            </a>
         ) : (
             shortText
         );

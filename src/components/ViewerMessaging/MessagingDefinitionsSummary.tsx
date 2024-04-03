@@ -4,7 +4,7 @@ import MessagingDefinition from "./MessagingDefinition";
 
 interface MessagingDefinitionsSummaryProps {
     schema: MessageSchema;
-    product: "web" | "mobile" | "common";
+    product: "web" | "mobile";
 }
 
 // Note that we blindly render all definitions present in the schema.

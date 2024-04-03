@@ -6,7 +6,7 @@ export function trimDefinitionsName(def: string) {
 
 export function getArgumentDefinitionLink(
     def: string,
-    product: "web" | "mobile" | "common" = "web"
+    product: "web" | "mobile" = "web"
 ) {
     return `docs/${product}/api-argument-definitions#definition-${trimDefinitionsName(
         def

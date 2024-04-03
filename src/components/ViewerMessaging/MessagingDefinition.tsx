@@ -1,3 +1,4 @@
+import Heading from "@theme/Heading";
 import React from "react";
 import { getDescription, listProperties } from "./MessagingArgument";
 import { MessageSchema } from "./schema";
@@ -10,7 +11,7 @@ import {
 interface MessagingDefinitionProps {
     definitionName: string;
     schema: MessageSchema;
-    product: "web" | "mobile" | "common";
+    product: "web" | "mobile";
 }
 
 export default function MessagingDefinition(props: MessagingDefinitionProps) {
@@ -37,7 +38,9 @@ export default function MessagingDefinition(props: MessagingDefinitionProps) {
     return (
         <div className="margin-bottom--lg">
             <span>
-                <h2 id={id}>{shortName}</h2>
+                <Heading as="h2" id={id}>
+                    {shortName}
+                </Heading>
                 {shortName !== trimmedName && <h5>{`${trimmedName}`}</h5>}
             </span>
             {getDescription(definition, schema, "margin-bottom--md")}

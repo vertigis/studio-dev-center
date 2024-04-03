@@ -54,6 +54,16 @@
     font-weight: bold;
 }
 
+.property-name-and-badges {
+    display: flex;
+    flex-direction: row;
+}
+
+.property-name-and-badges .badge {
+    margin-left: 0.25rem;
+    line-height: 1.25;
+}
+
 .footer .footer__links {
     margin-bottom: 3rem;
 }

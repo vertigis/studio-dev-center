@@ -1,3 +1,4 @@
+import Heading from "@theme/Heading";
 import React from "react";
 import MessagingArgument, { getDescription } from "./MessagingArgument";
 import { MessageSchema, Definition } from "./schema";
@@ -8,7 +9,7 @@ type RefDefinition = Required<Pick<Definition, "$ref">>;
 interface MessagingTypeSummaryProps {
     schema: MessageSchema;
     type: "command" | "event" | "operation";
-    product: "web" | "mobile" | "common";
+    product: "web" | "mobile";
 }
 
 function definitionIsRef(def: Definition): def is RefDefinition {
@@ -56,7 +57,9 @@ export default function MessagingTypeSummary(props: MessagingTypeSummaryProps) {
 
                 return (
                     <div key={key} className="margin-bottom--lg">
-                        <h2 id={linkId}>{key}</h2>
+                        <Heading as="h2" id={linkId}>
+                            {key}
+                        </Heading>
                         {getDescription(item, schema, "margin-bottom--md")}
                         <div className="margin-bottom--md">
                             <h3>{`Argument ${

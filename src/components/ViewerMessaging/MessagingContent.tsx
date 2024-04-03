@@ -6,7 +6,7 @@ import MessagingDefinitionsSummary from "./MessagingDefinitionsSummary";
 interface MessagingContentProps {
     schema: MessageSchema;
     type: "argument" | "command" | "event" | "operation" | "config";
-    product: "web" | "mobile" | "common";
+    product: "web" | "mobile";
 }
 
 export default function MessagingContent(props: MessagingContentProps) {

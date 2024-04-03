@@ -5,7 +5,7 @@ import { MessageSchema, Definition } from "./schema";
 import { isFeaturesLike, replaceFeaturesLike } from "./utils";
 
 interface ViewerMessagingProps {
-    product: "mobile" | "web" | "common";
+    product: "mobile" | "web";
     type: "argument" | "command" | "event" | "operation" | "config";
 }
 
@@ -18,7 +18,7 @@ export default function ViewerMessagingWrapper(props: ViewerMessagingProps) {
 // We need to be able to render the headers within markdown so it
 // plays nicely with the docusaurus right TOC component.
 const cachedRequests: Record<
-    ViewerMessagingProps["product"],
+    "web" | "mobile" | "common",
     Record<"action" | "event" | "config", Promise<Response> | undefined>
 > = {
     web: { action: undefined, event: undefined, config: undefined },
@@ -33,10 +33,11 @@ function ViewerMessaging(props: ViewerMessagingProps) {
     // Fetch schema
     useEffect(() => {
         let didCancel = false;
-        let schemaType: "action" | "event" | "config" | undefined = undefined;
+        let schemaType: "action" | "event" | "config";
         switch (type) {
             case "command":
             case "operation":
+            case "argument":
                 schemaType = "action";
                 break;
             case "event":
@@ -50,13 +51,17 @@ function ViewerMessaging(props: ViewerMessagingProps) {
         }
 
         (async () => {
-            if (schemaType && !cachedRequests[product][schemaType]) {
+            if (schemaType! && !cachedRequests[product][schemaType]) {
                 if (type === "config") {
                     cachedRequests["common"][schemaType] = fetch(
                         `https://apps.vertigisstudio.com/web/common-app-config.schema.json`
                     );
                     cachedRequests[product][schemaType] = fetch(
                         `https://apps.vertigisstudio.com/web/${product}-app-config.schema.json`
+                    );
+                    // We need to fetch this for some of the definitions it includes.
+                    cachedRequests[product].action = fetch(
+                        `https://apps.vertigisstudio.com/web/${product}-action.schema.json`
                     );
                 } else {
                     cachedRequests[product][schemaType] = fetch(
@@ -66,10 +71,12 @@ function ViewerMessaging(props: ViewerMessagingProps) {
             }
 
             const messageSchemas: MessageSchema[] = [];
-            if (schemaType === "config") {
+            if (schemaType! === "config") {
                 const commonConfigResponse = await cachedRequests["common"]
                     .config!;
                 const configResponse = await cachedRequests[product].config!;
+                const actionConfigResponse = await cachedRequests[product]
+                    .action!;
 
                 // Clone to avoid error when reading json multiple times
                 const commonConfigResponseJson: MessageSchema =
@@ -77,9 +84,12 @@ function ViewerMessaging(props: ViewerMessagingProps) {
                 const configResponseJson: MessageSchema = await configResponse
                     .clone()
                     .json();
+                const actionResponseJson: MessageSchema =
+                    await actionConfigResponse.clone().json();
 
                 messageSchemas.push(commonConfigResponseJson);
                 messageSchemas.push(configResponseJson);
+                messageSchemas.push(actionResponseJson);
             } else {
                 const actionResponse = await cachedRequests[product].action!;
                 const eventResponse = await cachedRequests[product].event!;

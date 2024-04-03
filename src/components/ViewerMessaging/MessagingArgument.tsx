@@ -6,7 +6,7 @@ import { getReferencedDefinition } from "./utils";
 interface MessagingArgumentProps {
     definition: Definition | string | undefined;
     schema: MessageSchema;
-    product: "web" | "mobile" | "common";
+    product: "web" | "mobile";
 }
 
 export function getDescription(
@@ -113,7 +113,7 @@ export function getDescription(
 export function listProperties(
     definition: Definition,
     schema: MessageSchema,
-    product: "web" | "mobile" | "common"
+    product: "web" | "mobile"
 ) {
     if (!definition.properties) {
         return null;
@@ -126,18 +126,22 @@ export function listProperties(
                     return (
                         <div key={propName} className="margin-bottom--md">
                             <div className="margin-bottom--sm">
-                                <div
-                                    role="heading"
-                                    aria-level={4}
-                                    className="monospaceHeader"
-                                >
-                                    {propName}
+                                <div className="property-name-and-badges">
+                                    <div
+                                        role="heading"
+                                        aria-level={4}
+                                        className="monospaceHeader"
+                                    >
+                                        {propName}
+                                    </div>
+                                    {definition.required?.includes(
+                                        propName
+                                    ) && (
+                                        <span className="badge badge--secondary">
+                                            Required
+                                        </span>
+                                    )}
                                 </div>
-                                {definition.required?.includes(propName) && (
-                                    <span className="badge badge--secondary">
-                                        Required
-                                    </span>
-                                )}
                             </div>
                             <div className="margin-left--sm">
                                 <MessagingArgument

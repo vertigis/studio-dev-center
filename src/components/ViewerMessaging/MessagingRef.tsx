@@ -11,7 +11,7 @@ interface MessagingRefProps {
     isArray?: boolean;
     name: string;
     schema: MessageSchema;
-    product: "web" | "mobile" | "common";
+    product: "web" | "mobile";
 }
 
 export default function MessagingRef(props: MessagingRefProps) {

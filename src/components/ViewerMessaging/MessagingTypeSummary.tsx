@@ -8,6 +8,7 @@ type RefDefinition = Required<Pick<Definition, "$ref">>;
 interface MessagingTypeSummaryProps {
     schema: MessageSchema;
     type: "command" | "event" | "operation";
+    product: "web" | "mobile" | "common";
 }
 
 function definitionIsRef(def: Definition): def is RefDefinition {
@@ -19,7 +20,7 @@ function typeIsOptional(def: Definition | undefined): boolean | undefined {
 }
 
 export default function MessagingTypeSummary(props: MessagingTypeSummaryProps) {
-    const { schema, type } = props;
+    const { schema, type, product } = props;
     const definitions = schema.definitions as Record<
         string,
         Definition | undefined
@@ -67,6 +68,7 @@ export default function MessagingTypeSummary(props: MessagingTypeSummaryProps) {
                                 <MessagingArgument
                                     definition={inputItem}
                                     schema={schema}
+                                    product={product}
                                 />
                             </div>
                         </div>
@@ -77,6 +79,7 @@ export default function MessagingTypeSummary(props: MessagingTypeSummaryProps) {
                                     <MessagingArgument
                                         definition={outputItem}
                                         schema={schema}
+                                        product={product}
                                     />
                                 </div>
                             </>

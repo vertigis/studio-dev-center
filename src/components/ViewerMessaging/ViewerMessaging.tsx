@@ -86,14 +86,18 @@ function ViewerMessaging(props: ViewerMessagingProps) {
 
                 // Clone to avoid error when reading json multiple times
                 const actionResponseJson: MessageSchema = await actionResponse
-                    .clone()
+                    ?.clone()
                     .json();
                 const eventResponseJson: MessageSchema = await eventResponse
-                    .clone()
+                    ?.clone()
                     .json();
 
-                messageSchemas.push(actionResponseJson);
-                messageSchemas.push(eventResponseJson);
+                if (actionResponseJson) {
+                    messageSchemas.push(actionResponseJson);
+                }
+                if (eventResponseJson) {
+                    messageSchemas.push(eventResponseJson);
+                }
             }
             if (didCancel) {
                 return;
@@ -185,7 +189,11 @@ function ViewerMessaging(props: ViewerMessagingProps) {
     }, [messagingJson]);
 
     return messagingJson ? (
-        <MessagingContent schema={messagingJson} type={type} />
+        <MessagingContent
+            schema={messagingJson}
+            type={type}
+            product={product}
+        />
     ) : (
         <div>Loading...</div>
     );

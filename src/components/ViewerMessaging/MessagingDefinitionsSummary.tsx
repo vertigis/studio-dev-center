@@ -4,6 +4,7 @@ import MessagingDefinition from "./MessagingDefinition";
 
 interface MessagingDefinitionsSummaryProps {
     schema: MessageSchema;
+    product: "web" | "mobile" | "common";
 }
 
 // Note that we blindly render all definitions present in the schema.
@@ -12,7 +13,7 @@ interface MessagingDefinitionsSummaryProps {
 export default function MessagingDefinitionsSummary(
     props: MessagingDefinitionsSummaryProps
 ) {
-    const { schema } = props;
+    const { schema, product } = props;
 
     // Grab only the `object` type definitions, everything else can be inlined.
     const filteredDefinitions: typeof schema.definitions = Object.entries(
@@ -53,6 +54,7 @@ export default function MessagingDefinitionsSummary(
                         key={name}
                         definitionName={name}
                         schema={schema}
+                        product={product}
                     />
                 ))}
         </div>

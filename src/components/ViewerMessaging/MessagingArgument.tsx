@@ -6,6 +6,7 @@ import { getReferencedDefinition } from "./utils";
 interface MessagingArgumentProps {
     definition: Definition | string | undefined;
     schema: MessageSchema;
+    product: "web" | "mobile" | "common";
 }
 
 export function getDescription(
@@ -109,7 +110,11 @@ export function getDescription(
     );
 }
 
-export function listProperties(definition: Definition, schema: MessageSchema) {
+export function listProperties(
+    definition: Definition,
+    schema: MessageSchema,
+    product: "web" | "mobile" | "common"
+) {
     if (!definition.properties) {
         return null;
     }
@@ -138,6 +143,7 @@ export function listProperties(definition: Definition, schema: MessageSchema) {
                                 <MessagingArgument
                                     definition={propDef}
                                     schema={schema}
+                                    product={product}
                                 />
                                 {getDescription(
                                     propDef,
@@ -154,7 +160,7 @@ export function listProperties(definition: Definition, schema: MessageSchema) {
 }
 
 export default function MessagingArgument(props: MessagingArgumentProps) {
-    const { schema } = props;
+    const { schema, product } = props;
 
     let definition = props.definition;
 
@@ -187,11 +193,21 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
         // We only hyperlink to object type definitions, everything else can be inlined.
         if (referencedDef && referencedDef.type !== "object") {
             return (
-                <MessagingArgument definition={referencedDef} schema={schema} />
+                <MessagingArgument
+                    definition={referencedDef}
+                    schema={schema}
+                    product={product}
+                />
             );
         }
 
-        return <MessagingRef name={definition.$ref} schema={schema} />;
+        return (
+            <MessagingRef
+                name={definition.$ref}
+                schema={schema}
+                product={product}
+            />
+        );
     }
     // This is a single type
     else if (definition.type) {
@@ -211,6 +227,7 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
                                     isArray
                                     name={option.$ref ?? ""}
                                     schema={schema}
+                                    product={product}
                                 />
                             </div>
                         ))}
@@ -225,7 +242,14 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
             }
             if (definition.items.$ref) {
                 const itemsRef = (definition.items as Definition).$ref!;
-                return <MessagingRef isArray name={itemsRef} schema={schema} />;
+                return (
+                    <MessagingRef
+                        isArray
+                        name={itemsRef}
+                        schema={schema}
+                        product={product}
+                    />
+                );
             }
             return <code>{(definition.items as Definition).type}[]</code>;
         } else if (definition.type === "object") {
@@ -236,7 +260,7 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
                 return (
                     <>
                         <code>object</code>
-                        {listProperties(definition, schema)}
+                        {listProperties(definition, schema, product)}
                     </>
                 );
             }
@@ -298,6 +322,7 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
                         <MessagingArgument
                             definition={option}
                             schema={schema}
+                            product={product}
                         />
                     </div>
                 ))}

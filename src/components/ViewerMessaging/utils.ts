@@ -4,8 +4,17 @@ export function trimDefinitionsName(def: string) {
     return def.replace("#/definitions/", "");
 }
 
+export function getArgumentDefinitionLink(
+    def: string,
+    product: "web" | "mobile" | "common" = "web"
+) {
+    return `docs/${product}/api-argument-definitions#definition-${trimDefinitionsName(
+        def
+    )}`;
+}
+
 export function getArgumentDefinitionLinkId(def: string) {
-    return `definition-${trimDefinitionsName(def)}`;
+    return getArgumentDefinitionLink(def).split("#")[1];
 }
 
 export function getActionOrEventDefinitionLinkId(
@@ -24,7 +33,6 @@ export function getReferencedDefinition(
     // SingleCommand and SingleOperation as they result in a large list of
     // `unknown` properties.
     if (
-        trimmedName.startsWith("esri.rest-api") ||
         trimmedName.startsWith("viewer-spec.SingleCommand") ||
         trimmedName.startsWith("viewer-spec.SingleOperation")
     ) {

@@ -2,18 +2,20 @@ import React from "react";
 import { MessageSchema } from "./schema";
 import {
     trimDefinitionsName,
-    getArgumentDefinitionLinkId,
     getReferencedDefinition,
+    getArgumentDefinitionLink,
 } from "./utils";
+import useBaseUrl from "@docusaurus/useBaseUrl";
 
 interface MessagingRefProps {
     isArray?: boolean;
     name: string;
     schema: MessageSchema;
+    product: "web" | "mobile" | "common";
 }
 
 export default function MessagingRef(props: MessagingRefProps) {
-    const { isArray, name, schema } = props;
+    const { isArray, name, schema, product } = props;
     const fullName = trimDefinitionsName(name);
     const trimmedName = fullName.includes(" ")
         ? fullName.split(/\s(.*)/)[1]
@@ -27,7 +29,11 @@ export default function MessagingRef(props: MessagingRefProps) {
         return (
             <span>
                 <code>
-                    <a href={`#${getArgumentDefinitionLinkId(name)}`}>
+                    <a
+                        href={useBaseUrl(
+                            getArgumentDefinitionLink(name, product)
+                        )}
+                    >
                         {shortName}
                         {isArray && "[]"}
                     </a>

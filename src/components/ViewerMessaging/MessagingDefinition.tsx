@@ -3,17 +3,18 @@ import { getDescription, listProperties } from "./MessagingArgument";
 import { MessageSchema } from "./schema";
 import {
     trimDefinitionsName,
-    getArgumentDefinitionLinkId,
     getReferencedDefinition,
+    getArgumentDefinitionLinkId,
 } from "./utils";
 
 interface MessagingDefinitionProps {
     definitionName: string;
     schema: MessageSchema;
+    product: "web" | "mobile" | "common";
 }
 
 export default function MessagingDefinition(props: MessagingDefinitionProps) {
-    const { definitionName, schema } = props;
+    const { definitionName, schema, product } = props;
 
     const trimmedName = trimDefinitionsName(definitionName);
     const parts = trimmedName.replace("/", ".").split(".");
@@ -45,7 +46,8 @@ export default function MessagingDefinition(props: MessagingDefinitionProps) {
                 Object.keys(definition.properties).length === 0) && (
                 <em>This object doesn't currently contain any properties.</em>
             )}
-            {definition.properties && listProperties(definition, schema)}
+            {definition.properties &&
+                listProperties(definition, schema, product)}
         </div>
     );
 }

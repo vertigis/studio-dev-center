@@ -5,16 +5,28 @@ export function trimDefinitionsName(def: string) {
 }
 
 export function getArgumentDefinitionLink(
-    def: string,
+    def: string | undefined,
     product: "web" | "mobile" = "web"
-) {
-    return `docs/${product}/api-argument-definitions#definition-${trimDefinitionsName(
-        def
-    )}`;
+): string | undefined {
+    if (!def || def === "") {
+        return undefined;
+    }
+    const name = trimDefinitionsName(def);
+    console.log(name);
+    if (name === "Features" || name === "Feature") {
+        return `docs/web/api-objects#features`;
+    }
+    if (name === "FeatureSource") {
+        return `docs/web/api-objects#featuresource`;
+    }
+    if (name.endsWith("Extension")) {
+        return `docs/${product}/api-objects#extensions`;
+    }
+    return `docs/${product}/api-argument-definitions#definition-${name}`;
 }
 
-export function getArgumentDefinitionLinkId(def: string) {
-    return getArgumentDefinitionLink(def).split("#")[1];
+export function getArgumentDefinitionLinkId(def: string): string | undefined {
+    return getArgumentDefinitionLink(def)?.split("#")[1];
 }
 
 export function getActionOrEventDefinitionLinkId(
@@ -99,7 +111,7 @@ export function replaceFeaturesLike(defs: Definition[]): Definition[] {
             def.$ref ===
             "@vertigis.arcgis-extensions.data.FeatureSet.FeatureSet"
     );
-    if (featureSetIndex >= -1) {
+    if (featureSetIndex >= 0) {
         newDefs.splice(featureSetIndex, 1);
         featureTypes.push("FeatureSet");
     }
@@ -142,7 +154,7 @@ export function replaceFeaturesLike(defs: Definition[]): Definition[] {
     });
 
     newDefs.splice(featureIndex >= 0 ? featureIndex : 0, 0, {
-        $ref: `@vertigis.api-docs.Features (${featureTypes.join(", ")})`,
+        $ref: `@vertigis.api-docs.Features ${featureTypes.join(", ")}`,
     });
 
     return newDefs;

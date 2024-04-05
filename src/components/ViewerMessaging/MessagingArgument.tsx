@@ -1,7 +1,8 @@
 import React from "react";
 import { Definition, MessageSchema, PrimitiveType } from "./schema";
 import MessagingRef from "./MessagingRef";
-import { getReferencedDefinition } from "./utils";
+import { getArgumentDefinitionLink, getReferencedDefinition } from "./utils";
+import useBaseUrl from "@docusaurus/useBaseUrl";
 
 interface MessagingArgumentProps {
     definition: Definition | string | undefined;
@@ -12,23 +13,33 @@ interface MessagingArgumentProps {
 export function getDescription(
     definition: Definition,
     schema: MessageSchema,
-    className: string
+    className: string,
+    product: "web" | "mobile"
 ): JSX.Element | undefined {
     let { description } = definition;
     if (!description) {
         return undefined;
     }
 
-    const parts = description.match(/{@link ([a-zA-Z\.\s\/!:\-_]*?)}|`(.*?)`/g);
+    const parts = description.match(
+        /{@link ([a-zA-Z0-9\.\s\/!:\-_]*?)}|`(.*?)`/g
+    );
     if (!parts) {
         return <div className={className}>{description}</div>;
     }
-    const getDefinition = (text: string | undefined): Definition => {
-        const key = text?.split(".")[0];
-        const property = text?.split(".")[1];
-        return (key &&
-            property &&
-            schema.definitions[key]?.properties?.[property]) as Definition;
+    const getDefinition = (
+        text: string | undefined
+    ): Definition | undefined => {
+        if (text?.includes(".")) {
+            const key = text?.split(".")[0];
+            const property = text?.split(".")[1];
+            return (key &&
+                property &&
+                schema.definitions[key]?.properties?.[property]) as Definition;
+        } else if (text) {
+            return schema.definitions[text];
+        }
+        return undefined;
     };
 
     // Descriptions consisting only of a link can be replaced.
@@ -38,12 +49,12 @@ export function getDescription(
     ) {
         const linkText = description
             .toLocaleLowerCase()
-            .match(/(see {@link )([a-zA-Z\.\s\/!]*?)}/)?.[2];
+            .match(/(see {@link )([a-zA-Z0-9\.\s\/!]*?)}/)?.[2];
         const referencedDef = definition.$ref
             ? getReferencedDefinition(definition.$ref, schema)
             : getDefinition(linkText);
         return referencedDef
-            ? getDescription(referencedDef, schema, className)
+            ? getDescription(referencedDef, schema, className, product)
             : undefined;
     }
 
@@ -53,20 +64,29 @@ export function getDescription(
         const start = description?.slice(0, linkIndex);
         const remaining = description?.slice(linkIndex);
         const linkMatch = link?.match(
-            /{@link ([a-zA-Z\.\s\/!:\-_]*?)}|`(.*?)`/
+            /{@link ([a-zA-Z0-9\.\s\/!:\-_]*?)}|`(.*?)`/
         );
-        const linkText = (linkMatch?.[1] ?? linkMatch?.[2])?.trim();
-        const refLink = getDefinition(linkText ?? "")?.$ref;
-        const isExternalLink = linkText?.startsWith("http");
-        const shortText = isExternalLink ? linkText : linkText?.split("!")[1];
-        const href = refLink ?? (isExternalLink ? linkText : undefined);
+        let displayText = (linkMatch?.[1] ?? linkMatch?.[2])?.trim();
+        if (displayText?.includes("!")) {
+            displayText = displayText.split("!")[1];
+        }
+        const isExternalLink = displayText?.startsWith("http");
+        const referenceLink =
+            displayText && schema.definitions[displayText]
+                ? useBaseUrl(getArgumentDefinitionLink(displayText, product))
+                : isExternalLink
+                ? displayText
+                : undefined;
 
-        const linkElement = href ? (
-            <a href={href} target={isExternalLink ? "_blank" : "_self"}>
-                {shortText}
+        const linkElement = referenceLink ? (
+            <a
+                href={referenceLink}
+                target={isExternalLink ? "_blank" : "_self"}
+            >
+                {displayText}
             </a>
         ) : (
-            shortText
+            displayText
         );
 
         description = remaining?.slice(link.length);
@@ -159,7 +179,8 @@ export function listProperties(
                                 {getDescription(
                                     propDef,
                                     schema,
-                                    "margin-top--sm"
+                                    "margin-top--sm",
+                                    product
                                 )}
                             </div>
                         </div>

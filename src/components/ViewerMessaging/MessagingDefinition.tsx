@@ -43,7 +43,7 @@ export default function MessagingDefinition(props: MessagingDefinitionProps) {
                 </Heading>
                 {shortName !== trimmedName && <h5>{`${trimmedName}`}</h5>}
             </span>
-            {getDescription(definition, schema, "margin-bottom--md")}
+            {getDescription(definition, schema, "margin-bottom--md", product)}
             <h3>Properties</h3>
             {(!definition.properties ||
                 Object.keys(definition.properties).length === 0) && (

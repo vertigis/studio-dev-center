@@ -1,0 +1,134 @@
+{
+    "_properties": {},
+    "components": [
+        {
+            "id": 1,
+            "steps": [
+                {
+                    "id": 2,
+                    "inputs": {},
+                    "position": "0,0",
+                    "purpose": "start",
+                    "title": "Start",
+                    "transitions": [
+                        {
+                            "id": 9,
+                            "position": "90,60 90,110",
+                            "target": { "id": 8 }
+                        }
+                    ]
+                },
+                {
+                    "action": "uuid:cc39c481-4d05-4c39-8363-07b79dc03aa7::MyCustomActivity",
+                    "id": 5,
+                    "inputs": {},
+                    "name": "myCustomActivityDirect",
+                    "position": "-290,230",
+                    "title": "My custom activity",
+                    "transitions": [
+                        {
+                            "id": 16,
+                            "position": "-170,300 -170,370",
+                            "sourceConnector": "bottom",
+                            "target": { "id": 13 },
+                            "targetConnector": "top"
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::RunActivity",
+                    "description": "Run \"**My custom activity**\" by calling its action id",
+                    "id": 7,
+                    "inputs": {
+                        "action": "uuid:cc39c481-4d05-4c39-8363-07b79dc03aa7::MyCustomActivity"
+                    },
+                    "name": "runCustomActivity",
+                    "position": "240,220",
+                    "title": "Run Activity",
+                    "transitions": [
+                        {
+                            "id": 21,
+                            "position": "360,340 360,370",
+                            "sourceConnector": "bottom",
+                            "target": { "id": 20 },
+                            "targetConnector": "top"
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::If",
+                    "description": "custom ctivity pack registered with portal",
+                    "id": 8,
+                    "inputs": { "condition": true },
+                    "position": "-30,110",
+                    "title": "If",
+                    "transitions": [
+                        {
+                            "branch": "true",
+                            "id": 10,
+                            "position": "-30,165 -170,165 -170,230",
+                            "sourceConnector": "left",
+                            "target": { "id": 5 },
+                            "targetConnector": "top"
+                        },
+                        {
+                            "branch": "false",
+                            "id": 11,
+                            "position": "210,165 360,165 360,220",
+                            "sourceConnector": "right",
+                            "target": { "id": 7 },
+                            "targetConnector": "top"
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:ui::Alert",
+                    "id": 13,
+                    "inputs": {
+                        "text": {
+                            "accessors": ["$myCustomActivityDirect"],
+                            "annotations": [
+                                { "count": 23, "index": 17, "kind": "idref" }
+                            ],
+                            "code": "\"Return value: \" + $myCustomActivityDirect.test",
+                            "source": "\"Return value: \"+$myCustomActivityDirect.test"
+                        },
+                        "title": "Directly called \"My custom actrivity\""
+                    },
+                    "position": "-290,370",
+                    "title": "Alert"
+                },
+                {
+                    "action": "gcx:wf:ui::Alert",
+                    "id": 20,
+                    "inputs": {
+                        "text": {
+                            "accessors": ["$runCustomActivity"],
+                            "annotations": [
+                                { "count": 18, "index": 17, "kind": "idref" }
+                            ],
+                            "code": "\"Return value: \" + $runCustomActivity[\"test\"]",
+                            "source": "\"Return value: \"+$runCustomActivity[\"test\"]"
+                        },
+                        "title": "Directly called \"My custom actrivity\""
+                    },
+                    "position": "240,370",
+                    "title": "Alert"
+                }
+            ]
+        }
+    ],
+    "deploymentConfig": { "supportedApps": { "VSD": true } },
+    "designerVersion": "5.35.0+38",
+    "licenseInfo": {
+        "licenseUrl": "https://vw-dev-qa-vgs.int.vertigis.com/vertigisstudio/workflow/service/auth/license"
+    },
+    "references": [
+        {
+            "id": 24,
+            "path": "https://localhost:5000",
+            "suite": "uuid:cc39c481-4d05-4c39-8363-07b79dc03aa7"
+        }
+    ],
+    "start": { "id": 2 }
+}

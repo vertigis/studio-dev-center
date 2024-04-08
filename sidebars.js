@@ -160,6 +160,7 @@ module.exports = {
                 "workflow/sdk-net-overview",
                 "workflow/sdk-net-register-activities",
                 "workflow/sdk-net-integrating-the-arcgis-api",
+                "workflow/sdk-net-integrating-the-arcgis-pro-api",
                 {
                     type: "category",
                     label: "VertiGIS Studio Mobile",
@@ -178,6 +179,15 @@ module.exports = {
                                 "workflow/tutorial-mobile-activity-indicator-form-element",
                             ],
                         },
+                    ],
+                },
+                {
+                    type: "category",
+                    label: "VertiGIS Studio Desktop",
+                    items: [
+                        "workflow/sdk-desktop-overview",
+                        "workflow/sdk-desktop-create-activity",
+                        "workflow/sdk-desktop-wrapping",
                     ],
                 },
                 {

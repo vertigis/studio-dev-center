@@ -1,0 +1,53 @@
+---
+title: Wrapping activity inputs and outputs
+sidebar_label: Input and output wrapping
+description: VertiGIS Studio Workflow - Overview of extending workflow for VertiGIS Studio Desktop
+---
+
+The implementation of the Workflow Runtime uses mechanisms to internally stay agnostic of used APIs. To achieve this, all [non-builtin types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/built-in-types) in the output of an activity should get wrapped in a `WrapperBase`:
+
+```cs
+public Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+{
+    // activity work, e.g. creating a feature
+
+    IDictionary<string, object> outputs = new Dictionary<string, object>();
+
+    // highlight-start
+    outputs.Add("feature", new CustomActivityWrapper(createdFeature));
+    // highlight-end
+
+    return Task.FromResult(outputs);
+}
+```
+
+where an implementation of a WrapperBase at least offers a `Unwrap` method:
+
+```cs
+private class CustomActivityWrapper : WrapperBase
+{
+    //internals of the wrapper
+
+    public override object Unwrap()
+    {
+        return _actualObject;
+    }
+}
+```
+
+### Unwrapping inputs
+
+Thus all inputs in an activity should get unwrapped before working with it. On Studio Desktop you may cast the input either to `WrapperBase` or `IServiceProvider` - both methods are equivalent:
+
+```cs
+public Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+{
+   // Variant 1 IServiceProvider:
+   IServiceProvider provider = inputs["feature"] as IServiceProvider;
+   Row actualObject = (Row)provider.GetService(typeof(Row));
+
+   // Variant 2 WrapperBase:
+   WrapperBase wrapper = inputs["feature"] as WrapperBase;
+   Row actualObject2 = (Row)wrapper.Unwrap();
+}
+```

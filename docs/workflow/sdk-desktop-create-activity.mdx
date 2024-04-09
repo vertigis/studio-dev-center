@@ -59,7 +59,7 @@ namespace Poc_ProCustomActivities
 :::important
 It's important to conform to two necessary constraints to make the activity recognizable to VertiGIS Studio Desktop:
 
-1.  Inside your assembly you need to add the `WorkflowActivites` attribute (make sure to add it only once across your whole project, e.g. in your module rather than inside your activity)
+1.  Inside your assembly you need to add the `WorkflowActivities` attribute (make sure to add it only once across your whole project, e.g. in your module rather than inside your activity)
 2.  Your custom activity needs to contain an action identifier that tells VertiGIS Studio Desktop what activity is represented by this implementation. This can be achieved by declaring a static string property named `Action` that returns the activities action id. As static members cannot be specified in interfaces, you have to ensure this property being present yourself.
 
 Ignoring any of those rules will lead to the activity not being found by VertiGIS Studio Desktop and thus cause a runtime error.

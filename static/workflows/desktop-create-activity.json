@@ -1,5 +1,7 @@
 {
-    "_properties": {},
+    "_properties": {
+        "isServerWorkflow": false
+    },
     "components": [
         {
             "id": 1,
@@ -13,8 +15,11 @@
                     "transitions": [
                         {
                             "id": 9,
+                            "inputs": {},
                             "position": "90,60 90,110",
-                            "target": { "id": 8 }
+                            "target": {
+                                "id": 8
+                            }
                         }
                     ]
                 },
@@ -28,9 +33,12 @@
                     "transitions": [
                         {
                             "id": 16,
+                            "inputs": {},
                             "position": "-170,300 -170,370",
                             "sourceConnector": "bottom",
-                            "target": { "id": 13 },
+                            "target": {
+                                "id": 13
+                            },
                             "targetConnector": "top"
                         }
                     ]
@@ -48,35 +56,46 @@
                     "transitions": [
                         {
                             "id": 21,
+                            "inputs": {},
                             "position": "360,340 360,370",
                             "sourceConnector": "bottom",
-                            "target": { "id": 20 },
+                            "target": {
+                                "id": 20
+                            },
                             "targetConnector": "top"
                         }
                     ]
                 },
                 {
                     "action": "gcx:wf:core::If",
-                    "description": "custom ctivity pack registered with portal",
+                    "description": "custom activity pack registered with portal",
                     "id": 8,
-                    "inputs": { "condition": true },
+                    "inputs": {
+                        "condition": true
+                    },
                     "position": "-30,110",
                     "title": "If",
                     "transitions": [
                         {
                             "branch": "true",
                             "id": 10,
+                            "inputs": {},
                             "position": "-30,165 -170,165 -170,230",
                             "sourceConnector": "left",
-                            "target": { "id": 5 },
+                            "target": {
+                                "id": 5
+                            },
                             "targetConnector": "top"
                         },
                         {
                             "branch": "false",
                             "id": 11,
+                            "inputs": {},
                             "position": "210,165 360,165 360,220",
                             "sourceConnector": "right",
-                            "target": { "id": 7 },
+                            "target": {
+                                "id": 7
+                            },
                             "targetConnector": "top"
                         }
                     ]
@@ -88,7 +107,11 @@
                         "text": {
                             "accessors": ["$myCustomActivityDirect"],
                             "annotations": [
-                                { "count": 23, "index": 17, "kind": "idref" }
+                                {
+                                    "count": 23,
+                                    "index": 17,
+                                    "kind": "idref"
+                                }
                             ],
                             "code": "\"Return value: \" + $myCustomActivityDirect.test",
                             "source": "\"Return value: \"+$myCustomActivityDirect.test"
@@ -105,7 +128,11 @@
                         "text": {
                             "accessors": ["$runCustomActivity"],
                             "annotations": [
-                                { "count": 18, "index": 17, "kind": "idref" }
+                                {
+                                    "count": 18,
+                                    "index": 17,
+                                    "kind": "idref"
+                                }
                             ],
                             "code": "\"Return value: \" + $runCustomActivity[\"test\"]",
                             "source": "\"Return value: \"+$runCustomActivity[\"test\"]"
@@ -118,17 +145,20 @@
             ]
         }
     ],
-    "deploymentConfig": { "supportedApps": { "VSD": true } },
-    "designerVersion": "5.35.0+38",
-    "licenseInfo": {
-        "licenseUrl": "https://vw-dev-qa-vgs.int.vertigis.com/vertigisstudio/workflow/service/auth/license"
+    "deploymentConfig": {
+        "supportedApps": {
+            "VSD": true
+        }
     },
+    "designerVersion": "5.35.0+38",
     "references": [
         {
-            "id": 24,
+            "id": 23,
             "path": "https://localhost:5000",
             "suite": "uuid:cc39c481-4d05-4c39-8363-07b79dc03aa7"
         }
     ],
-    "start": { "id": 2 }
+    "start": {
+        "id": 2
+    }
 }

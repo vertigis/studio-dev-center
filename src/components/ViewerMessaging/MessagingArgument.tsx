@@ -10,6 +10,10 @@ interface MessagingArgumentProps {
     product: "web" | "mobile";
 }
 
+const linkRegExp = /{@link ([a-zA-Z0-9\.\s\/!:\-_]*?)}|`(.*?)`/;
+const globalLinkRegExp = new RegExp(linkRegExp, "g");
+const singleLinkRegExp = /(see {@link )([a-zA-Z0-9\.\s\/!]*?)}/;
+
 export function getDescription(
     definition: Definition,
     schema: MessageSchema,
@@ -21,9 +25,7 @@ export function getDescription(
         return undefined;
     }
 
-    const parts = description.match(
-        /{@link ([a-zA-Z0-9\.\s\/!:\-_]*?)}|`(.*?)`/g
-    );
+    const parts = description.match(globalLinkRegExp);
     if (!parts) {
         return <div className={className}>{description}</div>;
     }
@@ -49,7 +51,7 @@ export function getDescription(
     ) {
         const linkText = description
             .toLocaleLowerCase()
-            .match(/(see {@link )([a-zA-Z0-9\.\s\/!]*?)}/)?.[2];
+            .match(singleLinkRegExp)?.[2];
         const referencedDef = definition.$ref
             ? getReferencedDefinition(definition.$ref, schema)
             : getDefinition(linkText);
@@ -63,9 +65,7 @@ export function getDescription(
         const linkIndex = description?.indexOf(link) ?? 0;
         const start = description?.slice(0, linkIndex);
         const remaining = description?.slice(linkIndex);
-        const linkMatch = link?.match(
-            /{@link ([a-zA-Z0-9\.\s\/!:\-_]*?)}|`(.*?)`/
-        );
+        const linkMatch = link?.match(linkRegExp);
         let displayText = (linkMatch?.[1] ?? linkMatch?.[2])?.trim();
         if (displayText?.includes("!")) {
             displayText = displayText.split("!")[1];

@@ -70,6 +70,10 @@
     font-size: 0.75rem;
 }
 
+.messaging-definition-subheader {
+    font-family: monospace;
+}
+
 .footer .footer__links {
     margin-bottom: 3rem;
 }

@@ -17,8 +17,8 @@
     "deploy": "docusaurus deploy"
   },
   "dependencies": {
-    "@docusaurus/core": "^3.2.0",
-    "@docusaurus/preset-classic": "^3.2.0",
+    "@docusaurus/core": "^3.2.1",
+    "@docusaurus/preset-classic": "^3.2.1",
     "@types/react": "^18.2.0",
     "clsx": "^1.2.1",
     "cspell": "^5.6.4",
@@ -31,9 +31,9 @@
     "remark-validate-links": "^10.0.4"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^3.2.0",
-    "@docusaurus/tsconfig": "^3.2.0",
-    "@docusaurus/types": "^3.2.0",
+    "@docusaurus/module-type-aliases": "^3.2.1",
+    "@docusaurus/tsconfig": "^3.2.1",
+    "@docusaurus/types": "^3.2.1",
     "simple-git-hooks": "2.3.1"
   },
   "browserslist": [

@@ -12,7 +12,8 @@ export function getArgumentDefinitionLink(
         return undefined;
     }
     const name = trimDefinitionsName(def);
-    console.log(name);
+    // Hardcoded links so that we have something to say about these common
+    // objects.
     if (name === "Features" || name === "Feature") {
         return `docs/web/api-objects#features`;
     }
@@ -20,7 +21,7 @@ export function getArgumentDefinitionLink(
         return `docs/web/api-objects#featuresource`;
     }
     if (name.endsWith("Extension")) {
-        return `docs/${product}/api-objects#extensions`;
+        return `docs/web/api-objects#extensions`;
     }
     return `docs/${product}/api-argument-definitions#definition-${name}`;
 }
@@ -41,9 +42,8 @@ export function getReferencedDefinition(
     schema: MessageSchema
 ): Definition | undefined {
     const trimmedName = trimDefinitionsName(name);
-    // Explicitly ignore esri.rest-api definitions for now. Also ignore
-    // SingleCommand and SingleOperation as they result in a large list of
-    // `unknown` properties.
+    // Explicitly ignore SingleCommand and SingleOperation as they result in a
+    // large list of `unknown` properties.
     if (
         trimmedName.startsWith("viewer-spec.SingleCommand") ||
         trimmedName.startsWith("viewer-spec.SingleOperation")

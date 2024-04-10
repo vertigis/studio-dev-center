@@ -1,0 +1,10 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPoints": [
+        "./node_modules/@vertigis/arcgis-extensions/*.ts",
+        "./node_modules/@vertigis/arcgis-extensions/**/index.d.ts"
+    ],
+    "json": "./typedoc.output.json",
+    "out": "./typedocs",
+    "tsconfig": "./tsconfig.api.json"
+}

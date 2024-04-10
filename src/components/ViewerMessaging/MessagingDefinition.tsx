@@ -17,8 +17,8 @@ interface MessagingDefinitionProps {
 export default function MessagingDefinition(props: MessagingDefinitionProps) {
     const { definitionName, schema, product } = props;
 
-    const trimmedName = trimDefinitionsName(definitionName);
-    const parts = trimmedName.replace("/", ".").split(".");
+    const typeName = trimDefinitionsName(definitionName);
+    const parts = typeName.replace("/", ".").split(".");
     const shortName = parts[parts.length - 1];
     const definition = getReferencedDefinition(definitionName, schema);
     if (!definition) {
@@ -28,12 +28,12 @@ export default function MessagingDefinition(props: MessagingDefinitionProps) {
     if (definition.type !== "object") {
         console.warn(
             "Tried to render definition for non-object type",
-            trimmedName
+            typeName
         );
         return null;
     }
 
-    const id = getArgumentDefinitionLinkId(trimmedName);
+    const id = getArgumentDefinitionLinkId(typeName);
 
     return (
         <div className="margin-bottom--lg">
@@ -41,7 +41,11 @@ export default function MessagingDefinition(props: MessagingDefinitionProps) {
                 <Heading as="h2" id={id}>
                     {shortName}
                 </Heading>
-                {shortName !== trimmedName && <h5>{`${trimmedName}`}</h5>}
+                {shortName !== typeName && (
+                    <h5 className="messaging-definition-subheader">
+                        {typeName}
+                    </h5>
+                )}
             </span>
             {getDescription(definition, schema, "margin-bottom--md", product)}
             <h3>Properties</h3>

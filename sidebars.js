@@ -311,7 +311,6 @@ module.exports = {
                 "mobile/api-events",
                 "mobile/api-argument-definitions",
                 "mobile/api-components",
-                "web/api-objects",
             ],
         },
     ],

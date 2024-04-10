@@ -5,15 +5,13 @@ import MessagingDefinition from "./MessagingDefinition";
 interface MessagingDefinitionsSummaryProps {
     schema: MessageSchema;
     product: "web" | "mobile";
+    type: "argument" | "config";
 }
 
-// Note that we blindly render all definitions present in the schema.
-// This would need to be refactored if we split up the
-// commands/operations/events across multiple pages.
 export default function MessagingDefinitionsSummary(
     props: MessagingDefinitionsSummaryProps
 ) {
-    const { schema, product } = props;
+    const { schema, product, type } = props;
 
     // Grab only the `object` type definitions, everything else can be inlined.
     const filteredDefinitions: typeof schema.definitions = Object.entries(
@@ -28,25 +26,17 @@ export default function MessagingDefinitionsSummary(
     return (
         <div>
             {Object.keys(filteredDefinitions)
-                // Rudimentary sort of components / services first and then the
-                // properties should all come after TODO: Better sort so
-                // components are in one section and services are in another
+                // Now filtering out everything but model properties on the "config"
+                // page, the remainder will be added to the "arguments" page
+                // instead.
+                .filter((key) =>
+                    type === "argument"
+                        ? !key.toLocaleLowerCase().includes("modelproperties")
+                        : key.toLocaleLowerCase().includes("modelproperties")
+                )
+                // TODO: Better sort so components are in one section and
+                // services are in another
                 .sort((a, b) => {
-                    const aHasModelProps = a
-                        .toLocaleLowerCase()
-                        .includes("modelproperties");
-                    const bHasModelProps = b
-                        .toLocaleLowerCase()
-                        .includes("modelproperties");
-                    if (aHasModelProps && bHasModelProps) {
-                        return a.localeCompare(b);
-                    }
-                    if (aHasModelProps) {
-                        return -1;
-                    }
-                    if (bHasModelProps) {
-                        return 1;
-                    }
                     return a.localeCompare(b);
                 })
                 .map((name) => (

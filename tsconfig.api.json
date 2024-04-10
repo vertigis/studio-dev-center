@@ -1,0 +1,8 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "outDir": "../../package/",
+        "sourceMap": false
+    },
+    "include": ["node_modules/@vertigis/arcgis-extensions/**/*"]
+}

@@ -37,12 +37,12 @@ function ViewerMessaging(props: ViewerMessagingProps) {
         switch (type) {
             case "command":
             case "operation":
-            case "argument":
                 schemaType = "action";
                 break;
             case "event":
                 schemaType = "event";
                 break;
+            case "argument":
             case "config":
                 schemaType = "config";
                 break;
@@ -52,16 +52,19 @@ function ViewerMessaging(props: ViewerMessagingProps) {
 
         (async () => {
             if (schemaType! && !cachedRequests[product][schemaType]) {
-                if (type === "config") {
-                    cachedRequests["common"][schemaType] = fetch(
-                        `https://apps.vertigisstudio.com/web/common-app-config.schema.json`
-                    );
-                    cachedRequests[product][schemaType] = fetch(
-                        `https://apps.vertigisstudio.com/web/${product}-app-config.schema.json`
-                    );
-                    // We need to fetch this for some of the definitions it includes.
+                cachedRequests["common"].config = fetch(
+                    `https://apps.vertigisstudio.com/web/common-app-config.schema.json`
+                );
+                cachedRequests[product].config = fetch(
+                    `https://apps.vertigisstudio.com/web/${product}-app-config.schema.json`
+                );
+                if (schemaType === "config") {
+                    // We need to fetch these for some of the definitions they include.
                     cachedRequests[product].action = fetch(
                         `https://apps.vertigisstudio.com/web/${product}-action.schema.json`
+                    );
+                    cachedRequests[product].event = fetch(
+                        `https://apps.vertigisstudio.com/web/${product}-event.schema.json`
                     );
                 } else {
                     cachedRequests[product][schemaType] = fetch(
@@ -71,44 +74,36 @@ function ViewerMessaging(props: ViewerMessagingProps) {
             }
 
             const messageSchemas: MessageSchema[] = [];
-            if (schemaType! === "config") {
-                const commonConfigResponse = await cachedRequests["common"]
-                    .config!;
-                const configResponse = await cachedRequests[product].config!;
-                const actionConfigResponse = await cachedRequests[product]
-                    .action!;
+            const commonConfigResponse = await cachedRequests["common"].config!;
+            const productConfigResponse = await cachedRequests[product].config!;
+            const actionResponse = await cachedRequests[product].action!;
+            const eventResponse = await cachedRequests[product].event!;
 
-                // Clone to avoid error when reading json multiple times
-                const commonConfigResponseJson: MessageSchema =
-                    await commonConfigResponse.clone().json();
-                const configResponseJson: MessageSchema = await configResponse
-                    .clone()
-                    .json();
-                const actionResponseJson: MessageSchema =
-                    await actionConfigResponse.clone().json();
+            // Clone to avoid error when reading json multiple times
+            const commonConfigResponseJson: MessageSchema =
+                await commonConfigResponse.clone().json();
+            const productConfigResponseJson: MessageSchema =
+                await productConfigResponse.clone().json();
+            const actionResponseJson: MessageSchema = await actionResponse
+                ?.clone()
+                .json();
+            const eventResponseJson: MessageSchema = await eventResponse
+                ?.clone()
+                .json();
 
+            if (commonConfigResponseJson) {
                 messageSchemas.push(commonConfigResponseJson);
-                messageSchemas.push(configResponseJson);
-                messageSchemas.push(actionResponseJson);
-            } else {
-                const actionResponse = await cachedRequests[product].action!;
-                const eventResponse = await cachedRequests[product].event!;
-
-                // Clone to avoid error when reading json multiple times
-                const actionResponseJson: MessageSchema = await actionResponse
-                    ?.clone()
-                    .json();
-                const eventResponseJson: MessageSchema = await eventResponse
-                    ?.clone()
-                    .json();
-
-                if (actionResponseJson) {
-                    messageSchemas.push(actionResponseJson);
-                }
-                if (eventResponseJson) {
-                    messageSchemas.push(eventResponseJson);
-                }
             }
+            if (productConfigResponseJson) {
+                messageSchemas.push(productConfigResponseJson);
+            }
+            if (actionResponseJson) {
+                messageSchemas.push(actionResponseJson);
+            }
+            if (eventResponseJson) {
+                messageSchemas.push(eventResponseJson);
+            }
+
             if (didCancel) {
                 return;
             }

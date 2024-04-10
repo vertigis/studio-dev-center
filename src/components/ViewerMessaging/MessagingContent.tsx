@@ -18,6 +18,7 @@ export default function MessagingContent(props: MessagingContentProps) {
                 <MessagingDefinitionsSummary
                     schema={schema}
                     product={product}
+                    type={type}
                 />
             )}
             {type === "command" && (

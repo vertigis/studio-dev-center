@@ -1,4 +1,5 @@
 import BrowserOnly from "@docusaurus/BrowserOnly";
+import lsCache from "lscache";
 import React, { useEffect, useState } from "react";
 import MessagingContent from "./MessagingContent";
 import { MessageSchema, Definition } from "./schema";
@@ -26,6 +27,36 @@ const cachedRequests: Record<
     common: { action: undefined, event: undefined, config: undefined },
 };
 
+const doSchemaRequest = async (
+    product: "web" | "mobile" | "common",
+    schema: "action" | "event" | "config"
+): Promise<MessageSchema | undefined> => {
+    let responseJson: MessageSchema | undefined = undefined;
+    try {
+        responseJson = lsCache.get(`${product}-${schema}`);
+    } catch (e) {
+        console.log(e);
+    }
+    if (!responseJson) {
+        if (!cachedRequests[product][schema]) {
+            const schemaName = schema === "config" ? "app-config" : schema;
+            cachedRequests[product][schema] = fetch(
+                `https://apps.vertigisstudio.com/web/${product}-${schemaName}.schema.json`
+            );
+        }
+        const response = await cachedRequests[product][schema]!;
+        responseJson = await response?.clone().json();
+        if (responseJson) {
+            try {
+                lsCache.set(`${product}-${schema}`, responseJson, 1440);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    }
+    return responseJson;
+};
+
 function ViewerMessaging(props: ViewerMessagingProps) {
     const { product, type } = props;
     const [messagingJson, setMessagingJson] = useState<any>();
@@ -51,46 +82,37 @@ function ViewerMessaging(props: ViewerMessagingProps) {
         }
 
         (async () => {
-            if (schemaType! && !cachedRequests[product][schemaType]) {
-                cachedRequests["common"].config = fetch(
-                    `https://apps.vertigisstudio.com/web/common-app-config.schema.json`
+            if (!schemaType!) {
+                return;
+            }
+
+            let commonConfigResponseJson: MessageSchema | undefined = undefined;
+            let productConfigResponseJson: MessageSchema | undefined =
+                undefined;
+            let actionResponseJson: MessageSchema | undefined = undefined;
+            let eventResponseJson: MessageSchema | undefined = undefined;
+
+            if (schemaType === "config") {
+                commonConfigResponseJson = await doSchemaRequest(
+                    "common",
+                    "config"
                 );
-                cachedRequests[product].config = fetch(
-                    `https://apps.vertigisstudio.com/web/${product}-app-config.schema.json`
+                productConfigResponseJson = await doSchemaRequest(
+                    product,
+                    "config"
                 );
-                if (schemaType === "config") {
-                    // We need to fetch these for some of the definitions they include.
-                    cachedRequests[product].action = fetch(
-                        `https://apps.vertigisstudio.com/web/${product}-action.schema.json`
-                    );
-                    cachedRequests[product].event = fetch(
-                        `https://apps.vertigisstudio.com/web/${product}-event.schema.json`
-                    );
-                } else {
-                    cachedRequests[product][schemaType] = fetch(
-                        `https://apps.vertigisstudio.com/web/${product}-${schemaType}.schema.json`
-                    );
-                }
+            }
+            if (schemaType === "action" || schemaType === "config") {
+                actionResponseJson = await doSchemaRequest(
+                    schemaType === "config" ? "web" : product,
+                    "action"
+                );
+            }
+            if (schemaType === "event") {
+                eventResponseJson = await doSchemaRequest(product, "event");
             }
 
             const messageSchemas: MessageSchema[] = [];
-            const commonConfigResponse = await cachedRequests["common"].config!;
-            const productConfigResponse = await cachedRequests[product].config!;
-            const actionResponse = await cachedRequests[product].action!;
-            const eventResponse = await cachedRequests[product].event!;
-
-            // Clone to avoid error when reading json multiple times
-            const commonConfigResponseJson: MessageSchema =
-                await commonConfigResponse.clone().json();
-            const productConfigResponseJson: MessageSchema =
-                await productConfigResponse.clone().json();
-            const actionResponseJson: MessageSchema = await actionResponse
-                ?.clone()
-                .json();
-            const eventResponseJson: MessageSchema = await eventResponse
-                ?.clone()
-                .json();
-
             if (commonConfigResponseJson) {
                 messageSchemas.push(commonConfigResponseJson);
             }

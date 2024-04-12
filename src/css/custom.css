@@ -77,3 +77,26 @@
 .footer .footer__links {
     margin-bottom: 3rem;
 }
+
+/**
+ * highlight.js classes, see https://highlightjs.org/examples
+ */
+
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-attribute,
+.hljs-meta .hljs-string {
+    color: var(--vertigis-blue);
+}
+
+.hljs-attr,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-type,
+.hljs-selector-class,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-number {
+    color: var(--ifm-color-primary);
+}

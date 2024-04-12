@@ -1,3 +1,7 @@
+import hljs from "highlight.js/lib/core";
+import javascript from "highlight.js/lib/languages/javascript";
+import { Marked } from "marked";
+import { markedHighlight } from "marked-highlight";
 import React from "react";
 import { Definition, MessageSchema, PrimitiveType } from "./schema";
 import MessagingRef from "./MessagingRef";
@@ -10,9 +14,30 @@ interface MessagingArgumentProps {
     product: "web" | "mobile";
 }
 
-const linkRegExp = /{@link ([a-zA-Z0-9\.\s\/!:\-_]*?)}|`(.*?)`/;
-const globalLinkRegExp = new RegExp(linkRegExp, "g");
-const singleLinkRegExp = /(see {@link )([a-zA-Z0-9\.\s\/!]*?)}/;
+hljs.registerLanguage("javascript", javascript);
+
+const linkRegex = /{@link ?([\S\s]*?)}/;
+const globalLinkRegex = new RegExp(linkRegex, "g");
+const singleLinkRegex = /([S|s]ee ?{@link ?)([\S\s]*?)}/;
+
+const marked = new Marked(
+    markedHighlight({
+        highlight(code) {
+            return hljs.highlight(code, { language: "javascript" }).value;
+        },
+    })
+);
+
+const renderMarkdown = (text: string): JSX.Element => (
+    <span
+        dangerouslySetInnerHTML={{
+            __html:
+                text.includes("|\n|") || text.includes("```")
+                    ? marked.parse(text, { async: false, breaks: true })
+                    : marked.parseInline(text, { async: false, breaks: true }),
+        }}
+    />
+);
 
 export function getDescription(
     definition: Definition,
@@ -25,9 +50,9 @@ export function getDescription(
         return undefined;
     }
 
-    const parts = description.match(globalLinkRegExp);
+    const parts = description.match(globalLinkRegex);
     if (!parts) {
-        return <div className={className}>{description}</div>;
+        return <div className={className}>{renderMarkdown(description)}</div>;
     }
     const getDefinition = (
         text: string | undefined
@@ -47,11 +72,11 @@ export function getDescription(
     // Descriptions consisting only of a link can be replaced.
     if (
         parts.length === 1 &&
-        description.toLocaleLowerCase().startsWith("see {@link")
+        description.toLocaleLowerCase().match(singleLinkRegex)
     ) {
         const linkText = description
             .toLocaleLowerCase()
-            .match(singleLinkRegExp)?.[2];
+            .match(singleLinkRegex)?.[2];
         const referencedDef = definition.$ref
             ? getReferencedDefinition(definition.$ref, schema)
             : getDefinition(linkText);
@@ -65,7 +90,7 @@ export function getDescription(
         const linkIndex = description?.indexOf(link) ?? 0;
         const start = description?.slice(0, linkIndex);
         const remaining = description?.slice(linkIndex);
-        const linkMatch = link?.match(linkRegExp);
+        const linkMatch = link?.match(linkRegex);
         let displayText = (linkMatch?.[1] ?? linkMatch?.[2])?.trim();
         if (displayText?.includes("!")) {
             displayText = displayText.split("!")[1];
@@ -94,37 +119,41 @@ export function getDescription(
         if (index === 0) {
             if (parts.length === 1) {
                 return [
-                    <span>{start}</span>,
+                    <span>{renderMarkdown(start!)}</span>,
                     <code>{linkElement}</code>,
-                    <span>{remaining?.slice(link.length)}</span>,
+                    <>{renderMarkdown(remaining?.slice(link.length)!)}</>,
                 ];
             }
             return [
-                <span>{start}</span>,
+                <span>{renderMarkdown(start!)}</span>,
                 <code>{linkElement}</code>,
-                <span>
-                    {description?.slice(
-                        0,
-                        description?.indexOf(parts[index + 1])
+                <>
+                    {renderMarkdown(
+                        description?.slice(
+                            0,
+                            description?.indexOf(parts[index + 1])
+                        )!
                     )}
-                </span>,
+                </>,
             ];
         }
-        if (description?.length ?? 0 > 0) {
+        if (description?.length! > 0) {
             if (index < parts.length - 1) {
                 return [
                     <code>{linkElement}</code>,
-                    <span>
-                        {description?.slice(
-                            0,
-                            description?.indexOf(parts[index + 1])
+                    <>
+                        {renderMarkdown(
+                            description?.slice(
+                                0,
+                                description?.indexOf(parts[index + 1])
+                            )!
                         )}
-                    </span>,
+                    </>,
                 ];
             }
             return [
                 <code>{linkElement}</code>,
-                <span>{remaining?.slice(link.length)}</span>,
+                <>{renderMarkdown(remaining?.slice(link.length)!)}</>,
             ];
         }
         return [<code>{linkElement}</code>];

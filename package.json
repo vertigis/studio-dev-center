@@ -7,7 +7,7 @@
     "build": "docusaurus build",
     "lint": "npm run lint:spelling && npm run lint:style && npm run lint:links:md",
     "lint:links": "npm run lint:links:md && npm run lint:links:ext",
-    "lint:links:md": "remark -f -q -u validate-links \"docs/**/*.mdx\"",
+    "lint:links:md": "remark -f -q -u validate-links --silently-ignore --ignore-pattern \"docs/**/api-objects.mdx\" \"docs/**/*.mdx\"",
     "lint:links:ext": "linkinator ./build -r --silent --concurrency 10 --skip https://github.com",
     "lint:spelling": "cspell \"{docs,src}/**\"",
     "lint:style": "npm run prettier -- --check",

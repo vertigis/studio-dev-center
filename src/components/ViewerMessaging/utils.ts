@@ -23,7 +23,9 @@ export function getArgumentDefinitionLink(
     if (name.endsWith("Extension")) {
         return `docs/web/api-objects#extensions`;
     }
-    return `docs/${product}/api-argument-definitions#definition-${name}`;
+    return window?.location.href.includes("api-argument-definitions")
+        ? `#definition-${name}`
+        : `docs/${product}/api-argument-definitions#definition-${name}`;
 }
 
 export function getArgumentDefinitionLinkId(def: string): string | undefined {

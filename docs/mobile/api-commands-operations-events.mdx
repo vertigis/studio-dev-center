@@ -1,11 +1,15 @@
+import ExecutionEnvironment from "@docusaurus/ExecutionEnvironment";
+
 {/* prettier-ignore */}
 {(() => {
-    const href = window.location.href;
-    if (href.includes("#event")) {
-        window.location.replace(href.replace("api-commands-operations-events", "api-events"));
-    } else if (href.includes("#definition")) {
-        window.location.replace(href.replace("api-commands-operations-events", "api-argument-definitions"))
-    } else {
-        window.location.replace(href.replace("api-commands-operations-events", "api-commands-operations"));
+    if (ExecutionEnvironment.canUseDOM) {
+        const href = window.location.href;
+        if (href.includes("#event")) {
+            window.location.replace(href.replace("api-commands-operations-events", "api-events"));
+        } else if (href.includes("#definition")) {
+            window.location.replace(href.replace("api-commands-operations-events", "api-argument-definitions"))
+        } else {
+            window.location.replace(href.replace("api-commands-operations-events", "api-commands-operations"));
+        }
     }
 })()}

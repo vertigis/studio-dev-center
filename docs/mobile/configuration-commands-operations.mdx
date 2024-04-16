@@ -27,7 +27,7 @@ edit.delete-features
 ```
 
 :::tip
-The full list of existing commands and operations available in VertiGIS Studio Mobile can be [found in the API documentation](api-commands-operations-events.mdx).
+The full list of existing commands and operations available in VertiGIS Studio Mobile can be [found in the API documentation](api-commands-operations.mdx).
 :::
 
 Commands and operations are used to power much of VertiGIS Studio Mobile's built in behavior and interactions. They can be run through configuration, or through [custom services](sdk-commands-operations.mdx) or [components](sdk-commands-operations.mdx).
@@ -155,7 +155,7 @@ Commands and operations can be configured with an `arguments` property that pass
 Each command has typed arguments that will [autocomplete in the app.json](configuration-app-config-reference.mdx#schema-properties). For example, `map.rotate-by` takes a object of type `MapRotateArgs`, which has the property `Rotation` of type `double`. In the app config, the `Rotation` property can be camelCased instead of PascalCased.
 
 :::tip
-You can find out what arguments a command or operation takes in the [commands and operations API reference](api-commands-operations-events.mdx).
+You can find out what arguments a command or operation takes in the [commands and operations API reference](api-commands-operations.mdx).
 :::
 
 ### Passing Implicit Arguments
@@ -311,7 +311,7 @@ This example demonstrates two different types of argument passing behavior. The 
 
 <!-- TODO - tasks.identify operation direct link -->
 
-`tasks.identify` receives this argument, and since it is an operation, produces an output. Looking at the [Commands and Operations Documentation](api-commands-operations-events.mdx), `tasks.identify` has output with the shape:
+`tasks.identify` receives this argument, and since it is an operation, produces an output. Looking at the [Commands and Operations Documentation](api-commands-operations.mdx), `tasks.identify` has output with the shape:
 
 ```json
 {
@@ -347,9 +347,7 @@ VertiGIS Studio Mobile has a large array of built-in command and operations that
     <UseCaseCard
         title="Commands, Operations, and Events API"
         description="Check out the available commands and operations"
-        link={useBaseUrl(
-            "docs/mobile/api-commands-operations-events"
-        )}
+        link={useBaseUrl("docs/mobile/api-commands-operations")}
     />
     <UseCaseCard
         title="Configure Commands and Operations"

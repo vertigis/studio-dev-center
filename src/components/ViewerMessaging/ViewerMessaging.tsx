@@ -108,7 +108,7 @@ function ViewerMessaging(props: ViewerMessagingProps) {
                     "action"
                 );
             }
-            if (schemaType === "event") {
+            if (schemaType === "event" || schemaType === "config") {
                 eventResponseJson = await doSchemaRequest(product, "event");
             }
 

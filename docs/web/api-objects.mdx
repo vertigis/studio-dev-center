@@ -1,0 +1,136 @@
+---
+title: API Object Reference
+description: VertiGIS Studio - API Object Reference
+---
+
+import ViewerMessaging from "../../src/components/ViewerMessaging";
+
+## Features
+
+There are a number of different ways that map features can be represented in the VertiGIS Web and Mobile APIs. While you should usually use [`FeatureProperties`](api-argument-definitions.mdx#definition-@vertigis.arcgis-extensions.data.Feature.FeatureProperties) JSON when creating inputs for commands and operations, you may see other feature representations in the outputs of operations, in event payloads, or in the supplied context.
+
+### Feature
+
+The base class that represents GIS features in the Vertigis Web and Mobile APIs, this object is analogous to and often directly represents an ESRI [`Graphic`](https://developers.arcgis.com/javascript/latest/api-reference/esri-Graphic.html) that has been added to the map or loaded in a table.
+
+-   A new feature may be instantiated with a [`FeatureProperties`](api-argument-definitions.mdx#definition-@vertigis.arcgis-extensions.data.Feature.FeatureProperties) JSON object:
+    ```
+    new Feature(arg: FeatureProperties)
+    ```
+-   You can retrieve this JSON object from a feature by calling `toJSON()` on the feature.
+
+-   After creation, most of these properties are read only. You may alter a feature's `geometry` property, but only if the new geometry type matches the old. The current feature geometry type is available on the `geometryType` property.
+
+-   A non-spatial feature from a table will not have a geometry.
+
+-   You can create a new ESRI [`Graphic`](https://developers.arcgis.com/javascript/latest/api-reference/esri-Graphic.html) by calling the `toGraphic()` method on any `Feature`.
+
+### FeatureSet
+
+A collection of `Features` that shares a common [`Schema`](api-argument-definitions.mdx#definition-@vertigis.arcgis-extensions.data.Schema.SchemaProperties), typically because they have all come from the same `FeatureSource`, eg: a single layer in the map.
+
+-   You may create a new FeatureSet with a [`FeatureSetProperties`](api-argument-definitions.mdx#definition-@vertigis.arcgis-extensions.data.FeatureSet.FeatureSetProperties) JSON object. Calling `toJSON()` will return this object.
+
+-   You can add a `Feature` or collection of `Features` to a `FeatureSet`. They must follow the same `Schema`:
+    ```
+    add(feature: Feature)
+    addMany(features: Iterable<Feature>)
+    ```
+-   You can delete a single `Feature` or a collection of `Features`. You can also clear the entire `FeatureSet`:
+    ```
+    delete(feature: Feature)
+    deleteMany(features: Iterable<Feature>)
+    clear()
+    ```
+-   You can query for the existence of a feature, or find a feature by its Object ID:
+    ```
+    has(feature: Feature)
+    findByPrimaryKey(primaryKey: string)
+    ```
+-   You can iterate through every feature in the FeatureSet:
+    ```
+    forEach(feature => { ... })
+    ```
+
+### FeatureList
+
+A read-only view of a `FeatureSet` that can be filtered and sorted. The `FeatureList` will always update as the underlying `FeatureSet` changes.
+
+-   You may create a new `FeatureList` directly from a `FeatureSet` or from a [`FeatureListProperties`](api-argument-definitions.mdx#definition-@vertigis.arcgis-extensions.data.FeatureList.FeatureListProperties) JSON object:
+    ```
+    new FeatureList(args: FeatureSet | FeatureListProperties)
+    ```
+-   Calling `toJSON()` will return the [`FeatureListProperties`](api-argument-definitions.mdx#definition-@vertigis.arcgis-extensions.data.FeatureList.FeatureListProperties).
+
+-   You can pass in the name of a field in the backing `FeatureSet` to sort alphabetically or numerically on that field:
+    ```
+    sort(criteria: string)
+    ```
+-   You can pass in a string to to filter the `FeatureList` by. Each searchable field will then be queried for the existence of the string. This operation does not alter the underlying `FeatureSet`:
+    ```
+    filter(criteria: string)
+    ```
+
+### FeatureStream
+
+A read-only stream of Features that must be read asynchronously.
+
+-   You may create a `FeatureStream` with a [`FeatureStreamProperties`](api-argument-definitions.mdx#definition-@vertigis.arcgis-extensions.data.FeatureStream.FeatureStreamProperties) JSON object, or with any collection of Features:
+    ```
+    new FeatureStream(args: Iterable<Feature> | AsyncIterable<Feature> | FeatureStreamProperties)
+    ```
+-   Calling `toJSON()` will return the [`FeatureStreamProperties`](api-argument-definitions.mdx#definition-@vertigis.arcgis-extensions.data.FeatureStream.FeatureStreamProperties).
+
+-   You can read the features asynchronously into an array or into a `FeatureSet`:
+    ```
+    toArray(): Promise<Feature[]>
+    toFeatureSet(): Promise<FeatureSet>
+    ```
+
+## Extensions
+
+API objects ending in `*Extension` wrap and extend objects that exist in ESRI's API. Each extension makes the ESRI object available on a named property, and has an `itemType` property that contains the type of the `Extension`.
+
+Here is a table listing common `*Extensions` along with their corresponding ESRI JSAPI item, the property where this ESRI object is made available on the `*Extension`, and their `itemType`.
+
+| \*Extension             | ESRI JSAPI Object                                                                                               | Object Property | Item Type                 |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------- | --------------- | ------------------------- |
+| `BasemapExtension`      | [`Basemap`](https://developers.arcgis.com/javascript/latest/api-reference/esri-Basemap.html)                    | `basemap`       | `basemap-extension`       |
+| `FieldExtension`        | [`Field`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-support-Field.html)         | `field`         | `field-extension`         |
+| `LayerExtension`        | [`Layer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-Layer.html)                 | `layer`         | `layer-extension`         |
+| `MapExtension`          | [`Map`](https://developers.arcgis.com/javascript/latest/api-reference/esri-Map.html)                            | `map`           | `map-extension`           |
+| `PopupContentExtension` | [`Content`](https://developers.arcgis.com/javascript/latest/api-reference/esri-popup-content-Content.html)      | `content`       | `popup-content-extension` |
+| `SublayerExtension`     | [`Sublayer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-support-Sublayer.html)   | `sublayer`      | `sublayer-extension`      |
+| `TableExtension`        | [`FeatureLayer`\*](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-FeatureLayer.html) | `table`         | `table-extension`         |
+
+\*non-spatial variant
+
+### LayerExtensions
+
+There are a number of `*Extensions` that inherit from `LayerExtension` and wrap different ESRI layer types. They share an `itemType` of `layer-extension` but the type of the object attached to the `layer` property varies by extension. Unless otherwise specified, these are all valid wherever a `LayerExtension` is called for:
+
+| LayerExtension               | ESRI JSAPI Object                                                                                                       |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `CSVLayerExtension`          | [`CSVLayer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-CSVLayer.html)                   |
+| `FeatureLayerExtension`      | [`FeatureLayer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-FeatureLayer.html)           |
+| `GeoJSONLayerExtension`      | [`GeoJSONLayer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-GeoJSONLayer.html)           |
+| `GeoRSSLayerExtension`       | [`GeoRSSLayer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-GeoRSSLayer.html)             |
+| `GraphicsLayerExtension`     | [`GraphicsLayer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-GraphicsLayer.html)         |
+| `GroupLayerExtension`        | [`GroupLayer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-GroupLayer.html)               |
+| `ImageryLayerExtension`      | [`ImageryLayer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-ImageryLayer.html)           |
+| `ImageryTileLayerExtension`  | [`ImageryTileLayer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-ImageryTileLayer.html)   |
+| `KMLLayerExtension`          | [`KMLLayer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-KMLLayer.html)                   |
+| `MapImageLayerExtension`     | [`MapImageLayer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-MapImageLayer.html)         |
+| `StreamLayerExtension`       | [`StreamLayer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-StreamLayer.html)             |
+| `SubtypeGroupLayerExtension` | [`SubtypeGroupLayer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-SubtypeGroupLayer.html) |
+| `TileLayerExtension`         | [`TileLayer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-TileLayer.html)                 |
+| `VectorTileLayerExtension`   | [`VectorTileLayer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-VectorTileLayer.html)     |
+| `WFSLayerExtension`          | [`WFSLayer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-WFSLayer.html)                   |
+| `WMSLayerExtension`          | [`WMSLayer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-WMSLayer.html)                   |
+| `WMTSLayerExtension`         | [`WMTSLayer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-WMTSLayer.html)                 |
+
+There should be a corresponding `*Extension` for every valid ESRI layer type, this list is not comprehensive.
+
+## FeatureSource
+
+A `FeatureSource` is any source of features. Typically this is a `FeatureLayerExtension` backed by a [`FeatureLayer`](https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-FeatureLayer.html), but this isn't required. A `FeatureSource` has a [`Schema`](api-argument-definitions.mdx#definition-@vertigis.arcgis-extensions.data.Schema.SchemaProperties) defining the type of features it holds.

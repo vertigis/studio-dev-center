@@ -12,7 +12,7 @@ import UseCaseContainer from "../../src/components/UseCaseContainer";
 
 Events are internal to VertiGIS Studio Web, so they can only be consumed by custom code. Custom components can access events through [their models](sdk-events-reference.mdx#component-models-1) or through the [UIContext](sdk-components-ui-context.mdx). Custom services can publish or subscribe to built-in or custom events [through the MessageBus](sdk-events-reference.mdx#services-1).
 
-The full list of existing events available in VertiGIS Studio Web can be [found in the API documentation](api-commands-operations-events.mdx#events).
+The full list of existing events available in VertiGIS Studio Web can be [found in the API documentation](api-events.mdx#events).
 
 Events in VertiGIS Studio Web are grouped by categories, such as `ui` or `viewer`.
 
@@ -36,9 +36,7 @@ Events can publish custom arguments with information about the change they are c
     <UseCaseCard
         title="Events API"
         description="Check out the full list of Events available in VertiGIS Studio Web"
-        link={useBaseUrl(
-            "docs/web/api-commands-operations-events#events"
-        )}
+        link={useBaseUrl("docs/web/api-events#events")}
     />
     <UseCaseCard
         title="Implementing Custom Events"

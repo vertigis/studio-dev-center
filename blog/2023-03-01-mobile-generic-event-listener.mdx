@@ -26,7 +26,7 @@ The new events capability can be exercised in a few ways:
 -   [Raise custom event](#raise-custom-events)
 
 :::tip Want a complete list of events?
-Check out the [Events](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations-events#events) for the complete list of eligible events that can be listened to.
+Check out the [Events](https://developers.vertigisstudio.com/docs/mobile/api-events#events) for the complete list of eligible events that can be listened to.
 :::
 
 ## Register a Listener
@@ -45,7 +45,7 @@ To get started, you'll want to introduce a new item `$type` into your `app.json`
 
 ### Wire up a new `Listener`
 
-With the new `event-listener` app item, you register a listener to a given event and respond with a configured action. Below, we're taking advantage of the [map.viewpoint-changed](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations-events/#event-map.viewpoint-changed) event. In particular, it's configured with the [highlights.clear](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations-events#command-highlights.clear) command. When you pan the map, the `map.viewpoint-changed` event is raised, and in turn, our `highlights.clear` command is executed. No more highlights when we pan!
+With the new `event-listener` app item, you register a listener to a given event and respond with a configured action. Below, we're taking advantage of the [map.viewpoint-changed](https://developers.vertigisstudio.com/docs/mobile/api-events/#event-map.viewpoint-changed) event. In particular, it's configured with the [highlights.clear](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#command-highlights.clear) command. When you pan the map, the `map.viewpoint-changed` event is raised, and in turn, our `highlights.clear` command is executed. No more highlights when we pan!
 
 ```json
 {
@@ -161,7 +161,7 @@ Using this new capability, you can also configure a Studio Workflow as an action
 Check out the overview to learn more about [Studio Workflow](https://developers.vertigisstudio.com/docs/workflow/overview).
 :::
 
-Below, we'll configure a [workflow.run](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations-events#command-workflow.run) action and listen to a [layers.visibility-changed](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations-events#event-layers.visibility-changed) event. Notice that we can specify arguments for our action, which in this case, will be the `id` of a `$type: "workflow"` item in `app.json` configuration.
+Below, we'll configure a [workflow.run](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#command-workflow.run) action and listen to a [layers.visibility-changed](https://developers.vertigisstudio.com/docs/mobile/api-events#event-layers.visibility-changed) event. Notice that we can specify arguments for our action, which in this case, will be the `id` of a `$type: "workflow"` item in `app.json` configuration.
 
 In this example, toggling an entry in the layer list will invoke the configured workflow.
 
@@ -263,7 +263,7 @@ While Mobile exposes a number of events that may be listened to, there are times
 
 ### Raise Event through Action
 
-Using the new [viewer.publish-event](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations-events#command-viewer.publish-event) command, a custom event can be raised. This action can be configured anywhere in the app that supports actions, like buttons, hooks, command chains, etc. Below is an example of a configured button action:
+Using the new [viewer.publish-event](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#command-viewer.publish-event) command, a custom event can be raised. This action can be configured anywhere in the app that supports actions, like buttons, hooks, command chains, etc. Below is an example of a configured button action:
 
 ```json
 "action": {

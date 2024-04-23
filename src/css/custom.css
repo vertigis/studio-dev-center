@@ -54,6 +54,49 @@
     font-weight: bold;
 }
 
+.property-name-and-badges {
+    display: flex;
+    flex-direction: row;
+}
+
+.property-name-and-badges .badge {
+    margin-left: 0.25rem;
+    line-height: 1.25;
+}
+
+.messaging-ref-type-name {
+    margin-left: 0.5rem;
+    font-family: monospace;
+    font-size: 0.75rem;
+}
+
+.messaging-definition-subheader {
+    font-family: monospace;
+}
+
 .footer .footer__links {
     margin-bottom: 3rem;
+}
+
+/**
+ * highlight.js classes, see https://highlightjs.org/examples
+ */
+
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-attribute,
+.hljs-meta .hljs-string {
+    color: var(--vertigis-blue);
+}
+
+.hljs-attr,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-type,
+.hljs-selector-class,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-number {
+    color: var(--ifm-color-primary);
 }

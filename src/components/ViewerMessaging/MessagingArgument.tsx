@@ -1,48 +1,92 @@
+import hljs from "highlight.js/lib/core";
+import javascript from "highlight.js/lib/languages/javascript";
+import { Marked } from "marked";
+import { markedHighlight } from "marked-highlight";
 import React from "react";
 import { Definition, MessageSchema, PrimitiveType } from "./schema";
 import MessagingRef from "./MessagingRef";
-import { getReferencedDefinition } from "./utils";
+import {
+    getArgumentDefinitionLink,
+    getArgumentDefinitionLinkId,
+    getReferencedDefinition,
+} from "./utils";
+import useBaseUrl from "@docusaurus/useBaseUrl";
 
 interface MessagingArgumentProps {
     definition: Definition | string | undefined;
     schema: MessageSchema;
+    linkId: string;
+    product: "web" | "mobile";
 }
+
+hljs.registerLanguage("javascript", javascript);
+
+const linkRegex = /{@link ?([\S\s]*?)}/;
+const globalLinkRegex = new RegExp(linkRegex, "g");
+const singleLinkRegex = /([S|s]ee ?{@link ?)([\S\s]*?)}/;
+
+const marked = new Marked(
+    markedHighlight({
+        highlight(code) {
+            return hljs.highlight(code, { language: "javascript" }).value;
+        },
+    })
+);
+
+const renderMarkdown = (text: string): JSX.Element => (
+    <span
+        dangerouslySetInnerHTML={{
+            __html:
+                text.includes("|\n|") || text.includes("```")
+                    ? marked.parse(text, { async: false, breaks: true })
+                    : marked.parseInline(text, { async: false, breaks: true }),
+        }}
+    />
+);
 
 export function getDescription(
     definition: Definition,
     schema: MessageSchema,
-    className: string
+    className: string,
+    product: "web" | "mobile"
 ): JSX.Element | undefined {
     let { description } = definition;
     if (!description) {
         return undefined;
     }
 
-    const parts = description.match(/{@link ([a-zA-Z\.\s\/!]*?)}|`(.*?)`/g);
+    const parts = description.match(globalLinkRegex);
     if (!parts) {
-        return <div className={className}>{description}</div>;
+        return <div className={className}>{renderMarkdown(description)}</div>;
     }
-    const getDefinition = (text: string | undefined): Definition => {
-        const key = text?.split(".")[0];
-        const property = text?.split(".")[1];
-        return (key &&
-            property &&
-            schema.definitions[key]?.properties?.[property]) as Definition;
+    const getDefinition = (
+        text: string | undefined
+    ): Definition | undefined => {
+        if (text?.includes(".")) {
+            const key = text?.split(".")[0];
+            const property = text?.split(".")[1];
+            return (key &&
+                property &&
+                schema.definitions[key]?.properties?.[property]) as Definition;
+        } else if (text) {
+            return schema.definitions[text];
+        }
+        return undefined;
     };
 
     // Descriptions consisting only of a link can be replaced.
     if (
         parts.length === 1 &&
-        description.toLocaleLowerCase().startsWith("see {@link")
+        description.toLocaleLowerCase().match(singleLinkRegex)
     ) {
         const linkText = description
             .toLocaleLowerCase()
-            .match(/(see {@link )([a-zA-Z\.\/!\s]*?)}/)?.[2];
+            .match(singleLinkRegex)?.[2];
         const referencedDef = definition.$ref
             ? getReferencedDefinition(definition.$ref, schema)
             : getDefinition(linkText);
         return referencedDef
-            ? getDescription(referencedDef, schema, className)
+            ? getDescription(referencedDef, schema, className, product)
             : undefined;
     }
 
@@ -51,14 +95,28 @@ export function getDescription(
         const linkIndex = description?.indexOf(link) ?? 0;
         const start = description?.slice(0, linkIndex);
         const remaining = description?.slice(linkIndex);
-        const linkMatch = link?.match(/{@link ([a-zA-Z\.\s\/!]*?)}|`(.*?)`/);
-        const linkText = (linkMatch?.[1] ?? linkMatch?.[2])?.trim();
-        const refLink = getDefinition(linkText ?? "")?.$ref;
-        const shortText = linkText?.split("!")[1] ?? linkText;
-        const linkElement = refLink ? (
-            <a href={refLink}>shortText</a>
+        const linkMatch = link?.match(linkRegex);
+        let displayText = (linkMatch?.[1] ?? linkMatch?.[2])?.trim();
+        if (displayText?.includes("!")) {
+            displayText = displayText.split("!")[1];
+        }
+        const isExternalLink = displayText?.startsWith("http");
+        const referenceLink =
+            displayText && schema.definitions[displayText]
+                ? useBaseUrl(getArgumentDefinitionLink(displayText, product))
+                : isExternalLink
+                ? displayText
+                : undefined;
+
+        const linkElement = referenceLink ? (
+            <a
+                href={referenceLink}
+                target={isExternalLink ? "_blank" : "_self"}
+            >
+                {displayText}
+            </a>
         ) : (
-            shortText
+            displayText
         );
 
         description = remaining?.slice(link.length);
@@ -66,37 +124,41 @@ export function getDescription(
         if (index === 0) {
             if (parts.length === 1) {
                 return [
-                    <span>{start}</span>,
+                    <span>{renderMarkdown(start!)}</span>,
                     <code>{linkElement}</code>,
-                    <span>{remaining?.slice(link.length)}</span>,
+                    <>{renderMarkdown(remaining?.slice(link.length)!)}</>,
                 ];
             }
             return [
-                <span>{start}</span>,
+                <span>{renderMarkdown(start!)}</span>,
                 <code>{linkElement}</code>,
-                <span>
-                    {description?.slice(
-                        0,
-                        description?.indexOf(parts[index + 1])
+                <>
+                    {renderMarkdown(
+                        description?.slice(
+                            0,
+                            description?.indexOf(parts[index + 1])
+                        )!
                     )}
-                </span>,
+                </>,
             ];
         }
-        if (description?.length ?? 0 > 0) {
+        if (description?.length! > 0) {
             if (index < parts.length - 1) {
                 return [
                     <code>{linkElement}</code>,
-                    <span>
-                        {description?.slice(
-                            0,
-                            description?.indexOf(parts[index + 1])
+                    <>
+                        {renderMarkdown(
+                            description?.slice(
+                                0,
+                                description?.indexOf(parts[index + 1])
+                            )!
                         )}
-                    </span>,
+                    </>,
                 ];
             }
             return [
                 <code>{linkElement}</code>,
-                <span>{remaining?.slice(link.length)}</span>,
+                <>{renderMarkdown(remaining?.slice(link.length)!)}</>,
             ];
         }
         return [<code>{linkElement}</code>];
@@ -109,7 +171,12 @@ export function getDescription(
     );
 }
 
-export function listProperties(definition: Definition, schema: MessageSchema) {
+export function listProperties(
+    definition: Definition,
+    schema: MessageSchema,
+    typeName: string,
+    product: "web" | "mobile"
+) {
     if (!definition.properties) {
         return null;
     }
@@ -121,28 +188,37 @@ export function listProperties(definition: Definition, schema: MessageSchema) {
                     return (
                         <div key={propName} className="margin-bottom--md">
                             <div className="margin-bottom--sm">
-                                <div
-                                    role="heading"
-                                    aria-level={4}
-                                    className="monospaceHeader"
-                                >
-                                    {propName}
+                                <div className="property-name-and-badges">
+                                    <div
+                                        role="heading"
+                                        aria-level={4}
+                                        className="monospaceHeader"
+                                    >
+                                        {propName}
+                                    </div>
+                                    {definition.required?.includes(
+                                        propName
+                                    ) && (
+                                        <span className="badge badge--secondary">
+                                            Required
+                                        </span>
+                                    )}
                                 </div>
-                                {definition.required?.includes(propName) && (
-                                    <span className="badge badge--secondary">
-                                        Required
-                                    </span>
-                                )}
                             </div>
                             <div className="margin-left--sm">
                                 <MessagingArgument
                                     definition={propDef}
                                     schema={schema}
+                                    linkId={
+                                        getArgumentDefinitionLinkId(typeName)!
+                                    }
+                                    product={product}
                                 />
                                 {getDescription(
                                     propDef,
                                     schema,
-                                    "margin-top--sm"
+                                    "margin-top--sm",
+                                    product
                                 )}
                             </div>
                         </div>
@@ -154,7 +230,7 @@ export function listProperties(definition: Definition, schema: MessageSchema) {
 }
 
 export default function MessagingArgument(props: MessagingArgumentProps) {
-    const { schema } = props;
+    const { schema, linkId, product } = props;
 
     let definition = props.definition;
 
@@ -187,11 +263,23 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
         // We only hyperlink to object type definitions, everything else can be inlined.
         if (referencedDef && referencedDef.type !== "object") {
             return (
-                <MessagingArgument definition={referencedDef} schema={schema} />
+                <MessagingArgument
+                    definition={referencedDef}
+                    schema={schema}
+                    linkId={linkId}
+                    product={product}
+                />
             );
         }
 
-        return <MessagingRef name={definition.$ref} schema={schema} />;
+        return (
+            <MessagingRef
+                name={definition.$ref}
+                schema={schema}
+                linkId={linkId}
+                product={product}
+            />
+        );
     }
     // This is a single type
     else if (definition.type) {
@@ -211,6 +299,8 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
                                     isArray
                                     name={option.$ref ?? ""}
                                     schema={schema}
+                                    linkId={linkId}
+                                    product={product}
                                 />
                             </div>
                         ))}
@@ -225,7 +315,15 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
             }
             if (definition.items.$ref) {
                 const itemsRef = (definition.items as Definition).$ref!;
-                return <MessagingRef isArray name={itemsRef} schema={schema} />;
+                return (
+                    <MessagingRef
+                        isArray
+                        name={itemsRef}
+                        schema={schema}
+                        linkId={linkId}
+                        product={product}
+                    />
+                );
             }
             return <code>{(definition.items as Definition).type}[]</code>;
         } else if (definition.type === "object") {
@@ -236,7 +334,7 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
                 return (
                     <>
                         <code>object</code>
-                        {listProperties(definition, schema)}
+                        {listProperties(definition, schema, linkId, product)}
                     </>
                 );
             }
@@ -298,6 +396,8 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
                         <MessagingArgument
                             definition={option}
                             schema={schema}
+                            linkId={linkId}
+                            product={product}
                         />
                     </div>
                 ))}

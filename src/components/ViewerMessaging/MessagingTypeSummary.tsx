@@ -1,3 +1,4 @@
+import Heading from "@theme/Heading";
 import React from "react";
 import MessagingArgument, { getDescription } from "./MessagingArgument";
 import { MessageSchema, Definition } from "./schema";
@@ -8,6 +9,7 @@ type RefDefinition = Required<Pick<Definition, "$ref">>;
 interface MessagingTypeSummaryProps {
     schema: MessageSchema;
     type: "command" | "event" | "operation";
+    product: "web" | "mobile";
 }
 
 function definitionIsRef(def: Definition): def is RefDefinition {
@@ -19,7 +21,7 @@ function typeIsOptional(def: Definition | undefined): boolean | undefined {
 }
 
 export default function MessagingTypeSummary(props: MessagingTypeSummaryProps) {
-    const { schema, type } = props;
+    const { schema, type, product } = props;
     const definitions = schema.definitions as Record<
         string,
         Definition | undefined
@@ -55,8 +57,15 @@ export default function MessagingTypeSummary(props: MessagingTypeSummaryProps) {
 
                 return (
                     <div key={key} className="margin-bottom--lg">
-                        <h2 id={linkId}>{key}</h2>
-                        {getDescription(item, schema, "margin-bottom--md")}
+                        <Heading as="h2" id={linkId}>
+                            {key}
+                        </Heading>
+                        {getDescription(
+                            item,
+                            schema,
+                            "margin-bottom--md",
+                            product
+                        )}
                         <div className="margin-bottom--md">
                             <h3>{`Argument ${
                                 typeIsOptional(inputItem) === true
@@ -67,6 +76,8 @@ export default function MessagingTypeSummary(props: MessagingTypeSummaryProps) {
                                 <MessagingArgument
                                     definition={inputItem}
                                     schema={schema}
+                                    linkId={linkId}
+                                    product={product}
                                 />
                             </div>
                         </div>
@@ -77,6 +88,8 @@ export default function MessagingTypeSummary(props: MessagingTypeSummaryProps) {
                                     <MessagingArgument
                                         definition={outputItem}
                                         schema={schema}
+                                        linkId={linkId}
+                                        product={product}
                                     />
                                 </div>
                             </>

@@ -1,15 +1,17 @@
 import BrowserOnly from "@docusaurus/BrowserOnly";
+import lsCache from "lscache";
 import React, { useEffect, useState } from "react";
 import MessagingContent from "./MessagingContent";
 import { MessageSchema, Definition } from "./schema";
+import { isFeaturesLike, replaceFeaturesLike } from "./utils";
 
 interface ViewerMessagingProps {
-    product: "mobile" | "web" | "common";
+    product: "mobile" | "web";
     type: "argument" | "command" | "event" | "operation" | "config";
 }
 
 export default function ViewerMessagingWrapper(props: ViewerMessagingProps) {
-    return BrowserOnly({ children: () => <ViewerMessaging {...props} /> });
+    return <BrowserOnly>{() => <ViewerMessaging {...props} />}</BrowserOnly>;
 }
 
 // Cache the requests to allow this component to be rendered
@@ -17,12 +19,42 @@ export default function ViewerMessagingWrapper(props: ViewerMessagingProps) {
 // We need to be able to render the headers within markdown so it
 // plays nicely with the docusaurus right TOC component.
 const cachedRequests: Record<
-    ViewerMessagingProps["product"],
+    "web" | "mobile" | "common",
     Record<"action" | "event" | "config", Promise<Response> | undefined>
 > = {
     web: { action: undefined, event: undefined, config: undefined },
     mobile: { action: undefined, event: undefined, config: undefined },
     common: { action: undefined, event: undefined, config: undefined },
+};
+
+const doSchemaRequest = async (
+    product: "web" | "mobile" | "common",
+    schema: "action" | "event" | "config"
+): Promise<MessageSchema | undefined> => {
+    let responseJson: MessageSchema | undefined = undefined;
+    try {
+        responseJson = lsCache.get(`${product}-${schema}`);
+    } catch (e) {
+        console.log(e);
+    }
+    if (!responseJson) {
+        if (!cachedRequests[product][schema]) {
+            const schemaName = schema === "config" ? "app-config" : schema;
+            cachedRequests[product][schema] = fetch(
+                `https://apps.vertigisstudio.com/web/${product}-${schemaName}.schema.json`
+            );
+        }
+        const response = await cachedRequests[product][schema]!;
+        responseJson = await response?.clone().json();
+        if (responseJson) {
+            try {
+                lsCache.set(`${product}-${schema}`, responseJson, 1440);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    }
+    return responseJson;
 };
 
 function ViewerMessaging(props: ViewerMessagingProps) {
@@ -32,7 +64,7 @@ function ViewerMessaging(props: ViewerMessagingProps) {
     // Fetch schema
     useEffect(() => {
         let didCancel = false;
-        let schemaType: "action" | "event" | "config" | undefined = undefined;
+        let schemaType: "action" | "event" | "config";
         switch (type) {
             case "command":
             case "operation":
@@ -41,6 +73,7 @@ function ViewerMessaging(props: ViewerMessagingProps) {
             case "event":
                 schemaType = "event";
                 break;
+            case "argument":
             case "config":
                 schemaType = "config";
                 break;
@@ -49,51 +82,50 @@ function ViewerMessaging(props: ViewerMessagingProps) {
         }
 
         (async () => {
-            if (schemaType && !cachedRequests[product][schemaType]) {
-                if (type === "config") {
-                    cachedRequests["common"][schemaType] = fetch(
-                        `https://apps.vertigisstudio.com/web/common-app-config.schema.json`
-                    );
-                    cachedRequests[product][schemaType] = fetch(
-                        `https://apps.vertigisstudio.com/web/${product}-app-config.schema.json`
-                    );
-                } else {
-                    cachedRequests[product][schemaType] = fetch(
-                        `https://apps.vertigisstudio.com/web/${product}-${schemaType}.schema.json`
-                    );
-                }
+            if (!schemaType!) {
+                return;
+            }
+
+            let commonConfigResponseJson: MessageSchema | undefined = undefined;
+            let productConfigResponseJson: MessageSchema | undefined =
+                undefined;
+            let actionResponseJson: MessageSchema | undefined = undefined;
+            let eventResponseJson: MessageSchema | undefined = undefined;
+
+            if (schemaType === "config") {
+                commonConfigResponseJson = await doSchemaRequest(
+                    "common",
+                    "config"
+                );
+                productConfigResponseJson = await doSchemaRequest(
+                    product,
+                    "config"
+                );
+            }
+            if (schemaType === "action" || schemaType === "config") {
+                actionResponseJson = await doSchemaRequest(
+                    schemaType === "config" ? "web" : product,
+                    "action"
+                );
+            }
+            if (schemaType === "event" || schemaType === "config") {
+                eventResponseJson = await doSchemaRequest(product, "event");
             }
 
             const messageSchemas: MessageSchema[] = [];
-            if (schemaType === "config") {
-                const commonConfigResponse = await cachedRequests["common"]
-                    .config!;
-                const configResponse = await cachedRequests[product].config!;
-
-                // Clone to avoid error when reading json multiple times
-                const commonConfigResponseJson: MessageSchema =
-                    await commonConfigResponse.clone().json();
-                const configResponseJson: MessageSchema = await configResponse
-                    .clone()
-                    .json();
-
+            if (commonConfigResponseJson) {
                 messageSchemas.push(commonConfigResponseJson);
-                messageSchemas.push(configResponseJson);
-            } else {
-                const actionResponse = await cachedRequests[product].action!;
-                const eventResponse = await cachedRequests[product].event!;
-
-                // Clone to avoid error when reading json multiple times
-                const actionResponseJson: MessageSchema = await actionResponse
-                    .clone()
-                    .json();
-                const eventResponseJson: MessageSchema = await eventResponse
-                    .clone()
-                    .json();
-
+            }
+            if (productConfigResponseJson) {
+                messageSchemas.push(productConfigResponseJson);
+            }
+            if (actionResponseJson) {
                 messageSchemas.push(actionResponseJson);
+            }
+            if (eventResponseJson) {
                 messageSchemas.push(eventResponseJson);
             }
+
             if (didCancel) {
                 return;
             }
@@ -147,7 +179,17 @@ function ViewerMessaging(props: ViewerMessagingProps) {
 
             messageSchemas.forEach((messageSchema) => {
                 Object.keys(messageSchema.definitions).forEach((key) => {
-                    schema.definitions[key] = messageSchema.definitions[key];
+                    schema.definitions[key] = isFeaturesLike(
+                        messageSchema.definitions[key].anyOf
+                    )
+                        ? {
+                              ...messageSchema.definitions[key],
+                              anyOf: replaceFeaturesLike(
+                                  messageSchema.definitions[key]
+                                      .anyOf as Definition[]
+                              ),
+                          }
+                        : messageSchema.definitions[key];
                 });
             });
 
@@ -174,7 +216,11 @@ function ViewerMessaging(props: ViewerMessagingProps) {
     }, [messagingJson]);
 
     return messagingJson ? (
-        <MessagingContent schema={messagingJson} type={type} />
+        <MessagingContent
+            schema={messagingJson}
+            type={type}
+            product={product}
+        />
     ) : (
         <div>Loading...</div>
     );

@@ -31,7 +31,11 @@ export default function MessagingDefinitionsSummary(
                 // instead.
                 .filter((key) =>
                     type === "argument"
-                        ? !key.toLocaleLowerCase().includes("modelproperties")
+                        ? !key
+                              .toLocaleLowerCase()
+                              .includes("modelproperties") &&
+                          !key.toLocaleLowerCase().endsWith(":input") &&
+                          !key.toLocaleLowerCase().endsWith(":output")
                         : key.toLocaleLowerCase().includes("modelproperties")
                 )
                 // TODO: Better sort so components are in one section and

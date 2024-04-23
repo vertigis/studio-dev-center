@@ -11,13 +11,15 @@ interface MessagingRefProps {
     isArray?: boolean;
     name: string;
     schema: MessageSchema;
+    linkId: string;
     product: "web" | "mobile";
 }
 
 const getRefLinkElement = (
     shortName: string,
     refUrl?: string,
-    typeName?: string
+    typeName?: string,
+    linkId?: string
 ): JSX.IntrinsicElements["span"] => (
     <span>
         <code>
@@ -25,6 +27,7 @@ const getRefLinkElement = (
                 <a
                     href={refUrl}
                     target={refUrl.startsWith("http") ? "_blank" : "_self"}
+                    onClick={() => (window.location.hash = linkId!)}
                 >
                     {shortName}
                 </a>
@@ -39,7 +42,7 @@ const getRefLinkElement = (
 );
 
 export default function MessagingRef(props: MessagingRefProps) {
-    const { isArray, name, schema, product } = props;
+    const { isArray, name, schema, linkId, product } = props;
     const fullName = trimDefinitionsName(name);
     const typeName = fullName.includes(" ")
         ? fullName.split(/\s(.*)/)[1]
@@ -53,7 +56,8 @@ export default function MessagingRef(props: MessagingRefProps) {
         return getRefLinkElement(
             isArray ? `${shortName}[]` : shortName,
             useBaseUrl(getArgumentDefinitionLink(name, product)),
-            shortName !== typeName ? typeName : undefined
+            shortName !== typeName ? typeName : undefined,
+            linkId
         );
     }
 
@@ -66,7 +70,8 @@ export default function MessagingRef(props: MessagingRefProps) {
         return getRefLinkElement(
             isArray ? `${shortName}[]` : shortName,
             useBaseUrl(getArgumentDefinitionLink(shortName, product)),
-            shortName !== typeName ? typeName : undefined
+            shortName !== typeName ? typeName : undefined,
+            linkId
         );
     }
 
@@ -77,13 +82,15 @@ export default function MessagingRef(props: MessagingRefProps) {
             `https://developers.arcgis.com/javascript/latest/api-reference/${parts.join(
                 "-"
             )}.html`,
-            `@arcgis.core.${parts.splice(1).join(".")}`
+            `@arcgis.core.${parts.splice(1).join(".")}`,
+            linkId
         );
     }
 
     return getRefLinkElement(
         isArray ? `${shortName}[]` : shortName,
         undefined,
-        shortName !== typeName ? typeName : undefined
+        shortName !== typeName ? typeName : undefined,
+        linkId
     );
 }

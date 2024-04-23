@@ -54,7 +54,7 @@ export default function MessagingDefinition(props: MessagingDefinitionProps) {
                 <em>This object doesn't currently contain any properties.</em>
             )}
             {definition.properties &&
-                listProperties(definition, schema, product)}
+                listProperties(definition, schema, typeName, product)}
         </div>
     );
 }

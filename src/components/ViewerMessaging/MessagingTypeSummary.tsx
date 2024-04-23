@@ -76,6 +76,7 @@ export default function MessagingTypeSummary(props: MessagingTypeSummaryProps) {
                                 <MessagingArgument
                                     definition={inputItem}
                                     schema={schema}
+                                    linkId={linkId}
                                     product={product}
                                 />
                             </div>
@@ -87,6 +88,7 @@ export default function MessagingTypeSummary(props: MessagingTypeSummaryProps) {
                                     <MessagingArgument
                                         definition={outputItem}
                                         schema={schema}
+                                        linkId={linkId}
                                         product={product}
                                     />
                                 </div>

@@ -5,12 +5,17 @@ import { markedHighlight } from "marked-highlight";
 import React from "react";
 import { Definition, MessageSchema, PrimitiveType } from "./schema";
 import MessagingRef from "./MessagingRef";
-import { getArgumentDefinitionLink, getReferencedDefinition } from "./utils";
+import {
+    getArgumentDefinitionLink,
+    getArgumentDefinitionLinkId,
+    getReferencedDefinition,
+} from "./utils";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 
 interface MessagingArgumentProps {
     definition: Definition | string | undefined;
     schema: MessageSchema;
+    linkId: string;
     product: "web" | "mobile";
 }
 
@@ -169,6 +174,7 @@ export function getDescription(
 export function listProperties(
     definition: Definition,
     schema: MessageSchema,
+    typeName: string,
     product: "web" | "mobile"
 ) {
     if (!definition.properties) {
@@ -203,6 +209,9 @@ export function listProperties(
                                 <MessagingArgument
                                     definition={propDef}
                                     schema={schema}
+                                    linkId={
+                                        getArgumentDefinitionLinkId(typeName)!
+                                    }
                                     product={product}
                                 />
                                 {getDescription(
@@ -221,7 +230,7 @@ export function listProperties(
 }
 
 export default function MessagingArgument(props: MessagingArgumentProps) {
-    const { schema, product } = props;
+    const { schema, linkId, product } = props;
 
     let definition = props.definition;
 
@@ -257,6 +266,7 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
                 <MessagingArgument
                     definition={referencedDef}
                     schema={schema}
+                    linkId={linkId}
                     product={product}
                 />
             );
@@ -266,6 +276,7 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
             <MessagingRef
                 name={definition.$ref}
                 schema={schema}
+                linkId={linkId}
                 product={product}
             />
         );
@@ -288,6 +299,7 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
                                     isArray
                                     name={option.$ref ?? ""}
                                     schema={schema}
+                                    linkId={linkId}
                                     product={product}
                                 />
                             </div>
@@ -308,6 +320,7 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
                         isArray
                         name={itemsRef}
                         schema={schema}
+                        linkId={linkId}
                         product={product}
                     />
                 );
@@ -321,7 +334,7 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
                 return (
                     <>
                         <code>object</code>
-                        {listProperties(definition, schema, product)}
+                        {listProperties(definition, schema, linkId, product)}
                     </>
                 );
             }
@@ -383,6 +396,7 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
                         <MessagingArgument
                             definition={option}
                             schema={schema}
+                            linkId={linkId}
                             product={product}
                         />
                     </div>

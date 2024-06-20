@@ -1,0 +1,104 @@
+---
+title: Create an Activity
+description: VertiGIS Studio Workflow - Create a workflow activity for desktop applications
+---
+
+import useBaseUrl from "@docusaurus/useBaseUrl";
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import UseCaseContainer from "../../src/components/UseCaseContainer";
+import UseCaseCard from "../../src/components/UseCaseCard";
+import MobilePrereqs from "./snippets/prereqs-mobile.mdx";
+import DesktopPrereqs from "./snippets/prereqs-desktop.mdx";
+import WorkflowUrlSnippet from "../snippets/workflow-url.mdx";
+
+This article will walk you through creating a new workflow activity for VertiGIS Studio Desktop applications.
+
+<img
+    src={useBaseUrl(
+        "img/desktop-pro-run-create-activity-workflow.png"
+    )}
+/>
+
+## Prerequisites
+
+<DesktopPrereqs />
+
+## Create the Activity
+
+1. If you haven't done yet, create a new Visual Studio project using the `ArcGIS Pro Module Add-In` project template.
+2. Create a new file `MyCustomActivity.cs` in the previously mentioned project.
+3. Add a new skeleton workflow activity that implements `IActivityHandler`.
+
+```cs title="MyCustomActivity.cs"
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using VertiGIS.Workflow.Runtime;
+
+// highlight-next-line
+[assembly:WorkflowActivities]
+namespace Poc_ProCustomActivities
+{
+    public class MyCustomActivity : IActivityHandler
+    {
+        // highlight-next-line
+        public static string Action => "uuid:cc39c481-4d05-4c39-8363-07b79dc03aa7::MyCustomActivity";
+
+        public Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        {
+            IDictionary<string, object> outputs = new Dictionary<string, object>();
+
+            outputs["test"] = "Hello World. This is a custom activity.";
+
+            return Task.FromResult(outputs);
+        }
+    }
+}
+```
+
+:::important
+It's important to conform to two necessary constraints to make the activity recognizable to VertiGIS Studio Desktop:
+
+1.  Inside your assembly you need to add the `WorkflowActivities` attribute (make sure to add it only once across your whole project, e.g. in your module rather than inside your activity)
+2.  Your custom activity needs to contain an action identifier that tells VertiGIS Studio Desktop what activity is represented by this implementation. This can be achieved by declaring a static string property named `Action` that returns the activities action id. As static members cannot be specified in interfaces, you have to ensure this property being present yourself.
+
+Ignoring any of those rules will lead to the activity not being found by VertiGIS Studio Desktop and thus cause a runtime error.
+:::
+
+## Use the Activity in a Workflow
+
+Workflows that run in your custom VertiGIS Studio Desktop application can now run this custom activity.
+
+:::tip
+[Registering stubs for .NET activities](sdk-net-register-activities.mdx) provides a user friendly interface for your custom activities in VertiGIS Studio Workflow Designer.
+
+<img src={useBaseUrl("img/desktop-designer-run-activity.png")} />
+:::
+
+Without registering stubs you may still call your custom activity using the [`RunActivity`](https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/activities/run-activity.htm%3FTocPath%3DActivities%7CActivity%2520Reference%7C_____167) by the name defined in `MyCustomActivity.cs` (for this example, `uuid:cc39c481-4d05-4c39-8363-07b79dc03aa7::MyCustomActivity`).
+
+:::note
+
+<p>
+    You can{" "}
+    <a
+        href={useBaseUrl("workflows/desktop-create-activity.json")}
+        download="custom-activity-workflow.json"
+        target="_blank"
+    >
+        download this demo workflow
+    </a>{" "}
+    that runs the custom activity and
+    <a
+        href="https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/import-export-workflows.htm"
+        target="_blank"
+    >
+        {" "}
+        import it into the VertiGIS Studio Workflow Designer.{" "}
+    </a>
+</p>
+:::
+
+Next you need to run the workflow you just created in your VertiGIS Studio Desktop project.
+
+<WorkflowUrlSnippet />

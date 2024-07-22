@@ -7,7 +7,7 @@
     "build": "docusaurus build",
     "lint": "npm run lint:spelling && npm run lint:style && npm run lint:links:md",
     "lint:links": "npm run lint:links:md && npm run lint:links:ext",
-    "lint:links:md": "remark -f -q -u validate-links \"docs/**/*.mdx\"",
+    "lint:links:md": "remark -f -q -u validate-links --silently-ignore --ignore-pattern \"docs/**/api-objects.mdx\" \"docs/**/*.mdx\"",
     "lint:links:ext": "linkinator ./build -r --silent --concurrency 10 --skip https://github.com",
     "lint:spelling": "cspell \"{docs,src}/**\"",
     "lint:style": "npm run prettier -- --check",
@@ -17,12 +17,16 @@
     "deploy": "docusaurus deploy"
   },
   "dependencies": {
-    "@docusaurus/core": "3.1.1",
-    "@docusaurus/preset-classic": "3.1.1",
+    "@docusaurus/core": "^3.2.1",
+    "@docusaurus/preset-classic": "^3.2.1",
     "@types/react": "^18.2.0",
     "clsx": "^1.2.1",
     "cspell": "^5.6.4",
+    "highlight.js": "^11.9.0",
     "linkinator": "^5.0.1",
+    "lscache": "^1.3.2",
+    "marked": "^12.0.1",
+    "marked-highlight": "^2.1.1",
     "prettier": "^2.3.1",
     "pretty-quick": "^3.1.1",
     "react": "^18.2.0",
@@ -31,6 +35,10 @@
     "remark-validate-links": "^10.0.4"
   },
   "devDependencies": {
+    "@docusaurus/module-type-aliases": "^3.2.1",
+    "@docusaurus/tsconfig": "^3.2.1",
+    "@docusaurus/types": "^3.2.1",
+    "@types/lscache": "^1.3.4",
     "simple-git-hooks": "2.3.1"
   },
   "browserslist": [

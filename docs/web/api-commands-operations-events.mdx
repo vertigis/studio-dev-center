@@ -1,26 +1,21 @@
 ---
-title: Commands, Operations and Events Reference
-description: VertiGIS Studio Web - Commands, Operations and Events API Reference
+title: Redirecting...
+custom_edit_url: null
+unlisted: true
 ---
 
-import ViewerMessaging from "../../src/components/ViewerMessaging";
+import ExecutionEnvironment from "@docusaurus/ExecutionEnvironment";
 
-Commands and operations are runnable, independent units of work within VertiGIS Studio Web. [Commands](#commands) are units of work which may take an input but do not produce an output, while [operations](#operations) differ because they produce output. You can learn more about commands and operations in our [conceptual documentation](configuration-commands-operations.mdx)
-
-[Events](#events) are distinct, discrete messaging about a change or update that occurs in the viewer. They can be used to initiate behaviors, communicate data changes, and more. Events themselves do not execute behavior, but merely provide messaging so subscribers can act on changes. You can learn more about events in our [conceptual documentation](sdk-events-overview.mdx)
-
-## Commands
-
-<ViewerMessaging product="web" type="command" />
-
-## Operations
-
-<ViewerMessaging product="web" type="operation" />
-
-## Events
-
-<ViewerMessaging product="web" type="event" />
-
-## Argument Definitions
-
-<ViewerMessaging product="web" type="argument" />
+{/* prettier-ignore */}
+{(() => {
+    if (ExecutionEnvironment.canUseDOM) {
+        const href = window.location.href;
+        if (href.includes("#event")) {
+            window.location.replace(href.replace("api-commands-operations-events", "api-events"));
+        } else if (href.includes("#definition")) {
+            window.location.replace(href.replace("api-commands-operations-events", "api-argument-definitions"))
+        } else {
+            window.location.replace(href.replace("api-commands-operations-events", "api-commands-operations"));
+        }
+    }
+})()}

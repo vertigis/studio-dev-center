@@ -119,7 +119,13 @@ module.exports = {
         {
             type: "category",
             label: "API",
-            items: ["web/api-commands-operations-events", "web/api-components"],
+            items: [
+                "web/api-commands-operations",
+                "web/api-events",
+                "web/api-argument-definitions",
+                "web/api-components",
+                "web/api-objects",
+            ],
         },
     ],
     workflow: [
@@ -311,7 +317,9 @@ module.exports = {
             type: "category",
             label: "API",
             items: [
-                "mobile/api-commands-operations-events",
+                "mobile/api-commands-operations",
+                "mobile/api-events",
+                "mobile/api-argument-definitions",
                 "mobile/api-components",
             ],
         },

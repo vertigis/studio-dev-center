@@ -1,0 +1,25 @@
+---
+title: Using the .NET Workflow SDK with VertiGIS Studio Desktop
+sidebar_label: Overview
+description: VertiGIS Studio Workflow - Overview of extending workflow for VertiGIS Studio Desktop
+---
+
+import useBaseUrl from "@docusaurus/useBaseUrl";
+import UseCaseContainer from "../../src/components/UseCaseContainer";
+import UseCaseCard from "../../src/components/UseCaseCard";
+
+Custom activities are being added to VertiGIS Studio Desktop using the add-in mechanism of ArcGIS Pro. Providing some implementations for well-known elements, you easily can bring your custom logic to Workflow Desktop:
+
+1. [Create a new](https://developers.arcgis.com/documentation/arcgis-add-ins-and-automation/arcgis-pro/tutorials/build-your-first-add-in/) (or extend your existing) ArcGIS Pro add-in.
+1. Add a reference to Workflow Runtime [NuGet Package](https://www.nuget.org/packages/VertiGIS.Workflow.Runtime) to your project
+1. [Implement](sdk-desktop-create-activity.mdx) your activities
+
+## Next Steps
+
+<UseCaseContainer>
+    <UseCaseCard
+        title="Implement a Custom Activity"
+        description="Implement a custom activity for VertiGIS Studio Desktop"
+        link={useBaseUrl("docs/workflow/sdk-desktop-create-activity")}
+    />
+</UseCaseContainer>

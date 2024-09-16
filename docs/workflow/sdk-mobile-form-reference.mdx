@@ -42,7 +42,7 @@ namespace App1.Workflow
 {
     class RegisterCustomFormElements : RegisterCustomFormElementBase
     {
-        public const string Action = "CustomFormElement";
+        public static string Action { get; } = "CustomFormElement";
 
         public override Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
         {

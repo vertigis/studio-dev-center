@@ -92,9 +92,9 @@ namespace App1.Workflow
     {
         public static string Action { get; } = "uuid:<uuid>::FormElementRegistrationActivity";
 
-        public override Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public override Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
-            IDictionary<string, object> result = new Dictionary<string, object>();
+            IDictionary<string, object?> result = new Dictionary<string, object?>();
             // highlight-next-line
             Register("LoadingIndicator", typeof(LoadingIndicator), context);
             return Task.FromResult(result);
@@ -298,4 +298,4 @@ You can do this by configuring the layout and app config to run a workflow. You 
 
 Check out the relevant VertiGIS Studio Mobile SDK Sample:
 
--   [Custom Workflow Form Element](https://github.com/geocortex/vertigis-mobile-samples/tree/master/Geocortex.Mobile.Samples/Geocortex.Mobile.Samples/Samples/Workflow/CustomFormComponent)
+-   [Custom Workflow Form Element](https://github.com/vertigis/vertigis-mobile-samples/tree/master/Geocortex.Mobile.Samples/Geocortex.Mobile.Samples/Samples/Workflow/CustomFormComponent)

@@ -34,9 +34,9 @@ namespace App1.Workflow
     {
         public static string Action { get; } = "uuid:<uuid>::CalculateLog";
 
-        public Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
-            return Task.FromResult((IDictionary<string, object>)new Dictionary<string, object>());
+            return Task.FromResult((IDictionary<string, object?>)new Dictionary<string, object?>());
         }
     }
 }
@@ -48,7 +48,7 @@ namespace App1.Workflow
 1. Add the custom VertiGIS Studio Workflow attribute to `AssemblyInfo.cs`:
 
 ```cs title="YourProjectName/Properties/AssemblyInfo.cs"
-[assembly: VertiGIS.Workflow.Runtime.WorkflowActivities]`
+[assembly: VertiGIS.Workflow.Runtime.WorkflowActivities]
 ```
 
 This registers the assembly to a namespace that VertiGIS Studio Workflow Server can discover.
@@ -75,18 +75,19 @@ namespace App1.Workflow
     {
         public static string Action { get; } = "uuid:<uuid>::CalculateLog";
 
-        public Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
             // highlight-start
+            var value = Convert.ToDouble(inputs["value"]);
             double? logBase = null;
-            if (inputs.ContainsKey("base"))
+
+            if (inputs.ContainsKey("base") && inputs["base"] != null)
             {
-                logBase = inputs["base"] as double?;
+                logBase = Convert.ToDouble(inputs["base"]);
             }
-            var value = (double)inputs["value"];
             // highlight-end
 
-            return Task.FromResult((IDictionary<string, object>)new Dictionary<string, object>());
+            return Task.FromResult((IDictionary<string, object?>)new Dictionary<string, object?>());
         }
     }
 }
@@ -106,27 +107,29 @@ namespace App1.Workflow
     {
         public static string Action { get; } = "uuid:<uuid>::CalculateLog";
 
-        public Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
+            var value = Convert.ToDouble(inputs["value"]);
             double? logBase = null;
-            if (inputs.ContainsKey("base"))
+
+            if (inputs.ContainsKey("base") && inputs["base"] != null)
             {
-                logBase = inputs["base"] as double?;
+                logBase = Convert.ToDouble(inputs["base"]);
             }
-            var value = (double)inputs["value"];
 
             // highlight-start
             double logResult;
+
             if (logBase != null)
             {
-                logResult = Math.Log(value, (double)logBase);
+                logResult = Math.Log(value, logBase.Value);
             }
             else
             {
                 logResult = Math.Log(value);
             }
 
-            return Task.FromResult((IDictionary<string, object>)new Dictionary<string, object>()
+            return Task.FromResult((IDictionary<string, object?>)new Dictionary<string, object>()
             {
                 ["result"] = logResult
             });

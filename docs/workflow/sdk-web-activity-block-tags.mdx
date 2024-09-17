@@ -66,10 +66,12 @@ You can specify which environments an activity is compatible with by adding the 
 
 App values that currently supported in VertiGIS Studio Workflow Designer:
 
--   `WAB` (Web AppBuilder for ArcGIS)
+-   `EXB` (ArcGIS Experience Builder)
 -   `GVH` (Geocortex Viewer for HTML5)
--   `VSW` (VertiGIS Studio Web)
+-   `VSD` (VertiGIS Studio Desktop for ArcGIS Pro)
 -   `VSM` (VertiGIS Studio Mobile)
+-   `VSW` (VertiGIS Studio Web)
+-   `WAB` (ArcGIS Web AppBuilder)
 
 If you do not want to limit the use of an activity, do not add any of the above tags. It will appear in the toolbox and will not generate any warnings when used.
 
@@ -79,11 +81,11 @@ The intention is that you use either `@supportedApps` or `@unsupportedApps`, dep
 
 ### Example: Activity Compatibility Tags
 
-The following example declares that an activity will only work on VertiGIS Studio Web or Web AppBuilder for ArcGIS in an online and client side environment. The display name will default to "Does Not Work On Mobile".
+The following example declares that an activity will only work on VertiGIS Studio Web or ArcGIS Web AppBuilder in an online and client side environment. The display name will default to "Does Not Work On Mobile".
 
 ```ts
 /**
- * @supportedApps WAB, GWV
+ * @supportedApps WAB, VSW
  * @onlineOnly
  * @clientOnly
  */

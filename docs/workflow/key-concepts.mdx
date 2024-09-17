@@ -10,7 +10,7 @@ import DesignerCallout from "./snippets/designer-callout.mdx";
 
 <DesignerCallout />
 
-VertiGIS Studio Workflow is a flexible tool for automating business processes. It allows you to create **workflows**, which are composed of various **activities**, control flow elements such as loops, and forms that enable user interaction. Workflows can run on different platforms, including [VertiGIS Studio Web](https://www.vertigisstudio.com/products/vertigis-studio-web/), [VertiGIS Studio Mobile](https://www.vertigisstudio.com/products/vertigis-studio-mobile/), on a business server, or in [Web AppBuilder for ArcGIS](https://www.esri.com/en-us/arcgis/products/web-appbuilder/overview).
+VertiGIS Studio Workflow is a flexible tool for automating business processes. It allows you to create **workflows**, which are composed of various **activities**, control flow elements such as loops, and forms that enable user interaction. Workflows can run on different platforms, including [VertiGIS Studio Web](https://www.vertigisstudio.com/products/vertigis-studio-web/), [VertiGIS Studio Mobile](https://www.vertigisstudio.com/products/vertigis-studio-mobile/), on a business server, or in [ArcGIS Web AppBuilder](https://www.esri.com/en-us/arcgis/products/web-appbuilder/overview).
 
 ## Workflow
 
@@ -34,7 +34,7 @@ VertiGIS Studio Workflow includes a powerful tool for building workflows, VertiG
 
 When a workflow is run, the workflow definition is read and executed by the **workflow runtime**. The runtime is responsible for locating the activity implementation definitions, and executing them with the inputs defined in the workflow definitions. Each **workflow host** has a different runtime:
 
--   VertiGIS Studio Web and Web AppBuilder for ArcGIS use the JavaScript workflow runtime
+-   VertiGIS Studio Web and ArcGIS Web AppBuilder use the JavaScript workflow runtime
 -   VertiGIS Studio Mobile and VertiGIS Studio Workflow Server use the .NET workflow runtime
 
 :::note Types of Workflows
@@ -50,12 +50,14 @@ The current existing workflow hosts are:
 **Web Applications**
 
 -   VertiGIS Studio Web (client)
+-   ArcGIS Experience Builder (client)
+-   ArcGIS Web AppBuilder (client)
 -   Geocortex Viewer for HTML5 (client)
--   Web AppBuilder for ArcGIS (client)
 
 **.NET Applications**
 
 -   VertiGIS Studio Mobile (client)
+-   VertiGIS Studio Desktop for ArcGIS Pro (client)
 -   VertiGIS Studio Workflow Server (server)
 
 [Learn more about the different workflow hosts](https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/hosting.htm%3FTocPath%3DConfigure%2520Host%2520Applications%7C_____0) or about [adapting workflows to different environments](https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/run-in-different-environments.htm#Run_a_Workflow_in_Different_Environments%3FTocPath%3DRun%2520a%2520Workflow%2520in%2520Different%2520Environments%7C_____0).

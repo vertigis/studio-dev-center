@@ -13,7 +13,7 @@
 
 
 <link rel="search" type="application/opensearchdescription+xml" title="VertiGIS Studio Developer Center" href="/opensearch.xml"><link rel="stylesheet" href="/assets/css/styles.4b1a9f9b.css">
-<script src="/assets/js/runtime~main.b131bc65.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.8d2408f0.js" defer="defer"></script>
 <script src="/assets/js/main.4c0925eb.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -81,9 +81,10 @@ This is located in the folder that you chose when installing VertiGIS Studio Wor
 <p>You can debug custom VertiGIS Studio Workflow Server activities by attaching to the VertiGIS Studio Workflow Server process from the VertiGIS Studio Workflow extension project you created.</p>
 <ol>
 <li>Start Visual Studio 2022 with administrator privileges.</li>
-<li><a href="https://docs.microsoft.com/en-us/visualstudio/debugger/debug-multiple-processes?view=vs-2019#BKMK_Attach_to_a_process" target="_blank" rel="noopener noreferrer">Attach the debugger</a> to the running <code>GeocortexWorkflowServer.exe</code> process.<!-- -->
+<li><a href="https://docs.microsoft.com/en-us/visualstudio/debugger/debug-multiple-processes?view=vs-2019#BKMK_Attach_to_a_process" target="_blank" rel="noopener noreferrer">Attach the debugger</a> to the <code>w3wp.exe</code> process that is running as the VertiGISStudioWorkflow user.<!-- -->
 <ul>
 <li>You may need to check &#x27;show processes from all users&#x27; to see it.</li>
+<li>If you have customized the application pool assigned to your installation of VertiGIS Studio Workflow, the username may be different.</li>
 </ul>
 </li>
 <li>Set a breakpoint in your custom activity.</li>

@@ -49,12 +49,12 @@ namespace App1.Workflow
     {
         public static string Action { get; } = "uuid:<uuid>::PlaceCalloutAtCenter";
 
-        public async Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public async Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
             // highlight-next-line
             var calloutText = (string)inputs["calloutText"];
 
-            return new Dictionary<string, object>();
+            return new Dictionary<string, object?>();
         }
     }
 }
@@ -148,11 +148,11 @@ namespace App1.Workflow
         public Func<MapProviderBase> MapProviderFactory { get; set; }
         // highlight-end
 
-        public async Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public async Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
             var calloutText = (string)inputs["calloutText"];
 
-            return new Dictionary<string, object>();
+            return new Dictionary<string, object?>();
         }
     }
 }
@@ -184,7 +184,7 @@ namespace App1.Workflow
         [ProviderFactoryAttribute(typeof(MapProviderBase))]
         public Func<MapProviderBase> MapProviderFactory { get; set; }
 
-        public async Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public async Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
             var calloutText = (string)inputs["calloutText"];
 
@@ -199,7 +199,7 @@ namespace App1.Workflow
             MapView mapView = (MapView)((WorkflowMapProvider)mapProvider).View;
             // highlight-end
 
-            return new Dictionary<string, object>();
+            return new Dictionary<string, object?>();
         }
     }
 }
@@ -237,7 +237,7 @@ namespace App1.Workflow
         [ProviderFactoryAttribute(typeof(MapProviderBase))]
         public Func<MapProviderBase> MapProviderFactory { get; set; }
 
-        public async Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public async Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
             var calloutText = (string)inputs["calloutText"];
 
@@ -259,7 +259,7 @@ namespace App1.Workflow
             });
             // highlight-end
 
-            return new Dictionary<string, object>();
+            return new Dictionary<string, object?>();
         }
     }
 }

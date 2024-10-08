@@ -243,7 +243,7 @@ Using the `layers.visibility-changed` event, we configure a Workflow as an actio
 },
 ```
 
-By specifying the `context`, we're able to retrieve an input value within a Workflow using the [Get Workflow Inputs](https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/activities/get-workflow-inputs.htm#Get_Workflow_Inputs_Activity) activity.
+By specifying the `context`, we're able to retrieve an input value within a Workflow using the [Get Workflow Inputs](https://docs.vertigisstudio.com/workflow/latest/help/get-workflow-inputs.html) activity.
 
 In our Workflow, we would want to run `Get Workflow Inputs` as our first activity to retrieve the input. Once we have the input as an object in our Workflow, we can access the `context` to start working with the input.
 
@@ -277,7 +277,7 @@ Using the new [viewer.publish-event](https://developers.vertigisstudio.com/docs/
 
 ### Raise Event through Workflow
 
-But what if we want to raise a custom event during execution of a Workflow? Using the [Publish Event](https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/activities/publish-event.htm) activity, it's possible to raise a custom event from anywhere in your Workflow logic. Simply provide the same custom event name to the `Event Name` input in the `Publish Event` activity. Arguments may also be provided. For the above example, that would be:
+But what if we want to raise a custom event during execution of a Workflow? Using the [Publish Event](https://docs.vertigisstudio.com/workflow/latest/help/publish-event.html) activity, it's possible to raise a custom event from anywhere in your Workflow logic. Simply provide the same custom event name to the `Event Name` input in the `Publish Event` activity. Arguments may also be provided. For the above example, that would be:
 
 ```json
 custom.raised-event

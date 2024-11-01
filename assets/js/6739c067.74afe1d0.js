@@ -1,1 +1,0 @@
-"use strict";(globalThis.webpackChunkvertigis_studio_dev_center=globalThis.webpackChunkvertigis_studio_dev_center||[]).push([[8932],{5e3:e=>{e.exports=JSON.parse('{"permalink":"/blog/tags/workflow","page":1,"postsPerPage":10,"totalPages":1,"totalCount":2,"blogDescription":"Blog","blogTitle":"Blog"}')}}]);

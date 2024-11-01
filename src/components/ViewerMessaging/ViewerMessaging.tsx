@@ -103,10 +103,7 @@ function ViewerMessaging(props: ViewerMessagingProps) {
                 );
             }
             if (schemaType === "action" || schemaType === "config") {
-                actionResponseJson = await doSchemaRequest(
-                    schemaType === "config" ? "web" : product,
-                    "action"
-                );
+                actionResponseJson = await doSchemaRequest(product, "action");
             }
             if (schemaType === "event" || schemaType === "config") {
                 eventResponseJson = await doSchemaRequest(product, "event");

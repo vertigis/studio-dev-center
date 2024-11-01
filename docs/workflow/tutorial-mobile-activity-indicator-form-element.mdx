@@ -9,7 +9,7 @@ import TabItem from "@theme/TabItem";
 import MobilePrereqs from "./snippets/prereqs-mobile.mdx";
 import WorkflowUrlSnippet from "../snippets/workflow-url.mdx";
 
-Implementing a custom [form element](key-concepts.mdx#form-elements) allows you to augment the existing [form elements that come with VertiGIS Studio Workflow](https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/form-elements/auto-complete.htm%3FTocPath%3DForms%7CForm%2520Element%2520Reference%7C_____0).
+Implementing a custom [form element](key-concepts.mdx#form-elements) allows you to augment the existing [form elements that come with VertiGIS Studio Workflow](https://docs.vertigisstudio.com/workflow/latest/help/auto-complete.html).
 This article will walk you through creating a form element that displays a loading indicator.
 
 <img
@@ -92,9 +92,9 @@ namespace App1.Workflow
     {
         public static string Action { get; } = "uuid:<uuid>::FormElementRegistrationActivity";
 
-        public override Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public override Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
-            IDictionary<string, object> result = new Dictionary<string, object>();
+            IDictionary<string, object?> result = new Dictionary<string, object?>();
             // highlight-next-line
             Register("LoadingIndicator", typeof(LoadingIndicator), context);
             return Task.FromResult(result);
@@ -203,7 +203,7 @@ Now you can [build a workflow for VertiGIS Studio Mobile](https://docs.vertigiss
     </a>{" "}
     that registers and displays the custom form element and
     <a
-        href="https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/import-export-workflows.htm"
+        href="https://docs.vertigisstudio.com/workflow/latest/help/import-export-workflows.html"
         target="_blank"
     >
         {" "}
@@ -298,4 +298,4 @@ You can do this by configuring the layout and app config to run a workflow. You 
 
 Check out the relevant VertiGIS Studio Mobile SDK Sample:
 
--   [Custom Workflow Form Element](https://github.com/geocortex/vertigis-mobile-samples/tree/master/Geocortex.Mobile.Samples/Geocortex.Mobile.Samples/Samples/Workflow/CustomFormComponent)
+-   [Custom Workflow Form Element](https://github.com/vertigis/vertigis-mobile-samples/tree/master/Geocortex.Mobile.Samples/Geocortex.Mobile.Samples/Samples/Workflow/CustomFormComponent)

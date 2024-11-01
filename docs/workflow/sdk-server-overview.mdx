@@ -86,8 +86,9 @@ You may need to stop VertiGIS Studio Workflow Server in IIS in order to copy you
 You can debug custom VertiGIS Studio Workflow Server activities by attaching to the VertiGIS Studio Workflow Server process from the VertiGIS Studio Workflow extension project you created.
 
 1. Start Visual Studio 2022 with administrator privileges.
-2. [Attach the debugger](https://docs.microsoft.com/en-us/visualstudio/debugger/debug-multiple-processes?view=vs-2019#BKMK_Attach_to_a_process) to the running `GeocortexWorkflowServer.exe` process.
+2. [Attach the debugger](https://docs.microsoft.com/en-us/visualstudio/debugger/debug-multiple-processes?view=vs-2019#BKMK_Attach_to_a_process) to the `w3wp.exe` process that is running as the VertiGISStudioWorkflow user.
     - You may need to check 'show processes from all users' to see it.
+    - If you have customized the application pool assigned to your installation of VertiGIS Studio Workflow, the username may be different.
 3. Set a breakpoint in your custom activity.
 4. Run your server workflow that uses the custom activity. Your breakpoint should be hit.
 

@@ -49,12 +49,12 @@ namespace App1.Workflow
     {
         public static string Action { get; } = "uuid:<uuid>::PlaceCalloutAtCenter";
 
-        public async Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public async Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
             // highlight-next-line
             var calloutText = (string)inputs["calloutText"];
 
-            return new Dictionary<string, object>();
+            return new Dictionary<string, object?>();
         }
     }
 }
@@ -148,11 +148,11 @@ namespace App1.Workflow
         public Func<MapProviderBase> MapProviderFactory { get; set; }
         // highlight-end
 
-        public async Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public async Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
             var calloutText = (string)inputs["calloutText"];
 
-            return new Dictionary<string, object>();
+            return new Dictionary<string, object?>();
         }
     }
 }
@@ -184,7 +184,7 @@ namespace App1.Workflow
         [ProviderFactoryAttribute(typeof(MapProviderBase))]
         public Func<MapProviderBase> MapProviderFactory { get; set; }
 
-        public async Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public async Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
             var calloutText = (string)inputs["calloutText"];
 
@@ -199,7 +199,7 @@ namespace App1.Workflow
             MapView mapView = (MapView)((WorkflowMapProvider)mapProvider).View;
             // highlight-end
 
-            return new Dictionary<string, object>();
+            return new Dictionary<string, object?>();
         }
     }
 }
@@ -237,7 +237,7 @@ namespace App1.Workflow
         [ProviderFactoryAttribute(typeof(MapProviderBase))]
         public Func<MapProviderBase> MapProviderFactory { get; set; }
 
-        public async Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public async Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
             var calloutText = (string)inputs["calloutText"];
 
@@ -259,7 +259,7 @@ namespace App1.Workflow
             });
             // highlight-end
 
-            return new Dictionary<string, object>();
+            return new Dictionary<string, object?>();
         }
     }
 }
@@ -273,7 +273,7 @@ Now you can [build a workflow for VertiGIS Studio Mobile](https://docs.vertigiss
 If you want your custom activity to show up with a friendly user interface in VertiGIS Studio Workflow Designer, check out [Registering .NET Activities with VertiGIS Studio Workflow Designer](sdk-net-register-activities.mdx).
 :::
 
-The [`RunActivity`](https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/activities/run-activity.htm%3FTocPath%3DActivities%7CActivity%2520Reference%7C_____167) activity can be used to execute your activity by the name defined in `PlaceCalloutAtCenter.cs` (for this example, `uuid:<uuid>::PlaceCalloutAtCenter`).
+The [`RunActivity`](https://docs.vertigisstudio.com/workflow/latest/help/run-activity.html) activity can be used to execute your activity by the name defined in `PlaceCalloutAtCenter.cs` (for this example, `uuid:<uuid>::PlaceCalloutAtCenter`).
 
 :::note
 
@@ -288,7 +288,7 @@ The [`RunActivity`](https://docs.vertigisstudio.com/workflow/latest/help/Default
     </a>{" "}
     that runs the custom activity and
     <a
-        href="https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/import-export-workflows.htm"
+        href="https://docs.vertigisstudio.com/workflow/latest/help/import-export-workflows.html"
         target="_blank"
     >
         {" "}

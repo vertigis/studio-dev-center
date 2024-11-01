@@ -6,7 +6,7 @@ description: VertiGIS Studio Workflow - Implement a custom activity for VertiGIS
 import ServerPrereqs from "./snippets/prereqs-server.mdx";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 
-Implementing a custom [activity](key-concepts.mdx#activities) allows you to build a reusable, completely custom behavior to augment the [existing activities](https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/activity-reference.htm%3FTocPath%3DActivities%7CActivity%2520Reference%7C_____0) that come with VertiGIS Studio Workflow.
+Implementing a custom [activity](key-concepts.mdx#activities) allows you to build a reusable, completely custom behavior to augment the [existing activities](https://docs.vertigisstudio.com/workflow/latest/help/activity-reference.html) that come with VertiGIS Studio Workflow.
 
 In this article, you will learn how to create a custom activity that calculates the logarithm of a number with a given base.
 
@@ -34,9 +34,9 @@ namespace App1.Workflow
     {
         public static string Action { get; } = "uuid:<uuid>::CalculateLog";
 
-        public Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
-            return Task.FromResult((IDictionary<string, object>)new Dictionary<string, object>());
+            return Task.FromResult((IDictionary<string, object?>)new Dictionary<string, object?>());
         }
     }
 }
@@ -48,7 +48,7 @@ namespace App1.Workflow
 1. Add the custom VertiGIS Studio Workflow attribute to `AssemblyInfo.cs`:
 
 ```cs title="YourProjectName/Properties/AssemblyInfo.cs"
-[assembly: VertiGIS.Workflow.Runtime.WorkflowActivities]`
+[assembly: VertiGIS.Workflow.Runtime.WorkflowActivities]
 ```
 
 This registers the assembly to a namespace that VertiGIS Studio Workflow Server can discover.
@@ -73,20 +73,21 @@ namespace App1.Workflow
 {
     public class CalculateLog : IActivityHandler
     {
-        public const string Action = "uuid:<uuid>::CalculateLog";
+        public static string Action { get; } = "uuid:<uuid>::CalculateLog";
 
-        public Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
             // highlight-start
+            var value = Convert.ToDouble(inputs["value"]);
             double? logBase = null;
-            if (inputs.ContainsKey("base"))
+
+            if (inputs.ContainsKey("base") && inputs["base"] != null)
             {
-                logBase = inputs["base"] as double?;
+                logBase = Convert.ToDouble(inputs["base"]);
             }
-            var value = (double)inputs["value"];
             // highlight-end
 
-            return Task.FromResult((IDictionary<string, object>)new Dictionary<string, object>());
+            return Task.FromResult((IDictionary<string, object?>)new Dictionary<string, object?>());
         }
     }
 }
@@ -104,29 +105,31 @@ namespace App1.Workflow
 {
     public class CalculateLog : IActivityHandler
     {
-        public const string Action = "uuid:<uuid>::CalculateLog";
+        public static string Action { get; } = "uuid:<uuid>::CalculateLog";
 
-        public Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
+            var value = Convert.ToDouble(inputs["value"]);
             double? logBase = null;
-            if (inputs.ContainsKey("base"))
+
+            if (inputs.ContainsKey("base") && inputs["base"] != null)
             {
-                logBase = inputs["base"] as double?;
+                logBase = Convert.ToDouble(inputs["base"]);
             }
-            var value = (double)inputs["value"];
 
             // highlight-start
             double logResult;
+
             if (logBase != null)
             {
-                logResult = Math.Log(value, (double)logBase);
+                logResult = Math.Log(value, logBase.Value);
             }
             else
             {
                 logResult = Math.Log(value);
             }
 
-            return Task.FromResult((IDictionary<string, object>)new Dictionary<string, object>()
+            return Task.FromResult((IDictionary<string, object?>)new Dictionary<string, object>()
             {
                 ["result"] = logResult
             });
@@ -142,13 +145,13 @@ Follow the instructions to [deploy VertiGIS Studio Workflow Server activities](s
 
 ## Test your Activity
 
-[Server workflows](https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/server-workflows.htm) that run on your VertiGIS Studio Workflow Server deployment can now run this custom activity.
+[Server workflows](https://docs.vertigisstudio.com/workflow/latest/help/server-workflows.html) that run on your VertiGIS Studio Workflow Server deployment can now run this custom activity.
 
 :::tip
 [Registering .NET activity stubs](sdk-net-register-activities.mdx) provides a user friendly interface for your custom activities in VertiGIS Studio Workflow Designer.
 :::
 
-You can run the custom activity by referencing it by action with [the `RunActivity` activity](https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/activities/run-activity.htm).
+You can run the custom activity by referencing it by action with [the `RunActivity` activity](https://docs.vertigisstudio.com/workflow/latest/help/run-activity.html).
 
 :::note
 
@@ -165,7 +168,7 @@ You can run the custom activity by referencing it by action with [the `RunActivi
     </a>{" "}
     that runs the custom activity and
     <a
-        href="https://docs.vertigisstudio.com/workflow/latest/help/Default.htm#wf5/help/import-export-workflows.htm"
+        href="https://docs.vertigisstudio.com/workflow/latest/help/import-export-workflows.html"
         target="_blank"
     >
         {" "}

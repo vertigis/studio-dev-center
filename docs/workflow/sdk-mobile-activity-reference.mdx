@@ -21,9 +21,9 @@ namespace App1.Workflow
     {
         public static string Action { get; } = "uuid:<uuid>::CustomActivity";
 
-        public Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
-            return Task.FromResult((IDictionary<string, object>)new Dictionary<string, object>(){
+            return Task.FromResult((IDictionary<string, object?>)new Dictionary<string, object?>(){
                 ["result"] = "value"
             });
         }
@@ -102,24 +102,24 @@ First, add the class you want to inject to the constructor of the custom activit
 
 ```cs
 // highlight-next-line
-[assembly: Export(typeof(DisplayGeocortexMobileAlert))]
+[assembly: Export(typeof(DisplayVertiGISStudioMobileAlert))]
 namespace App1.Workflow
 {
-    public class DisplayGeocortexMobileAlert : IActivityHandler
+    public class DisplayVertiGISStudioMobileAlert : IActivityHandler
     {
         private UIOperations _uiOperations;
 
-        public static string Action { get; } = "uuid:<uuid>::DisplayGeocortexMobileAlert";
+        public static string Action { get; } = "uuid:<uuid>::DisplayVertiGISStudioMobileAlert";
 
         // highlight-next-line
-        public DisplayGeocortexMobileAlert(UIOperations uiOperations)
+        public DisplayVertiGISStudioMobileAlert(UIOperations uiOperations)
         {
             _uiOperations = uiOperations;
         }
 
-        public Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
-            return Task.FromResult((IDictionary<string, object>)new Dictionary<string, object>());
+            return Task.FromResult((IDictionary<string, object?>)new Dictionary<string, object?>());
         }
     }
 }
@@ -128,7 +128,7 @@ namespace App1.Workflow
 Next, [inject the activity](../mobile/sdk-dependency-injection.mdx) into the `IActivityHandlerFactory` for the application.
 
 :::note
-Since the `DisplayGeocortexMobileAlert` activity is injected into the `IActivityHandlerFactory` with Autofac, its dependency on the `UIOperations` class will be be resolved by Autofac.
+Since the `DisplayVertiGISStudioMobileAlert` activity is injected into the `IActivityHandlerFactory` with Autofac, its dependency on the `UIOperations` class will be be resolved by Autofac.
 :::
 
 ```cs
@@ -137,9 +137,9 @@ public class ActivityLoader : IActivityHandlerFactory
     ...
 
     // highlight-next-line
-    public ActivityLoader(Func<DisplayGeocortexMobileAlert> displayGeocortexMobileAlertFactory)
+    public ActivityLoader(Func<DisplayVertiGISStudioMobileAlert> displayVertiGISStudioMobileAlertFactory)
     {
-        RegisteredActivities[DisplayGeocortexMobileAlert.Action] = displayGeocortexMobileAlertFactory;
+        RegisteredActivities[DisplayVertiGISStudioMobileAlert.Action] = displayVertiGISStudioMobileAlertFactory;
     }
     ...
 }
@@ -163,25 +163,25 @@ using VertiGIS.Workflow.Runtime;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-[assembly: Export(typeof(DisplayGeocortexMobileAlert))]
+[assembly: Export(typeof(DisplayVertiGISStudioMobileAlert))]
 namespace App1.Workflow
 {
-    public class DisplayGeocortexMobileAlert : IActivityHandler
+    public class DisplayVertiGISStudioMobileAlert : IActivityHandler
     {
         private UIOperations _uiOperations;
 
-        public static string Action { get; } = "uuid:<uuid>::DisplayGeocortexMobileAlert";
+        public static string Action { get; } = "uuid:<uuid>::DisplayVertiGISStudioMobileAlert";
 
-        public DisplayGeocortexMobileAlert(UIOperations uiOperations)
+        public DisplayVertiGISStudioMobileAlert(UIOperations uiOperations)
         {
             _uiOperations = uiOperations;
         }
 
-        public async Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public async Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
             await _uiOperations.Alert.ExecuteAsync(new UIAlertArgs() { Title = "It's dangerous to go alone.", Message = "Take this!", ButtonText = "*take sword*" });
 
-            return new Dictionary<string, object>();
+            return new Dictionary<string, object?>();
         }
     }
 }
@@ -212,9 +212,9 @@ namespace App1.Samples.Workflow.CustomActivity
         /// </summary>
         private Dictionary<string, Func<IActivityHandler>> RegisteredActivities { get; } = new Dictionary<string, Func<IActivityHandler>>();
 
-        public ActivityLoader(Func<DisplayGeocortexMobileAlert> displayGeocortexMobileAlertFactory)
+        public ActivityLoader(Func<DisplayVertiGISStudioMobileAlert> displayVertiGISStudioMobileAlertFactory)
         {
-            RegisteredActivities[DisplayGeocortexMobileAlert.Action] = displayGeocortexMobileAlertFactory;
+            RegisteredActivities[DisplayVertiGISStudioMobileAlert.Action] = displayVertiGISStudioMobileAlertFactory;
         }
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace App1.Workflow
 
         public static string Action { get; } = "uuid:<uuid>::CustomActivity";
 
-        public Task<IDictionary<string, object>> Execute(IDictionary<string, object> inputs, IActivityContext context)
+        public Task<IDictionary<string, object?>> Execute(IDictionary<string, object?> inputs, IActivityContext context)
         {
             // highlight-start
             var mapProvider = MapProviderFactory();
@@ -279,7 +279,7 @@ namespace App1.Workflow
 
             // ...
 
-            return new Dictionary<string, object>();
+            return new Dictionary<string, object?>();
         }
     }
 }

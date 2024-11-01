@@ -1,0 +1,20 @@
+---
+title: VertiGIS Mobile Now Supports ArcGIS Maps SDK 200.x
+author: Felicity Rhone
+authorTitle: Software Developer
+authorURL: https://github.com/Felicity-R
+authorImageURL: https://github.com/felicity-r.png
+tags: [mobile]
+---
+
+import Link from "@docusaurus/Link";
+
+A new version of VertiGIS Mobile, based on Esri's new 200.x ArcGIS Maps SDK for .NET, is now available as a beta.
+
+<!--truncate-->
+
+With the new SDK, Esri dropped support for Xamarin Forms in favor of .NET MAUI. Therefore, upgrading to the 200.x SDK also necessitated updating our version of .NET and migrating VertiGIS Mobile from a Xamarin Forms-based solution to a MAUI-based solution.
+
+For a large project like Mobile, which includes dozens of custom controls for each of our supported platforms (iOS, Android and Windows), this turned out to be a complicated and time-consuming endeavor. We had to contend not only with deprecations and breaking changes in the Esri SDK, MAUI, and other third-party libraries, but also with unexpected issues in MAUI, as it was in its early days itself when we started our upgrade and went through a few growing pains.
+
+We are glad to finally be able to present the result of our hard work to the public. See [our Community post here](https://support.vertigis.com/hc/en-us/community/posts/20063879496594-Open-Beta-for-NET-200-x-MAUI-release-of-VertiGIS-Studio-Go) for more information on how to access the beta and to provide feedback.

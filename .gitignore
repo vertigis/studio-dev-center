@@ -106,6 +106,7 @@ dist
 # Generated files
 .docusaurus
 .cache-loader
+**/.vs/
 
 # Misc
 .DS_Store

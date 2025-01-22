@@ -73,7 +73,7 @@ Once a component has been registered, it can be used in a layout by referring it
 
 ## Component Anatomy
 
-VertiGIS Studio Mobile is built on top of the [Xamarin Platform](https://docs.microsoft.com/en-us/xamarin/). In general, [XAML Views](https://docs.microsoft.com/en-us/xamarin/xamarin-forms/xaml/) are used to define reactive component UI. Component Views in VertiGIS Studio Mobile are built with the [Model-View-ViewModel (MVVM) pattern](https://docs.microsoft.com/en-us/xamarin/xamarin-forms/xaml/xaml-basics/data-bindings-to-mvvm). The model for components is usually either [app config](configuration-app-config-getting-started.mdx) or a service hosting shared application data.
+VertiGIS Studio Mobile is built on top of the [.NET MAUI Platform](https://learn.microsoft.com/en-us/dotnet/maui/). In general, [XAML Views](https://learn.microsoft.com/en-us/dotnet/maui/xaml/) are used to define reactive component UI. Component Views in VertiGIS Studio Mobile are built with the [Model-View-ViewModel (MVVM) pattern](https://learn.microsoft.com/en-us/dotnet/maui/xaml/fundamentals/mvvm). The model for components is usually either [app config](configuration-app-config-getting-started.mdx) or a service hosting shared application data.
 
 ### Component Class
 
@@ -103,7 +103,7 @@ The preferred way to provide sub-dependencies to classes associated with compone
 
 XAML views and their respective "code-behind" are responsible for the presentation concerns of a component. Check out a [complete example in the SDK samples](https://github.com/vertigis/vertigis-mobile-samples/tree/master/Geocortex.Mobile.Samples/Geocortex.Mobile.Samples/Samples/Custom/XamlComponent).
 
-XAML views can use any [XAML Controls](https://docs.microsoft.com/en-us/xamarin/xamarin-forms/xaml/xaml-controls) along with built-in [VertiGIS Studio Mobile XAML Elements and styling](sdk-components-styling.mdx#using-vertigis-studio-mobile-views).
+XAML views can use any [XAML Controls](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/) along with built-in [VertiGIS Studio Mobile XAML Elements and styling](sdk-components-styling.mdx#using-vertigis-studio-mobile-views).
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>

@@ -63,18 +63,18 @@ Required software on the Mac:
 -   XCode
 -   Visual Studio for Mac
 
-See the [Xamarin guide](https://docs.microsoft.com/en-us/xamarin/ios/deploy-test/) on deploying and testing iOS apps for more details.
+See the [MAUI guide](https://learn.microsoft.com/en-us/dotnet/maui/deployment/?view=net-maui-9.0#ios) on deploying and testing iOS apps for more details.
 
 ### Android
 
-No extra setup is required. You can install your emulator of choice, or debug on a physical device. See the [Xamarin guide](https://docs.microsoft.com/en-us/xamarin/android/deploy-test/) on deploying and testing Android apps for more detail.
+No extra setup is required. You can install your emulator of choice, or debug on a physical device. See the [MAUI guide](https://learn.microsoft.com/en-us/dotnet/maui/deployment/?view=net-maui-9.0#android) on deploying and testing Android apps for more detail.
 
 ## Getting Up and Running
 
-A [VertiGIS Studio Mobile Quickstart](https://github.com/vertigis/vertigis-mobile-quickstart) is provided, which is a basic VertiGIS Studio Mobile application. This Quickstart is essentially a [Xamarin Forms Quickstart Application](https://docs.microsoft.com/en-us/xamarin/get-started/Quickstarts/single-page?pivots=windows) that initializes and boots VertiGIS Studio Mobile on each platform. To get up and running, simply check out the [Mobile Quickstart Repository](https://github.com/vertigis/vertigis-mobile-quickstart) and start the solution on the appropriate platform.
+A [VertiGIS Studio Mobile Quickstart](https://github.com/vertigis/vertigis-mobile-quickstart) is provided, which is a basic VertiGIS Studio Mobile application. This Quickstart is essentially a [MAUI Quickstart Application](https://learn.microsoft.com/en-us/dotnet/maui/get-started/first-app) that initializes and boots VertiGIS Studio Mobile on each platform. To get up and running, simply check out the [Mobile Quickstart Repository](https://github.com/vertigis/vertigis-mobile-quickstart) and start the solution on the appropriate platform.
 
 :::info Important
-VertiGIS Studio Mobile is built on [Xamarin Forms](https://docs.microsoft.com/en-us/xamarin/xamarin-forms/), a framework for building cross platform native apps. As a consequence, building non trivial extensions to VertiGIS Studio Mobile will require some Xamarin development knowledge.
+VertiGIS Studio Mobile is built on [.NET MAUI](https://learn.microsoft.com/en-us/dotnet/maui/), a framework for building cross platform native apps. As a consequence, building non trivial extensions to VertiGIS Studio Mobile will require some MAUI development knowledge.
 :::
 
 ### Build and run for Windows 10
@@ -108,7 +108,7 @@ This build can also be run from Visual Studio for Mac.
 
 ## Anatomy of the Quickstart
 
-The Quickstart is composed of four projects, one for each platform, and a common project that is shared by all platforms. This is a standard Xamarin Forms setup, as described [in their documentation](https://docs.microsoft.com/en-us/xamarin/get-started/Quickstarts/deepdive?pivots=windows#anatomy-of-a-xamarinforms-application). Changes have been made to each project to support the [bootstrapping of a VertiGIS Studio Mobile application](sdk-quickstart-reference.mdx#entry-points) using the SDK.
+The Quickstart is composed of one project, with some code that is shared by all platforms, as well as separate Platforms/ folders hosting specific code for each platform. This is a standard .NET MAUI setup, as described [in their documentation](https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/single-project). Changes have been made to each project to support the [bootstrapping of a VertiGIS Studio Mobile application](sdk-quickstart-reference.mdx#entry-points) using the SDK.
 
 ### VertiGIS Studio Mobile SDK Packages
 
@@ -124,9 +124,9 @@ The VertiGIS Studio Mobile SDK is composed of VertiGIS Studio packages:
 
 ## Development Patterns
 
-For the most part, the VertiGIS Studio Mobile project follows the development practices outlined in [Enterprise Application Patterns using Xamarin.Forms](https://docs.microsoft.com/en-us/xamarin/xamarin-forms/enterprise-application-patterns/).
+For the most part, the VertiGIS Studio Mobile project follows the development practices outlined in [Enterprise Application Patterns Using .NET MAUI](https://learn.microsoft.com/en-us/dotnet/architecture/maui/).
 
-One major deviation from usual Xamarin Development patterns is that [Autofac](https://autofac.org/) is used as the Dependency Injection framework.
+One major deviation from usual MAUI development patterns is that [Autofac](https://autofac.org/) is used as the Dependency Injection framework.
 
 ## Next Steps
 

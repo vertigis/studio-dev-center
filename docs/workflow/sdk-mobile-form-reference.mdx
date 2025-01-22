@@ -8,7 +8,7 @@ In the VertiGIS Studio Workflow .NET SDK, all custom form elements must implemen
 
 ```xml title="App1/App1/workflow/CustomFormElement.xaml"
 <?xml version="1.0" encoding="UTF-8"?>
-<core:ContentComponent xmlns="http://xamarin.com/schemas/2014/forms"
+<core:ContentComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                        xmlns:core="clr-namespace:VertiGIS.Mobile.Workflow.Core;assembly=VertiGIS.Mobile.Workflow"
                        xmlns:views="clr-namespace:VertiGIS.Mobile.Toolkit.Views;assembly=VertiGIS.Mobile.Toolkit"
@@ -70,15 +70,15 @@ Events are raised through the `OnEventRaised` method of the form component. The 
 ```xml title="App1/App1/workflow/CustomFormComponent.xaml"
 <?xml version="1.0" encoding="UTF-8"?>
 <core:ContentComponent  xmlns:core="clr-namespace:VertiGIS.Mobile.Workflow.Core;assembly=VertiGIS.Mobile.Workflow"
-                        xmlns="http://xamarin.com/schemas/2014/forms"
+                        xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                         xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                         xmlns:views="clr-namespace:VertiGIS.Mobile.Toolkit.Views;assembly=VertiGIS.Mobile.Toolkit"
                         x:Class="App1.Workflow.CustomFormComponent">
-    <StackLayout>
+    <VerticalStackLayout>
         <views:EnhancedButton Text="Raise Clicked Event" Clicked="RaiseClickedEvent"/>
         <views:EnhancedButton Text="Raise Changed Event" Clicked="RaiseChangedEvent"/>
         <views:EnhancedButton Text="Raise Custom Event" Clicked="RaiseCustomEvent"/>
-    </StackLayout>
+    </VerticalStackLayout>
 </core:ContentComponent>
 ```
 
@@ -129,11 +129,11 @@ A custom form element may produce a value that a workflow needs to access at run
 ```xml title="App1/App1/workflow/CustomFormComponent.xaml"
 <?xml version="1.0" encoding="UTF-8"?>
 <core:ContentComponent  xmlns:core="clr-namespace:VertiGIS.Mobile.Workflow.Core;assembly=VertiGIS.Mobile.Workflow"
-                        xmlns="http://xamarin.com/schemas/2014/forms"
+                        xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                         xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                         xmlns:views="clr-namespace:VertiGIS.Mobile.Toolkit.Views;assembly=VertiGIS.Mobile.Toolkit"
                         x:Class="App1.Workflow.CustomFormComponent">
-    <StackLayout>
+    <VerticalStackLayout>
         <Label>
             <Label.FormattedText>
                 <FormattedString>
@@ -142,7 +142,7 @@ A custom form element may produce a value that a workflow needs to access at run
                 </FormattedString>
             </Label.FormattedText>
         </Label>
-    </StackLayout>
+    </VerticalStackLayout>
 </core:ContentComponent>
 ```
 

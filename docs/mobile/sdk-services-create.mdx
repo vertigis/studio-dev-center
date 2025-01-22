@@ -77,7 +77,7 @@ namespace App1.Services
             // highlight-start
             operationRegistry.VoidOperation<string>("custom.alert").RegisterExecute((string customMessage) =>
             {
-                return Xamarin.Forms.Application.Current.MainPage.DisplayAlert("Custom Alert", customMessage, "Cancel");
+                return Application.Current.MainPage.DisplayAlert("Custom Alert", customMessage, "Cancel");
             }, this);
             // highlight-end
 

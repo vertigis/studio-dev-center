@@ -32,26 +32,23 @@ Implementing a custom form element in VertiGIS Studio Mobile consists of three s
 
 ## Set up the Custom Form Element Skeleton
 
-1. Using Visual Studio, create a new file, using the Content View template. Name the file `LoadingIndicator.xaml`, and place it in the platform agnostic project of the VertiGIS Studio Mobile [Quickstart](../mobile/sdk-overview.mdx).
+1. Using Visual Studio, create a new file, using the '.NET MAUI ContentView (XAML)' template. Name the file `LoadingIndicator.xaml`, and place it in the platform agnostic project of the VertiGIS Studio Mobile [Quickstart](../mobile/sdk-overview.mdx).
 2. Change the base class to `ContentComponent` both in the xaml and in the code-behind.
 
 ```xml title="App1/App1/workflow/LoadingIndicator.xaml"
 <?xml version="1.0" encoding="UTF-8"?>
 // highlight-next-line
-<core:ContentComponent xmlns="http://xamarin.com/schemas/2014/forms"
+<core:ContentComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                        xmlns:core="clr-namespace:VertiGIS.Mobile.Workflow.Core;assembly=VertiGIS.Mobile.Workflow"
                        x:Class="App1.Workflow.LoadingIndicator">
     <ContentView.Content>
-        <Label Text="Hello Xamarin.Forms!" />
+        <Label Text="Hello world!" />
     </ContentView.Content>
 </core:ContentComponent>
 ```
 
 ```cs title="App1/App1/workflow/LoadingIndicator.xaml.cs"
-using VertiGIS.Mobile.Workflow.Core;
-using Xamarin.Forms.Xaml;
-
 namespace App1.Workflow
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
@@ -173,7 +170,7 @@ Next we can add the loading indicator to the form element xaml.
 
 ```xml title="App1/App1/workflow/LoadingIndicator.xaml.cs"
 <?xml version="1.0" encoding="UTF-8"?>
-<core:ContentComponent xmlns="http://xamarin.com/schemas/2014/forms"
+<core:ContentComponent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                        xmlns:core="clr-namespace:VertiGIS.Mobile.Workflow.Core;assembly=VertiGIS.Mobile.Workflow"
                        // highlight-next-line

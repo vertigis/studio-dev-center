@@ -14,7 +14,7 @@ Components and services have multiple ways of interacting with other components 
 -   When possible, interaction through [commands and operations](sdk-commands-operations.mdx#running-commands-and-operations) should be preferred, as this introduces the loosest coupling.
 -   When you need stronger coupling and direct access to a service, then [dependency injection](sdk-dependency-injection.mdx) can be used to reference services.
 
-If a component or service needs access to the [ArcGIS MapView object](https://developers.arcgis.com/net/latest/uwp/api-reference/html/T_Esri_ArcGISRuntime_Xamarin_Forms_MapView.htm) powering the applications map, it can reference it through an `ILayoutModel`.
+If a component or service needs access to the [ArcGIS MapView object](https://developers.arcgis.com/net/api-reference/api/net/Maui/Esri.ArcGISRuntime.Maui.MapView.html) powering the applications map, it can reference it through an `ILayoutModel`.
 
 ## Interacting with the `MapView`
 
@@ -54,6 +54,6 @@ class CustomComponent : ComponentBase
 
 Check out the relevant VertiGIS Studio Mobile SDK Samples:
 
--   [Basemap Toggle that uses Custom Services and Components](https://github.com/vertigis/vertigis-mobile-samples/tree/master/Geocortex.Mobile.Samples/Geocortex.Mobile.Samples/Samples/CustomSamples/BasemapToggle)
+-   [Basemap Toggle that uses Custom Services and Components](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/CustomSamples/BasemapToggle)
 
--   [Breadcrumb Tracker that uses Custom Services and Components](https://github.com/vertigis/vertigis-mobile-samples/tree/master/Geocortex.Mobile.Samples/Geocortex.Mobile.Samples/Samples/CustomSamples/BreadCrumbs)
+-   [Breadcrumb Tracker that uses Custom Services and Components](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/CustomSamples/BreadCrumbs)

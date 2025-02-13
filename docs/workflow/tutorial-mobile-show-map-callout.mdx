@@ -165,7 +165,7 @@ Next, we need to load the `MapView` from the `MapProviderFactory`.
 ```cs title="App1/App1/workflow/PlaceCalloutAtCenter.cs"
 using App1.Workflow;
 using Esri.ArcGISRuntime.Mapping;
-using Esri.ArcGISRuntime.Xamarin.Forms;
+using Esri.ArcGISRuntime.Maui;
 using VertiGIS.Mobile.Composition;
 using VertiGIS.Workflow.GIS.ArcGISRuntime;
 using VertiGIS.Workflow.Runtime;
@@ -210,7 +210,7 @@ namespace App1.Workflow
 Finally, we can use the `MapView` to get the map center and add a callout with the user's text.
 
 :::tip
-Operations related to UI activities have to run in Xamarin's [main thread](https://docs.microsoft.com/en-us/xamarin/essentials/main-thread), else they will throw an error.
+Operations related to UI activities have to run in MAUI's [main thread](https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/appmodel/main-thread), else they will throw an error.
 :::
 
 ```cs title="App1/App1/workflow/PlaceCalloutAtCenter.cs"
@@ -219,7 +219,7 @@ using VertiGIS.Mobile.Composition;
 using Esri.ArcGISRuntime.Geometry;
 using Esri.ArcGISRuntime.UI;
 using Esri.ArcGISRuntime.Mapping;
-using Esri.ArcGISRuntime.Xamarin.Forms;
+using Esri.ArcGISRuntime.Maui;
 using VertiGIS.Workflow.GIS.ArcGISRuntime;
 using VertiGIS.Workflow.Runtime;
 using System;
@@ -251,7 +251,7 @@ namespace App1.Workflow
             MapView mapView = (MapView)((WorkflowMapProvider)mapProvider).View;
 
             // highlight-start
-            Xamarin.Essentials.MainThread.BeginInvokeOnMainThread(() =>
+            MainThread.BeginInvokeOnMainThread(() =>
             {
                 var currentEnvelope = (Envelope)mapView.GetCurrentViewpoint(Esri.ArcGISRuntime.Mapping.ViewpointType.BoundingGeometry).TargetGeometry;
 

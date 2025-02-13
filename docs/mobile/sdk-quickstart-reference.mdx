@@ -21,12 +21,12 @@ The constructors of the `App.xaml.cs` and `MainPage.xaml.cs` files in the UWP sp
 
 ## Error Handling
 
-In each of the platform specific setups, there is a call to the `HandleExceptions` method. This method tells VertiGIS Studio Mobile to handle exceptions and display an Error. If you need to have control over global error handling, you can remove the call to `HandleExceptions` and implement your own global exception handling for the Xamarin Application. [This Stack Overflow post](https://stackoverflow.com/questions/39503390/global-exception-handling-in-xamarin-cross-platform) is a good starting point for implementing global error handling.
+In each of the platform specific setups, there is a call to the `HandleExceptions` method. This method tells VertiGIS Studio Mobile to handle exceptions and display an Error. If you need to have control over global error handling, you can remove the call to `HandleExceptions` and implement your own global exception handling for the MAUI Application.
 
 ## Referencing Third Party Libraries
 
-The VertiGIS Studio Mobile Quickstart is simply a [.NET Xamarin Forms project](https://docs.microsoft.com/en-us/xamarin/get-started/Quickstarts/deepdive?pivots=windows) so you can add dependencies to it like any other .NET project.
+The VertiGIS Studio Mobile Quickstart is simply a [.NET MAUI project](https://learn.microsoft.com/en-us/dotnet/maui/get-started/first-app) so you can add dependencies to it like any other .NET project.
 
 :::caution
-The VertiGIS Studio Mobile SDK relies on exact versions of [ArcGIS Runtime](https://developers.arcgis.com/arcgis-runtime/) and [Xamarin Forms](https://dotnet.microsoft.com/apps/xamarin/xamarin-forms) NuGet packages.
+The VertiGIS Studio Mobile SDK relies on exact versions of [ArcGIS Runtime](https://developers.arcgis.com/arcgis-runtime/) and [MAUI](https://learn.microsoft.com/en-us/dotnet/maui/) NuGet packages.
 :::

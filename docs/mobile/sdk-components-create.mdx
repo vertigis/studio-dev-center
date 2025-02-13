@@ -22,15 +22,14 @@ If you can't solve your use case by editing the app layout and config using the 
 
 ## Basic Component
 
-Create a new file `components/CustomComponent.cs` under the platform agnostic project.
+Create a new file `components/CustomComponent.cs` in your project.
 In the file, add a new component class `CustomComponent` and register it with VertiGIS Studio Mobile using an assembly attribute.
 
 ```cs
 using App1;
 using App1.Components;
-using VertiGIS.Mobile.Composition.Layout;
 using System.Xml.Linq;
-using Xamarin.Forms;
+using VertiGIS.Mobile.Composition.Layout;
 
 [assembly: Component(typeof(CustomComponent), "custom-component", XmlNamespace = XmlNamespaces.App1Namespace)]
 namespace App1.Components
@@ -39,7 +38,7 @@ namespace App1.Components
     {
         protected override VisualElement Create(XNode node)
         {
-            return new Label(){ Text = "My Custom Component" };
+            return new Label() { Text = "My Custom Component" };
         }
     }
 }
@@ -111,11 +110,11 @@ You've now accomplished the basics of extending VertiGIS Studio Mobile with a cu
 
 Check out the relevant VertiGIS Studio Mobile SDK Samples:
 
--   [Custom Component](https://github.com/vertigis/vertigis-mobile-samples/tree/master/Geocortex.Mobile.Samples/Geocortex.Mobile.Samples/Samples/Custom/Component)
+-   [Custom Component](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/Custom/Component)
 
--   [Component with Configuration](https://github.com/vertigis/vertigis-mobile-samples/tree/master/Geocortex.Mobile.Samples/Geocortex.Mobile.Samples/Samples/Custom/ComponentConfiguration)
+-   [Component with Configuration](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/Custom/ComponentConfiguration)
 
--   [Component with XAML UI](https://github.com/vertigis/vertigis-mobile-samples/tree/master/Geocortex.Mobile.Samples/Geocortex.Mobile.Samples/Samples/Custom/XamlComponent)
+-   [Component with XAML UI](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/Custom/XamlComponent)
 
 ## Next Steps
 

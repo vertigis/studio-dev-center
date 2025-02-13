@@ -60,7 +60,6 @@ using App1;
 using App1.Components;
 using VertiGIS.Mobile.Composition.Layout;
 using System.Xml.Linq;
-using Xamarin.Forms;
 
 [assembly: Component(typeof(CustomComponent), "custom-component", XmlNamespace = XmlNamespaces.App1Namespace)]
 namespace App1.Components
@@ -81,16 +80,13 @@ namespace App1.Components
 
 ```xml title="App1/App1/components/CustomComponentView.xaml"
 <?xml version="1.0" encoding="UTF-8"?>
-<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="App1.Components.CustomComponentView">
   <ContentView.Content>
-      <StackLayout>
-          <Label Text="Hello Xamarin.Forms!" />
-      </StackLayout>
+    <Label Text="Hello world!" />
   </ContentView.Content>
 </ContentView>
 ```
@@ -101,8 +97,6 @@ namespace App1.Components
 ```cs title="App1/App1/components/CustomComponentView.xaml.cs"
 using App1.Components;
 using VertiGIS.Mobile.Composition;
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 
 [assembly: View(typeof(CustomComponentView))]
 namespace App1.Components
@@ -201,7 +195,6 @@ using VertiGIS.Mobile.Infrastructure.App;
 using VertiGIS.Mobile.Infrastructure.Layout;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Xamarin.Forms;
 
 // highlight-next-line
 [assembly: AppItemComponent(typeof(CustomComponent), "custom-component", CustomComponentConfiguration.ConfigItemtype, XmlNamespace = XmlNamespaces.App1Namespace)]
@@ -246,19 +239,18 @@ namespace App1.Components
 
 ```xml title="App1/App1/components/CustomComponentView.xaml"
 <?xml version="1.0" encoding="UTF-8"?>
-<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="App1.Components.CustomComponentView">
     <ContentView.Content>
-        <StackLayout>
+        <VerticalStackLayout>
             // highlight-start
             <Label FontSize="Title" Text="{Binding Title}" />
             <Label Text="{Binding Description}" />
             // highlight-end
-        </StackLayout>
+        </VerticalStackLayout>
     </ContentView.Content>
 </ContentView>
 ```
@@ -269,8 +261,6 @@ namespace App1.Components
 ```cs title="App1/App1/components/CustomComponentView.xaml.cs"
 using App1.Components;
 using VertiGIS.Mobile.Composition;
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 
 [assembly: View(typeof(CustomComponentView))]
 namespace App1.Components
@@ -390,7 +380,7 @@ App Config is defined in the [app JSON](sdk-edit-layout-app-config.mdx) and link
 
 Check out the relevant VertiGIS Studio Mobile SDK Sample:
 
--   [Component with Configuration](https://github.com/vertigis/vertigis-mobile-samples/tree/master/Geocortex.Mobile.Samples/Geocortex.Mobile.Samples/Samples/Custom/ComponentConfiguration)
+-   [Component with Configuration](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/Custom/ComponentConfiguration)
 
 ## Next Steps
 

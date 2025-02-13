@@ -35,7 +35,6 @@ using App1;
 using App1.Components;
 using VertiGIS.Mobile.Composition.Layout;
 using System.Xml.Linq;
-using Xamarin.Forms;
 
 // highlight-next-line
 [assembly: Component(typeof(CustomComponent), "custom-component", XmlNamespace = XmlNamespaces.App1Namespace)]
@@ -109,7 +108,7 @@ Now that the `custom` namespace has been added, the component can be added to th
 
 ## Use XAML to define your UI
 
-[XAML is a markup language created by Microsoft](https://docs.microsoft.com/en-us/xamarin/xamarin-forms/xaml/xaml-basics/), and one of the recommended patterns for defining UI in Xamarin Forms. We can modify our component to reference a [XAML view](https://docs.microsoft.com/en-us/xamarin/xamarin-forms/user-interface/controls/views).
+[XAML is a markup language created by Microsoft](https://learn.microsoft.com/en-us/dotnet/maui/xaml/), and one of the recommended patterns for defining UI in MAUI. We can modify our component to reference a XAML View.
 
 1. Right click on the `Components` folder and select "Add" > "New Item" > "Content View"
 2. Rename the files and classes within to `CustomComponentView.xaml` and `CustomComponentView.xaml.cs`
@@ -130,7 +129,6 @@ using App1;
 using App1.Components;
 using VertiGIS.Mobile.Composition.Layout;
 using System.Xml.Linq;
-using Xamarin.Forms;
 
 [assembly: Component(typeof(CustomComponent), "custom-component", XmlNamespace = XmlNamespaces.App1Namespace)]
 namespace App1.Components
@@ -152,16 +150,15 @@ namespace App1.Components
 
 ```xml title="App1/App1/components/CustomComponentView.xaml"
 <?xml version="1.0" encoding="UTF-8"?>
-<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="App1.Components.CustomComponentView">
   <ContentView.Content>
-      <StackLayout>
-          <Label Text="Hello Xamarin.Forms!" />
-      </StackLayout>
+      <VerticalStackLayout>
+          <Label Text="Hello world!" />
+      </VerticalStackLayout>
   </ContentView.Content>
 </ContentView>
 ```
@@ -172,8 +169,6 @@ namespace App1.Components
 ```cs title="App1/App1/components/CustomComponentView.xaml.cs"
 using App1.Components;
 using VertiGIS.Mobile.Composition;
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 
 [assembly: View(typeof(CustomComponentView))]
 namespace App1.Components
@@ -191,7 +186,7 @@ namespace App1.Components
 
 </TabItem>
 <TabItem value="ui">
-    <img src={useBaseUrl("img/mobile-custom-component-xamarin-view.png")} alt="Custom Component with Text Block"/>
+    <img src={useBaseUrl("img/mobile-custom-component-view.png")} alt="Custom Component with Text Block"/>
 </TabItem>
 </Tabs>
 
@@ -203,15 +198,15 @@ Learn about how to extend this component to [participate in app config](tutorial
 
 ## Extend your Component with Custom Code
 
-From here, you can implement your own business logic and interfaces, create custom [Commands and Operations](sdk-commands-operations.mdx#implementing-commands-and-operations) that are powered by and/or interact with your component, and much more. The [Xamarin Forms Documentation](https://docs.microsoft.com/en-us/xamarin/xamarin-forms/xaml/) has excellent guides to implementing user interfaces in Xaml.
+From here, you can implement your own business logic and interfaces, create custom [Commands and Operations](sdk-commands-operations.mdx#implementing-commands-and-operations) that are powered by and/or interact with your component, and much more. The [MAUI documentation](https://learn.microsoft.com/en-us/dotnet/maui/xaml/) has excellent guides to implementing user interfaces in Xaml.
 
 :::info
-VertiGIS Studio Mobile comes with built-in [Enhanced Components](https://github.com/vertigis/vertigis-mobile-samples/tree/master/Geocortex.Mobile.Samples/Geocortex.Mobile.Samples/Samples/Custom/GeocortexMobileElements) that can ease development and styling of custom UI.
+VertiGIS Studio Mobile comes with built-in [Enhanced Components](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/Custom/VSMElements) that can ease development and styling of custom UI.
 :::
 
 ### Example: Progress Bar
 
-Here's an example of a component with a progress bar that is advanced on a button click. It uses a [MVVM pattern](https://docs.microsoft.com/en-us/xamarin/xamarin-forms/xaml/xaml-basics/data-bindings-to-mvvm) to power the user interface, as is best practice recommended by Xamarin.
+Here's an example of a component with a progress bar that is advanced on a button click. It uses a [MVVM pattern](https://learn.microsoft.com/en-us/dotnet/maui/xaml/fundamentals/mvvm) to power the user interface, as is best practice recommended by Microsoft.
 
 <Tabs defaultValue="component"
   values={[
@@ -229,7 +224,6 @@ using App1;
 using App1.Components;
 using VertiGIS.Mobile.Composition.Layout;
 using System.Xml.Linq;
-using Xamarin.Forms;
 
 [assembly: Component(typeof(ProgressBarComponent), "progress-bar-component", XmlNamespace = XmlNamespaces.App1Namespace)]
 namespace App1.Components
@@ -257,24 +251,23 @@ namespace App1.Components
 
 ```xml title="App1/App1/components/ProgressBarComponentView.xaml
 <?xml version="1.0" encoding="UTF-8"?>
-<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="App1.Components.ProgressBarComponentView">
     <ContentView.Content>
-        <StackLayout Margin="20">
-            <StackLayout Spacing="20" IsVisible="{Binding WorkNotComplete}">
+        <VerticalStackLayout Margin="20">
+            <VerticalStackLayout Spacing="20" IsVisible="{Binding WorkNotComplete}">
                 <Label Text="Click the button to advance the progress bar."></Label>
                 <Button Text="Do some work." Clicked="DoWork_Clicked"></Button>
                 <ProgressBar ProgressColor="Red" Progress="{Binding Progress}" />
-            </StackLayout>
-            <StackLayout Spacing="20" IsVisible="{Binding WorkComplete}">
+            </VerticalStackLayout>
+            <VerticalStackLayout Spacing="20" IsVisible="{Binding WorkComplete}">
                 <Label  Text="Work Complete"></Label>
                 <Button Text="Reset" Clicked="Reset_Clicked"></Button>
-            </StackLayout>
-        </StackLayout>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
     </ContentView.Content>
 </ContentView>
 ```
@@ -287,8 +280,6 @@ using App1.Components;
 using VertiGIS.Mobile.Composition;
 using VertiGIS.Mobile.Infrastructure.Messaging;
 using System;
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 
 // Here, the view is registered with Autofac so it can be injected.
 // highlight-next-line
@@ -385,9 +376,9 @@ Learn more of this ViewModel's use of the VertiGIS Studio Mobile helper class [`
 
 Check out the relevant VertiGIS Studio Mobile SDK Samples:
 
--   [Custom Component](https://github.com/vertigis/vertigis-mobile-samples/tree/master/Geocortex.Mobile.Samples/Geocortex.Mobile.Samples/Samples/Custom/Component)
+-   [Custom Component](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/Custom/Component)
 
--   [Custom Component with XAML](https://github.com/vertigis/vertigis-mobile-samples/tree/master/Geocortex.Mobile.Samples/Geocortex.Mobile.Samples/Samples/Custom/XamlComponent)
+-   [Custom Component with XAML](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/Custom/XamlComponent)
 
 ## Next Steps
 

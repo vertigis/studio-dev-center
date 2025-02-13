@@ -47,9 +47,9 @@ you'll need to add `ExcludeAssets="buildTransitive;build" PrivateAssets="all"` t
 <PackageReference Include="VertiGIS.Mobile" Version="5.34.0" ExcludeAssets="buildTransitive;build" PrivateAssets="all" />
 ```
 
-:::
-
 This issue only affects multi-projects; if you're converting to a single-project, it won't be necessary.
+
+:::
 
 :::info Important
 There's also a new step you'll need to add to use our package: in the MAUIProgram.cs file for each of the platform projects, you'll need to add a call to `UseStudioMobile`. It should end up looking like this:

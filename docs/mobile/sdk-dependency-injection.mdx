@@ -112,7 +112,7 @@ Used for registering the definition for an [app item](configuration-app-config-r
 
 ### `View`
 
-Used for registering a [view](https://docs.microsoft.com/en-us/xamarin/xamarin-forms/enterprise-application-patterns/mvvm) with VertiGIS Studio Mobile. For a more detailed example see the tutorial on [implementing a custom component with UI](tutorial-implement-component-with-ui.mdx#use-xaml-to-define-your-ui).
+Used for registering a [view](https://learn.microsoft.com/en-us/dotnet/architecture/maui/mvvm#view) with VertiGIS Studio Mobile. For a more detailed example see the tutorial on [implementing a custom component with UI](tutorial-implement-component-with-ui.mdx#use-xaml-to-define-your-ui).
 
 ```cs
 [assembly: View(typeof(CustomView))]
@@ -120,7 +120,7 @@ Used for registering a [view](https://docs.microsoft.com/en-us/xamarin/xamarin-f
 
 ### `ViewModel`
 
-Used for registering a [view model](https://docs.microsoft.com/en-us/xamarin/xamarin-forms/enterprise-application-patterns/mvvm) with VertiGIS Studio Mobile. For a more detailed example see the tutorial on [implementing a custom component with UI](tutorial-implement-component-with-ui.mdx#example-progress-bar).
+Used for registering a [view model](https://learn.microsoft.com/en-us/dotnet/architecture/maui/mvvm#viewmodel) with VertiGIS Studio Mobile. For a more detailed example see the tutorial on [implementing a custom component with UI](tutorial-implement-component-with-ui.mdx#example-progress-bar).
 
 ```cs
 [assembly: ViewModel(typeof(CustomViewModel))]
@@ -145,13 +145,12 @@ Autofac allows for the injection of [factory functions for classes, partially re
 <TabItem value="related">
 
 ```cs
+using App1.Custom.Component;
 using VertiGIS.Mobile.Composition;
-using VertiGIS.Mobile.Infrastructure.Messaging;
-using VertiGIS.Mobile.Samples.Samples.Custom.Component;
 
 // highlight-next-line
 [assembly: Export(typeof(RelatedClass))]
-namespace VertiGIS.Mobile.Samples.Samples.Custom.Component
+namespace App1.Custom.Component
 {
     internal class RelatedClass
     {
@@ -170,11 +169,10 @@ namespace VertiGIS.Mobile.Samples.Samples.Custom.Component
 <TabItem value="component">
 
 ```cs
-using VertiGIS.Mobile.Samples;
-using VertiGIS.Mobile.Samples.Samples.Custom.Component;
-using VertiGIS.Mobile.Composition.Layout;
+using App1;
+using App1.Custom.Component;
 using System.Xml.Linq;
-using Xamarin.Forms;
+using VertiGIS.Mobile.Composition.Layout;
 
 [assembly: Component(typeof(CustomComponent), "component", XmlNamespace = XmlNamespaces.SamplesNamespace)]
 namespace VertiGIS.Mobile.Samples.Samples.Custom.Component
@@ -206,4 +204,4 @@ namespace VertiGIS.Mobile.Samples.Samples.Custom.Component
 
 ## Relevant SDK Sample
 
-Check out the VertiGIS Studio Mobile SDK Sample for [dependency injection](https://github.com/vertigis/vertigis-mobile-samples/tree/master/Geocortex.Mobile.Samples/Geocortex.Mobile.Samples/Samples/Conceptual/DependencyInjection).
+Check out the VertiGIS Studio Mobile SDK Sample for [dependency injection](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/Conceptual/DependencyInjection).

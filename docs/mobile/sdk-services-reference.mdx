@@ -45,7 +45,7 @@ Services have an initialization method, which can be used to perform asynchronou
 Always call `base.Dispose(disposing)` when overriding the `Dispose` method. `ServiceBase` already implements `IDisposable` and `IDisposableTracker`, so only override the `Dispose` method if you have created new managed resources which need to be cleaned up.
 :::
 
-To learn more about memory management in VertiGIS Studio Mobile, check out [this article](sdk-memory-leaks.mdx), and the [relevant SDK sample](https://github.com/vertigis/vertigis-mobile-samples/tree/master/Geocortex.Mobile.Samples/Geocortex.Mobile.Samples/Samples/Conceptual/Disposal).
+To learn more about memory management in VertiGIS Studio Mobile, check out [this article](sdk-memory-leaks.mdx), and the [relevant SDK sample](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/Conceptual/Disposal).
 
 ```cs
 [assembly: Service(typeof(CustomService), PropertiesAutowired = true)]
@@ -233,11 +233,11 @@ namespace App1.Services
 
 Check out the relevant VertiGIS Studio Mobile SDK Samples:
 
--   [Custom Service](https://github.com/vertigis/vertigis-mobile-samples/tree/master/Geocortex.Mobile.Samples/Geocortex.Mobile.Samples/Samples/Custom/Service)
+-   [Custom Service](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/Custom/Service)
 
--   [Basemap Toggle that uses a Custom Service](https://github.com/vertigis/vertigis-mobile-samples/tree/master/Geocortex.Mobile.Samples/Geocortex.Mobile.Samples/Samples/CustomSamples/BasemapToggle)
+-   [Basemap Toggle that uses a Custom Service](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/CustomSamples/BasemapToggle)
 
--   [Breadcrumb Tracker that Uses a Custom Service](https://github.com/vertigis/vertigis-mobile-samples/tree/master/Geocortex.Mobile.Samples/Geocortex.Mobile.Samples/Samples/CustomSamples/BreadCrumbs)
+-   [Breadcrumb Tracker that Uses a Custom Service](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/CustomSamples/BreadCrumbs)
 
 ## Next Steps
 

@@ -1,0 +1,162 @@
+---
+title: Converting a VertiGIS Studio Mobile SDK project to .NET MAUI
+author: Felicity Rhone
+authorTitle: Software Developer
+authorURL: https://github.com/Felicity-R
+authorImageURL: https://github.com/felicity-r.png
+tags: [mobile, maui, sdk, samples]
+---
+
+import Link from "@docusaurus/Link";
+import useBaseUrl from "@docusaurus/useBaseUrl";
+
+As of our 5.30 release, VertiGIS Studio Mobile has been migrated from Xamarin Forms to .NET MAUI, on .NET 8. We've now completed work to support MAUI in our nuget package as well, so the time has come for any Xamarin Forms projects using our SDK to do their own migration.
+In this blog post I'll walk you through the process, using our [VertiGIS Mobile Samples](https://github.com/vertigis/vertigis-mobile-samples) project as an example.
+
+<!--truncate-->
+
+You can find the PR for this conversion in our samples repo here: https://github.com/vertigis/studio-dev-center/pull/79
+
+There are some helpful guides out there already. For example, Microsoft has written [_Upgrade a Xamarin.Forms app to a .NET MAUI app with the .NET Upgrade Assistant_](https://learn.microsoft.com/en-us/dotnet/maui/migration/upgrade-assistant?view=net-maui-9.0&tabs=vswin) and
+[_Manually upgrade a Xamarin.Forms app to a single project .NET MAUI app_](https://learn.microsoft.com/en-us/dotnet/maui/migration/multi-project-to-single-project?view=net-maui-9.0), which I do recommend checking out.
+However, I will detail some specific errors I encountered along the way, which may provide some extra help.
+
+The method I'll be going through will result in one shared project, and separate projects for each platform - the structure you're probably familiar with from your Xamarin Forms app. It is possible afterwards to merge these projects together to take advantage of MAUI's convenient single-project structure. To do so, I recommend creating a brand new single-project MAUI app and moving your files over, the way Microsoft describes in their "_Manually upgrade \[...]_" article I linked above.
+This blog post will not talk about the process of converting custom Renderers to use the new MAUI Handler pattern, but if you do have custom Renderers that is something you'll have to handle as well during your upgrade process.
+
+## Step 1 - Run the .NET Upgrade Assistant
+
+We'll be using the [.NET Upgrade Assistant](https://learn.microsoft.com/en-us/dotnet/core/porting/upgrade-assistant-overview) to help us through the first step.
+It won't get you to 100%, but it's a good starting point. You can find installation instructions [here](https://learn.microsoft.com/en-us/dotnet/maui/migration/upgrade-assistant?view=net-maui-8.0&tabs=vswin#installation).
+
+Once you've installed it, run the tool on each project in your Xamarin Forms solution, to upgrade it to a newer .NET version - in this case, .NET 8 (which will also necessarily migrate your project from Xamarin Forms to MAUI).
+
+## Step 2 - Upgrade packages
+
+The Upgrade Assistant will have done some package updates automatically, but not all of them.
+If you're referencing any Esri ArcGIS Runtime packages, you'll need to upgrade those from 100.x to the 200.x version (as of writing this post, Mobile is using 200.5).
+In some cases you'll need a different package rather than just changing the version number; for example, Esri.ArcGISRuntime.Xamarin.Forms is replaced by Esri.ArcGISRuntime.MAUI.
+
+:::note
+
+For the VertiGIS.Mobile nuget package, you'll need to update to version 5.34.x.
+Note: due to [a known MAUI issue (Issue #19840)](https://github.com/dotnet/maui/issues/19840),
+you'll need to add `ExcludeAssets="buildTransitive;build" PrivateAssets="all"` to your package reference for the Mobile package - only in your base shared project. It's not necessary to add in the platform-specific projects. So it'll look like this:
+
+```xml
+<PackageReference Include="VertiGIS.Mobile" Version="5.34.0" ExcludeAssets="buildTransitive;build" PrivateAssets="all" />
+```
+
+This issue only affects multi-projects; if you're converting to a single-project, it won't be necessary.
+
+:::
+
+:::info Important
+There's also a new step you'll need to add to use our package: in the MAUIProgram.cs file for each of the platform projects, you'll need to add a call to `UseStudioMobile`. It should end up looking like this:
+
+```cs
+public static MAUIApp CreateMAUIApp()
+{
+    var builder = MAUIApp.CreateBuilder();
+
+    builder
+    .UseSharedMAUIApp()
+    // highlight-next-line
+    .UseStudioMobile();
+
+    return builder.Build();
+}
+```
+
+:::
+
+## Step 3 - Remove any lingering outdated references
+
+Do a search through your codebase for any remaining references to Xamarin.Forms. There are probably some instances that the Upgrade Assistant didn't handle. For example:
+
+```cs
+// TODO Xamarin.Forms.Device.RuntimePlatform is no longer supported. Use Microsoft.MAUI.Devices.DeviceInfo.Platform instead. For more details see https://learn.microsoft.com/en-us/dotnet/maui/migration/forms-projects#device-changes
+if (Xamarin.Forms.Device.RuntimePlatform != Xamarin.Forms.Device.UWP)
+{
+    AppManager.Instance.OnActivated();
+}
+```
+
+will become:
+
+```cs
+if (DeviceInfo.Platform != DevicePlatform.WinUI)
+{
+    AppManager.Instance.OnActivated();
+}
+```
+
+(Note the change from UWP to WinUI).
+
+A few types in Mobile, like the `EnhancedActivityIndicator` and `EnhancedSwitch` which were previously used in our Samples, have been removed as no longer necessary. Instead you should use MAUI's standard controls, in this case `ActivityIndicator` or `Switch`.
+
+## Step 4 - Fix other build errors
+
+To fix this problem in your solution:
+
+<img
+    src={useBaseUrl("img/mobile-sdk-configuration-mapping-error.png")}
+/>
+Open your .sln file in a text editor and delete everything in the `GlobalSection(ProjectConfigurationPlatforms)
+= postSolution` section. When you re-open the sln file in Visual Studio,
+it will repopulate that section correctly.
+
+On Windows, the build error `Type 'App' already defines a member called 'InitializeComponent' with the same parameter types` is solved by adding the following lines to the csproj:
+
+```xml
+<!-- We do not want WinUI XAML files to be processed as .NET MAUI XAML -->
+<EnableDefaultXamlItems>false</EnableDefaultXamlItems>
+<EnableDefaultMAUIItems>false</EnableDefaultMAUIItems>
+```
+
+If you find that Visual Studio simply isn't giving you the option to deploy to Windows, you may be missing your launchsettings.json file. Ensure you add such a file under the Properties folder of your Windows project.
+
+Those are some specific errors I ran into while converting the Samples project. Continue working through your own project fixing any additional problems you might have, until you are able to build succesfully.
+
+## Step 5 - Migrate code from \*.original files
+
+You may have noticed that in Step 1 the Upgrade Assistant created copies of several platform-specific startup files, suffixed with .original.
+E.g. `AppDelegate.cs.original`
+
+For each of the platforms, compare the .original file to the new version and copy over any logic required. For example, your SDK project would likely have extended `VertiGISMobileActivity` and `VertiGISAppDelegate` for Android and iOS, respectively.
+The upgrade tool won't have preserved that, so you'll need to do that now.
+
+## Step 6 - Fix runtime errors
+
+At this point you should be able to build and run your app, but will likely encounter some runtime errors.
+
+On Android for example, you'll likely have to fix `[AndroidRuntime] java.lang.RuntimeException: Unable to get provider android.support.v4.content.FileProvider: java.lang.ClassNotFoundException: Didn't find class "android.support.v4.content.FileProvider" on path: [...]`
+by making a change in your AndroidManifest.xml.
+
+Change
+
+```xml
+<provider android:name="android.support.v4.content.FileProvider" android:authorities="${applicationId}.fileprovider" android:exported="false" android:grantUriPermissions="true">
+```
+
+to
+
+```xml
+<provider android:name="androidx.core.content.FileProvider" android:authorities="${applicationId}.fileprovider" android:exported="false" android:grantUriPermissions="true">
+```
+
+And if your Android MainActivity had a custom name, make sure the name is still being set in MainActivity.cs.
+
+On Windows, if you were merging in Mobile's VertiGISResources.xaml file in a merged dictionary, like `<ResourceDictionary Source="VertiGIS.Mobile.UWP/Resources/VertiGISResources.xaml"/>`, you'll now need to update the path: `<ResourceDictionary Source="VertiGIS.Mobile/Platforms/Windows/VertiGISResources.xaml"/>`.
+`VertiGIS.Mobile.Toolkit.UWP/Resources/ToolkitResources.xaml` no longer exists as a separate file.
+
+## Step 7 - Update outdated controls
+
+Once you've got all the build and runtime errors sorted out, I strongly recommend updating certain MAUI controls to their new and improved counterparts.
+This article, ["Layout behavior changes from Xamarin.Forms"](https://learn.microsoft.com/en-us/dotnet/maui/migration/layouts?view=net-maui-9.0), has some useful information about this.
+
+In particular, all `Frame` controls should be replaced with `Border`.
+
+`StackLayout` should be replaced by `VerticalStackLayout` or `HorizontalStackLayout`, or by `Grid`, depending on your use case.
+For the layout options, `*AndExpand` is no longer supported in MAUI, so any instances of `StartAndExpand` or `CenterAndExpand` for example should now be replaced by just `Start` or `Center`.
+The article I mentioned above explains [how to replace a `StackLayout`](https://learn.microsoft.com/en-us/dotnet/maui/migration/layouts?view=net-maui-9.0#stacklayout) to preserve the previous expanding behaviour.

@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkvertigis_studio_dev_center=globalThis.webpackChunkvertigis_studio_dev_center||[]).push([[7011],{8335:s=>{s.exports=JSON.parse('{"label":"samples","permalink":"/blog/tags/samples","allTagsPath":"/blog/tags","count":1,"unlisted":false}')}}]);

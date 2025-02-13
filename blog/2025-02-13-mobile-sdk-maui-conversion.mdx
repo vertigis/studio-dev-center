@@ -37,6 +37,8 @@ The Upgrade Assistant will have done some package updates automatically, but not
 If you're referencing any Esri ArcGIS Runtime packages, you'll need to upgrade those from 100.x to the 200.x version (as of writing this post, Mobile is using 200.5).
 In some cases you'll need a different package rather than just changing the version number; for example, Esri.ArcGISRuntime.Xamarin.Forms is replaced by Esri.ArcGISRuntime.MAUI.
 
+:::note
+
 For the VertiGIS.Mobile nuget package, you'll need to update to version 5.34.x.
 Note: due to [a known MAUI issue (Issue #19840)](https://github.com/dotnet/maui/issues/19840),
 you'll need to add `ExcludeAssets="buildTransitive;build" PrivateAssets="all"` to your package reference for the Mobile package - only in your base shared project. It's not necessary to add in the platform-specific projects. So it'll look like this:
@@ -44,6 +46,8 @@ you'll need to add `ExcludeAssets="buildTransitive;build" PrivateAssets="all"` t
 ```xml
 <PackageReference Include="VertiGIS.Mobile" Version="5.34.0" ExcludeAssets="buildTransitive;build" PrivateAssets="all" />
 ```
+
+:::
 
 This issue only affects multi-projects; if you're converting to a single-project, it won't be necessary.
 

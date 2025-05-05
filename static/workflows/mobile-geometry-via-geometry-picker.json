@@ -1,0 +1,431 @@
+{
+    "_properties": {
+        "isServerWorkflow": false
+    },
+    "components": [
+        {
+            "id": 2,
+            "steps": [
+                {
+                    "id": 3,
+                    "inputs": {},
+                    "position": "0,-310",
+                    "purpose": "start",
+                    "title": "Start",
+                    "transitions": [
+                        {
+                            "id": 26,
+                            "inputs": {},
+                            "position": "90,-250 90,-170",
+                            "target": {
+                                "id": 21
+                            }
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:forms:form:DisplayForm",
+                    "id": 21,
+                    "inputs": {
+                        "form": {
+                            "accessors": [],
+                            "code": "resources.forms[values.id]",
+                            "values": {
+                                "id": 22
+                            }
+                        }
+                    },
+                    "name": "form1",
+                    "position": "-30,-170",
+                    "title": "Display Form",
+                    "transitions": [
+                        {
+                            "id": 27,
+                            "position": "90,-50 90,70",
+                            "sourceConnector": "bottom",
+                            "target": {
+                                "id": 54
+                            },
+                            "targetConnector": "top"
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::ConvertToJson",
+                    "id": 54,
+                    "inputs": {
+                        "object": {
+                            "accessors": ["$form1"],
+                            "annotations": [
+                                {
+                                    "count": 6,
+                                    "index": 0,
+                                    "kind": "idref"
+                                }
+                            ],
+                            "code": "$form1.state.geometryPicker1.value.geometry[0]",
+                            "source": "$form1.state.geometryPicker1.value.geometry[0]"
+                        }
+                    },
+                    "name": "json1",
+                    "position": "-30,70",
+                    "title": "Convert To JSON",
+                    "transitions": [
+                        {
+                            "id": 62,
+                            "inputs": {},
+                            "position": "90,130 90,240",
+                            "target": {
+                                "id": 56
+                            }
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:forms:form:DisplayForm",
+                    "id": 56,
+                    "inputs": {
+                        "form": {
+                            "accessors": [],
+                            "code": "resources.forms[values.id]",
+                            "values": {
+                                "id": 52
+                            }
+                        }
+                    },
+                    "name": "form2",
+                    "position": "-30,240",
+                    "title": "Display Form"
+                }
+            ]
+        },
+        {
+            "id": 36,
+            "steps": [
+                {
+                    "action": "gcx:wf:forms::SetFormElementProperty",
+                    "id": 38,
+                    "inputs": {
+                        "elementName": {
+                            "accessors": ["$form2"],
+                            "annotations": [
+                                {
+                                    "count": 6,
+                                    "index": 0,
+                                    "kind": "idref"
+                                }
+                            ],
+                            "code": "$form2.state.textBox1",
+                            "source": "$form2.state.textBox1"
+                        },
+                        "form": {
+                            "accessors": ["$$form"],
+                            "annotations": [
+                                {
+                                    "count": 6,
+                                    "index": 0,
+                                    "kind": "idref"
+                                }
+                            ],
+                            "code": "$$form",
+                            "source": "$$form"
+                        },
+                        "propertyName": "value",
+                        "propertyValue": {
+                            "accessors": ["$json1"],
+                            "annotations": [
+                                {
+                                    "count": 6,
+                                    "index": 0,
+                                    "kind": "idref"
+                                }
+                            ],
+                            "code": "$json1.json",
+                            "source": "$json1.json"
+                        }
+                    },
+                    "position": "-30,270",
+                    "title": "Set Form Element Property"
+                },
+                {
+                    "id": 40,
+                    "inputs": {},
+                    "position": "0,0",
+                    "purpose": "start",
+                    "title": "Event",
+                    "transitions": [
+                        {
+                            "id": 46,
+                            "inputs": {},
+                            "position": "90,60 90,110",
+                            "target": {
+                                "id": 42
+                            }
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:forms::SetFormElementProperty",
+                    "id": 42,
+                    "inputs": {
+                        "elementName": {
+                            "accessors": ["$form2"],
+                            "annotations": [
+                                {
+                                    "count": 6,
+                                    "index": 0,
+                                    "kind": "idref"
+                                }
+                            ],
+                            "code": "$form2.state.text1",
+                            "source": "$form2.state.text1"
+                        },
+                        "form": {
+                            "accessors": ["$$form"],
+                            "annotations": [
+                                {
+                                    "count": 6,
+                                    "index": 0,
+                                    "kind": "idref"
+                                }
+                            ],
+                            "code": "$$form",
+                            "source": "$$form"
+                        },
+                        "propertyName": "value",
+                        "propertyValue": {
+                            "accessors": ["$json1"],
+                            "annotations": [
+                                {
+                                    "count": 6,
+                                    "index": 0,
+                                    "kind": "idref"
+                                }
+                            ],
+                            "code": "$json1.json",
+                            "source": "$json1.json"
+                        }
+                    },
+                    "position": "-30,110",
+                    "title": "Set Form Element Property",
+                    "transitions": [
+                        {
+                            "id": 48,
+                            "inputs": {},
+                            "position": "90,140 90,190",
+                            "target": {
+                                "id": 44
+                            }
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:forms::SetFormElementProperty",
+                    "id": 44,
+                    "inputs": {
+                        "elementName": {
+                            "accessors": ["$form2"],
+                            "annotations": [
+                                {
+                                    "count": 6,
+                                    "index": 0,
+                                    "kind": "idref"
+                                }
+                            ],
+                            "code": "$form2.state.textArea1",
+                            "source": "$form2.state.textArea1"
+                        },
+                        "form": {
+                            "accessors": ["$$form"],
+                            "annotations": [
+                                {
+                                    "count": 6,
+                                    "index": 0,
+                                    "kind": "idref"
+                                }
+                            ],
+                            "code": "$$form",
+                            "source": "$$form"
+                        },
+                        "propertyName": "value",
+                        "propertyValue": {
+                            "accessors": ["$json1"],
+                            "annotations": [
+                                {
+                                    "count": 6,
+                                    "index": 0,
+                                    "kind": "idref"
+                                }
+                            ],
+                            "code": "$json1.json",
+                            "source": "$json1.json"
+                        }
+                    },
+                    "position": "-30,190",
+                    "title": "Set Form Element Property",
+                    "transitions": [
+                        {
+                            "id": 50,
+                            "inputs": {},
+                            "position": "90,220 90,270",
+                            "target": {
+                                "id": 38
+                            }
+                        }
+                    ]
+                }
+            ],
+            "title": "load-header"
+        }
+    ],
+    "deploymentConfig": {
+        "supportedApps": {
+            "VSM": true
+        }
+    },
+    "designerVersion": "5.44.1+1",
+    "forms": [
+        {
+            "defaults": {},
+            "elements": {
+                "footer": {
+                    "enabled": true,
+                    "items": {
+                        "0": {
+                            "default": true,
+                            "index": 0,
+                            "label": {
+                                "markdown": "Submit"
+                            },
+                            "validates": true,
+                            "value": "submit"
+                        },
+                        "1": {
+                            "index": 1,
+                            "label": {
+                                "markdown": "Cancel"
+                            },
+                            "validates": false,
+                            "value": "cancel"
+                        }
+                    },
+                    "section": "footer",
+                    "type": "ButtonBar"
+                },
+                "geometryPicker1": {
+                    "enabled": true,
+                    "format": "polygon",
+                    "index": 0,
+                    "itemLabel": {
+                        "markdown": "Location"
+                    },
+                    "prompt": {
+                        "markdown": "Add Location"
+                    },
+                    "rowIndex": 0,
+                    "rowNumber": 0,
+                    "size": 1,
+                    "title": {
+                        "markdown": "Geometry Picker"
+                    },
+                    "type": "GeometryPicker"
+                },
+                "header": {
+                    "section": "header",
+                    "title": {
+                        "markdown": "Form Title"
+                    },
+                    "type": "Header"
+                }
+            },
+            "id": 22
+        },
+        {
+            "defaults": {},
+            "elements": {
+                "footer": {
+                    "enabled": true,
+                    "items": {
+                        "0": {
+                            "default": true,
+                            "index": 0,
+                            "label": {
+                                "markdown": "Submit"
+                            },
+                            "validates": true,
+                            "value": "submit"
+                        },
+                        "1": {
+                            "index": 1,
+                            "label": {
+                                "markdown": "Cancel"
+                            },
+                            "validates": false,
+                            "value": "cancel"
+                        }
+                    },
+                    "section": "footer",
+                    "type": "ButtonBar"
+                },
+                "header": {
+                    "section": "header",
+                    "title": {
+                        "markdown": "Form Title"
+                    },
+                    "type": "Header"
+                },
+                "text1": {
+                    "description": {
+                        "markdown": "Text"
+                    },
+                    "enabled": true,
+                    "index": 0,
+                    "rowIndex": 0,
+                    "rowNumber": 0,
+                    "type": "Text"
+                },
+                "textArea1": {
+                    "enabled": true,
+                    "index": 1,
+                    "rowIndex": 0,
+                    "rowNumber": 1,
+                    "title": {
+                        "markdown": "Text Area"
+                    },
+                    "type": "TextArea",
+                    "wrap": "soft"
+                },
+                "textBox1": {
+                    "enabled": true,
+                    "index": 2,
+                    "rowIndex": 0,
+                    "rowNumber": 2,
+                    "title": {
+                        "markdown": "Text Box"
+                    },
+                    "type": "TextBox"
+                }
+            },
+            "id": 52
+        }
+    ],
+    "licenseInfo": {
+        "licenseeId": "88cb61d6-af47-9b3e-5181-ed674c4c0815"
+    },
+    "start": {
+        "id": 3
+    },
+    "transitions": [
+        {
+            "branch": "load$header",
+            "id": 60,
+            "inputs": {},
+            "source": {
+                "id": 56
+            },
+            "target": {
+                "id": 40
+            }
+        }
+    ]
+}

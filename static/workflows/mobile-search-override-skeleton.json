@@ -1,0 +1,100 @@
+{
+    "_properties": {
+        "isServerWorkflow": false
+    },
+    "components": [
+        {
+            "id": 2,
+            "steps": [
+                {
+                    "id": 3,
+                    "inputs": {},
+                    "position": "0,0",
+                    "purpose": "start",
+                    "title": "Start",
+                    "transitions": [
+                        {
+                            "id": 21,
+                            "position": "90,60 90,150",
+                            "target": {
+                                "id": 4
+                            }
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::GetWorkflowInputs",
+                    "id": 4,
+                    "inputs": {},
+                    "name": "getWorkflowInputs1",
+                    "position": "-30,150",
+                    "title": "Get Workflow Inputs",
+                    "transitions": [
+                        {
+                            "id": 22,
+                            "position": "90,210 90,280",
+                            "target": {
+                                "id": 10
+                            }
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:app::RunCommand",
+                    "id": 8,
+                    "inputs": {
+                        "commandName": {
+                            "accessors": [],
+                            "code": "\"tasks.search,results.display\"",
+                            "source": "\"tasks.search,results.display\""
+                        },
+                        "commandParameter": {
+                            "accessors": ["$getWorkflowInputs1"],
+                            "annotations": [
+                                {
+                                    "count": 19,
+                                    "index": 0,
+                                    "kind": "idref"
+                                }
+                            ],
+                            "code": "$getWorkflowInputs1.inputs.context",
+                            "source": "$getWorkflowInputs1.inputs.context"
+                        }
+                    },
+                    "position": "-30,380",
+                    "title": "Run Command"
+                },
+                {
+                    "action": "gcx:wf:core::SetProperty",
+                    "id": 10,
+                    "inputs": {},
+                    "position": "-30,280",
+                    "title": "Set Property",
+                    "transitions": [
+                        {
+                            "id": 23,
+                            "position": "90,310 90,380",
+                            "sourceConnector": "bottom",
+                            "target": {
+                                "id": 8
+                            },
+                            "targetConnector": "top"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "deploymentConfig": {
+        "supportedApps": {
+            "VSM": true
+        }
+    },
+    "designerVersion": "5.44.1+1",
+    "licenseInfo": {
+        "licenseeId": "88cb61d6-af47-9b3e-5181-ed674c4c0815"
+    },
+    "start": {
+        "id": 3
+    }
+}

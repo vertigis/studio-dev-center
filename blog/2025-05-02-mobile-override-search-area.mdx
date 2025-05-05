@@ -16,11 +16,13 @@ VertiGIS Studio Mobile enables app developers to override the default search are
 
 ## 1 - Creating the Search Override Workflow {#creating-search-override-workflow}
 
-To start off the work, we'll need to head to VertiGIS Studio Workflow and create a new blank Workflow. Call it `Search Override`. This Workflow will be used to override the search functionality in Mobile. Configure the Workflow in the following way:
+To start off the work, we'll need to head to VertiGIS Studio Workflow and create a new blank Workflow. Call it `Search Override`. This Workflow will be used to override the search functionality in Mobile.
+
+To create the Workflow, you may either download and import this <a href={useBaseUrl("workflows/mobile-search-override-skeleton.json")} download="search-override-skeleton.json" target="\_blank">skeleton file</a> in Workflow Designer, or create and configure it yourself in the following way:
 
 1. Add a `Get Workflow Inputs` activity with ID `getWorkflowInputs1`
-2. Add a `Set Property` activity, which we'll leave empty for now as we'll need to obtain
-3. Add a `Run Command` activity; configure the parameter as follows:
+2. Add a `Set Property` activity, which we'll leave empty for now.
+3. Add a `Run Command` activity; configure the parameters as follows:
     - `Command Name`: `="tasks.search,results.display"`
     - `Command Parameter`: `=$getWorkflowInputs1.inputs.context`
 
@@ -46,9 +48,9 @@ On the `Search Override` Workflow, add a `Get Layer` activity to obtain a layer 
 
 ### 2.2 - Using custom bounds to obtain the extent {#using-custom-bounds}
 
-Creating a custom search area requires a bit more work to obtain the required search extent numbers. Start off by creating a new blank Workflow, call it something along the lines of `Get Geometry from Geometry Picker`. We will be using this Workflow to obtain the extent values from a geometry picker.
+Creating a custom search area requires a bit more work to obtain the required search extent numbers. To start off, you may either download and import this <a href={useBaseUrl("workflows/mobile-geometry-via-geometry-picker.json")} download="geometry-via-geometry-picker.json" target="\_blank">skeleton file</a> in Workflow Designer, or you can create it yourself.
 
-To create the `Get Geometry from Geometry Picker` Workflow, follow these steps:
+If you wish to create the Workflow yourself: Create a new blank Workflow, call it something along the lines of `Get Geometry from Geometry Picker`. We will be using this Workflow to obtain the extent values from a geometry picker which will be used to define our search area. Follow these steps to configure the Workflow:
 
 1. Add a `Display Form` activity, with ID `form1`, and add a geometry picker in there. Make sure that the geometry type is set to `Polygon`
     <img

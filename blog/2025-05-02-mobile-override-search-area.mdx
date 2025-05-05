@@ -14,61 +14,64 @@ VertiGIS Studio Mobile enables app developers to override the default search are
 
 <!--truncate-->
 
-## 1 - Finding the Area to Override Search
+## 1 - Creating the Search Override Workflow {#creating-search-override-workflow}
 
-To start off the work, we'll need to head to VertiGIS Studio Workflow and create a new blank Workflow. This Workflow will be used to override the search functionality in Mobile.
+To start off the work, we'll need to head to VertiGIS Studio Workflow and create a new blank Workflow. Call it `Search Override`. This Workflow will be used to override the search functionality in Mobile. Configure the Workflow in the following way:
 
-There are two ways of obtaining the extent numbers needed to override the search area: Using a layer's FullExtent property to obtain the extent, or using a feature action on a polygon feature to create a custom search area.
+1. Add a `Get Workflow Inputs` activity with ID `getWorkflowInputs1`
+2. Add a `Set Property` activity, which we'll leave empty for now as we'll need to obtain
+3. Add a `Run Command` activity; configure the parameter as follows:
+    - `Command Name`: `="tasks.search,results.display"`
+    - `Command Parameter`: `=$getWorkflowInputs1.inputs.context`
 
-I will walk you through how to use both of these methods to enable the most amount of customization.
+We will be using this Workflow to override the default search behaviour in Mobile so that we change the search area prior to performing the search.
 
-### 1.1 - Using a layer's FullExtent property to obtain the extent {#using-layer-bounds}
+## 2 - Finding the Area to Override Search
+
+There are two ways of obtaining the extent numbers needed to override the search area: Using a layer's FullExtent property to obtain the extent, or using a geometry picker to create a custom search area.
+
+I will walk you through how to use both of these methods to enable the most amount of customization and to fit your use case.
+
+### 2.1 - Using a layer's FullExtent property to obtain the extent {#using-layer-bounds}
 
 Using a layer to obtain the extent numbers is the more foolproof way since it doesn't involve hard-coding any specific numbers to Workflow.
 
 :::info Note
 
-This is the recommended way as using a feature to obtain the extent numbers is a more complicated process.
+This is the _recommended_ way, as obtaining custom extent numbers is a more complicated process. However, while testing, I found this to cover a much larger area than what's actually covered by the features of the layer so, although this works to extend the search area, developers who want a finer control of the search area override should use the method described in [section 2.2](#using-custom-bounds).
 
 :::
 
-Use the `Get Layer` activity to obtain a layer that will act as the basis of the search area. While testing, I found this to cover a much larger area than what's actually covered by the features of the layer so, although this works to extend the search area, developers who want a finer control of the search area override should use the method described in [section 1.2](#using-feature-bounds).
+On the `Search Override` Workflow, add a `Get Layer` activity to obtain a layer that will act as the basis of the search area. Add this activity **to the start** of the Workflow. Assuming the `Get Layer` activity's ID is `layer1`, we will be using `=$layer1.layer.Unwrap().FullExtent` as input to the `Set Property` activity; the [next section](#finishing-workflow) will point out how to fill the activity properly. `layer.unwrap()` is an undocumented function which unwraps a layer from what we use internally in VertiGIS Studio products into [ESRI's layer objects](https://developers.arcgis.com/net/api-reference/api/netwin/Esri.ArcGISRuntime/Esri.ArcGISRuntime.Mapping.FeatureLayer.html).
 
-Assuming the `Get Layer` activity's ID is `layer1`, we will be using `=$layer1.layer.Unwrap().FullExtent` as input to the `Set Property` activity. This is an undocumented function because it unwraps a layer from what we use in VertiGIS Studio products into ESRI's layer objects, so unwrapping layers should be done with care.
+### 2.2 - Using custom bounds to obtain the extent {#using-custom-bounds}
 
-### 1.2 - Using a feature's bounds to obtain the extent {#using-feature-bounds}
+Creating a custom search area requires a bit more work to obtain the required search extent numbers. Start off by creating a new blank Workflow, call it something along the lines of `Get Geometry from Geometry Picker`. We will be using this Workflow to obtain the extent values from a geometry picker.
 
-Creating a custom search area requires a bit more work to obtain the required extent numbers. Start off by creating a new blank Workflow, call it something along the lines of `Alert geometry JSON`. We will be using this Workflow as a feature action to obtain the extent values from a geometry.
+To create the `Get Geometry from Geometry Picker` Workflow, follow these steps:
 
-To create the `Alert geometry JSON` Workflow, follow these steps:
-
-1. Add a `Get Workflow Inputs` activity, this is used to obtain the passed feature through feature actions
-2. Add a `Convert To JSON` next and use `=$getWorkflowInputs1.inputs.context[0].geometry` as the inputs to the `Object` parameter
-3. Use a `Display Form` activity to display these results in a way that is easily copyable. Add a `Text Area` form element and a load event that replaces the text area's value with the output from the `Convert To JSON` activity
+1. Add a `Display Form` activity, with ID `form1`, and add a geometry picker in there. Make sure that the geometry type is set to `Polygon`
+    <img
+        src={useBaseUrl("img/mobile-set-geometry-picker-type.png")}
+    />
+2. Add a `Convert To JSON` next and use `=$form1.state.geometryPicker1.value.geometry[0]` as the inputs to the `Object` parameter
+3. Use another `Display Form` activity to display these results in a way that is easily copyable. Add a `Text Area` form element and a load event on the form's title that replaces the text area's value with the output from the `Convert To JSON` activity
     <img src={useBaseUrl("img/mobile-set-text-area-with-json.png")} />
 
-Next, attach the `Alert geometry JSON` Workflow as a feature action on a polygon feature layer and launch the app in Go. Create a feature that belongs to that layer that covers the desired search area, and use the `Alert geometry JSON` feature action button to fill out the polygon extent numbers in a display form.
-
-The output should look something like the following but unformatted; you may format it for readability. If the last point is repeated, delete it and the comma trailing the point that came before it. Additionally, make sure the first point matches the last point and that these two are the only identical points.
+The output should look something like the following but unformatted; you may format it for readability. Ensure sure the first point matches the last point and that these two are the only identical points.
 
 ```json
 {
-    "rings":
-    [
+    "rings": [
         [
-            [-13260363.6109,4252325.2478],
-            [-12578545.318599999,4254159.7365000024],
-            [-12577322.326200001,3788811.1083000004],
-            [-13255471.641100001,3793703.0781000033],
-            [-13260363.6109,4252325.2478],
-            [-13260363.6109,4252325.2478]   <-- DELETE THIS
+            [-13261447.128629405, 4248956.0934711397],
+            [-13255720.535082744, 3797373.288077388],
+            [-12575073.987822598, 3791646.6945307283],
+            [-12581618.666161638, 4253046.5174330398],
+            [-13261447.128629405, 4248956.0934711397]
         ]
     ],
-    "spatialReference":
-    {
-        "wkid":102100,
-        "latestWkid":3857
-    }
+    "spatialReference": { "wkid": 102100, "latestWkid": 3857 }
 }
 ```
 
@@ -78,26 +81,25 @@ Make sure to copy the spatial reference info as the extent numbers are meaningle
 
 :::
 
-After obtaining the JSON of the search area, use that as input to the `Json` parameter for the `Get Geometry From JSON` activity. Assuming the mentioned `Get Geometry From JSON` activity's ID is `geometry1`, we will be using `=$geometry1.geometry.Polygon` as input to the `Set Property` activity.
+After obtaining the JSON of the search area, add a `Get Geometry From JSON` activity to the `Search Override` Workflow, and use the JSON as input to the `Json` parameter for the `Get Geometry From JSON` activity you just added. Assuming the mentioned `Get Geometry From JSON` activity's ID is `geometry1`, we will be using `=$geometry1.geometry.Polygon` as input to the `Set Property` activity. The [next section](#finishing-workflow) will point out how to fill the activity properly.
 
-## 2 - Finishing the Workflow
+:::tip
 
-After finding the search area values, the process is the same no matter which method of obtaining the search area you chose. After you've set up the Workflow as described in [section 1.1](#using-layer-bounds) or [section 1.2](#using-feature-bounds), add a `Get Workflow Inputs` activity with ID `getWorkflowInputs1` immediately afterwards.
+You may include this `Get Geometry from Geometry Picker` Workflow in the main `Search Override` Workflow, instead of copying the values over, to allow a higher degree of customizability during run-time; however, that will require using the geometry picker to set create the bounds polygon every time a search is commenced.
 
-Afterwards, add a `Set Property` activity. This activity is where we will replace the search area with the one we customized. Set up the activity as follows:
+You may either do so by using it as a separate sub-Workflow, or copy all the activities to the start of the `Search Override` Workflow. You will need to adjust the input of the `Get Geometry From JSON` activity accordingly.
+
+:::
+
+## 3 - Finishing the Workflow {#finishing-workflow}
+
+After finding the search area's geometry, the process is the same no matter which method of obtaining the search area you chose. After you've performed the required setup as described in [section 2.1](#using-layer-bounds) or [section 2.2](#using-custom-bounds), head to the `Search Override` Workflow. There, we will populate the `Set Property` activity we've added in [section 1](#creating-search-override-workflow). This activity is where we will replace the search area with the one we customized. Set up the activity as follows:
 
 -   `Object`: Use `=$getWorkflowInputs1.inputs.context`
 -   `Property Name`: Use `="SearchArea"`
 -   `Property Value`:
-    -   `=$layer1.layer.Unwrap().FullExtent` if you've followed [section 1.1](#using-layer-bounds).
-    -   `=$geometry1.geometry.Polygon` if you've followed [section 1.2](#using-feature-bounds).
-
-Lastly, add a `Run Command` activity configured as follows:
-
--   `Command Name`: `="tasks.search,results.display"`
--   `Command Parameter`: `=$getWorkflowInputs1.inputs.context`
-
-We will be using this Workflow to override the default search behaviour in Mobile so that we change the search area prior to performing the search.
+    -   `=$layer1.layer.Unwrap().FullExtent` if you've followed [section 2.1](#using-layer-bounds).
+    -   `=$geometry1.geometry.Polygon` if you've followed [section 2.2](#using-custom-bounds).
 
 :::tip
 
@@ -126,23 +128,28 @@ Then, add a `Create Feature` activity and fill out the inputs as follows:
 
 :::
 
-## 3 - Updating the Mobile app JSON and overriding the Search functionality
+## 4 - Updating the Mobile app JSON and overriding the Search functionality
 
-To use this Workflow we've created in Mobile, it can be added as a launch link Workflow so it's hidden, but it can be added anywhere. It just needs to exist in Designer and be assigned an ID. Save the app after adding the Workflow.
+To use this Workflow we've created in Mobile, launch the SuDo editor in Designer using `Ctrl+Shift+E` and scroll to the bottom. There, add a new entry to reference the `Search Override` Workflow we created earlier. You may use the following template and replace `portalItem` with your Workflow's ArcGIS portal link:
 
-Launch the SuDo editor in Designer using `Ctrl+Shift+E` and locate the Workflow you have just added. The easiest way to do so would be to look for the Workflow's name to obtain the language string ID assigned to it, and then use that ID to locate the Workflow itself.
+```json
+{
+    "id": "search-override-workflow",
+    "title": "Search Override Workflow",
+    "target": "auto",
+    "portalItem": "<Replace me>",
+    "commandArgumentInput": "context",
+    "$type": "workflow"
+}
+```
 
-<img src={useBaseUrl("img/mobile-finding-workflow-via-name.png")} />
-
-Use that `language-designer-...` to locate the Workflow object. Once you do, you'll want to note down the value of `id`.
+When done correctly, the app JSON should look like the following:
 
 <img
-    src={useBaseUrl(
-        "img/mobile-finding-workflow-via-designer-id.png"
-    )}
+    src={useBaseUrl("img/mobile-adding-workflow-via-sudo-editor.png")}
 />
 
-Lastly, look up and change the search object in Designer from
+Lastly, look up the search object in Designer, which you can find by searching (`Ctrl+F`) for `"$type": "search"`. Change it from
 
 ```json
 {
@@ -161,7 +168,7 @@ To
 },
 ```
 
-Where you replace the `XXX...` with the value of the `id` field you obtained in the previous step. So it looks like the following:
+Where you replace the `XXX...` with the value of the `id` field you typed in the previous step. So it looks like the following:
 
 <img
     src={useBaseUrl(
@@ -169,4 +176,4 @@ Where you replace the `XXX...` with the value of the `id` field you obtained in 
     )}
 />
 
-After that is done, click on the `Apply, I know what I'm doing` button and save the app. Launch the app in Go and attempt to search for a feature that doesn't exist in the visible extent. If you've done everything correctly, the search should go through with the configured extent.
+After that is done, click on the `Apply, I know what I'm doing` button and wait for Designer to load, then save the app. Launch the app in Go and attempt to search for a feature that doesn't exist in the visible extent. If you've done everything correctly, the search should go through with the configured extent.

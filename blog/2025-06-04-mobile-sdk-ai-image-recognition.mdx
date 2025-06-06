@@ -199,9 +199,9 @@ We found that the AI Model did a fine job of inferring what kind of value we wer
 
 To get the image, we�ll use the Mobile�s [TakePhoto operation](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#operation-photos.take-photo). In this sample we also have the option of launching a file picker, to make testing easier.
 
-:: Note
+:::note
 Be sure you allow your SDK apps to access the camera and/or file picker in your app, [as required for each platform](https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/appmodel/permissions?view=net-maui-9.0&tabs=android#platform-differences).
-::
+:::
 
 Starting on line 178 is where we we call the AI service, get the attributes from the AI response, and create a feature. Note that we convert the feature into [a VertiGIS Feature](https://developers.vertigisstudio.com/docs/web/api-objects/#feature) type: this enables us to work with it more easily in other Mobile SDK functions, such as [adding the attachment](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#command-edit.add-attachment) (line 187) and [activating feature editing](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#command-edit.display-update-feature) (line 193).
 

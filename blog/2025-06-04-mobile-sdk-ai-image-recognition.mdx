@@ -52,7 +52,7 @@ internal class OpenAIAssistant
         _openAIClient = new AzureOpenAIClient(new Uri(endpoint), new AzureKeyCredential(key));
     }
 
-    public async Task<ChatCompletion> QueryImageAsync(byte[] imageData, List<string> queries)
+    public async Task<ChatCompletion> QueryImageAsync(byte[] imageData, List<string> queries, string systemPrompt)
     {
         // Limit image to 2MB for quick response and less tokens used
         if (imageData.Length > 2097152)
@@ -68,7 +68,7 @@ internal class OpenAIAssistant
         // highlight-start
         var chatClient = _openAIClient.GetChatClient(deploymentName);
         var chatContent = ChatMessageContentPart.CreateImagePart(imageBytes: BinaryData.FromBytes(imageData), "image/png");
-        var systemPrompt = new SystemChatMessage("You are a helpful assistant knowledgeable about trees");
+        var systemPrompt = new SystemChatMessage(systemPrompt);
         var imagePrompt = new UserChatMessage(chatContent);
 
         var chatMessages = new List<ChatMessage>
@@ -94,7 +94,7 @@ internal class OpenAIAssistant
 
 Note that there are variables for a deployment name, endpoint URL and a key at the top of the file (lines 10-12). You will need to have your own values there in order to actually make the AI queries.
 From line 34 to 49, we configure the chat client with a message and image which will be passed in by the caller - in QuickCaptureService.cs - described in the next section.
-The system prompt on line 36 provides the model with context for any the queries we will be making.
+The system prompt passed in on line 36 provides the model with context for any the queries we will be making.
 The ResponseFormat option being set to json on line 52 will make parsing the response easier.
 
 You can learn more about how to interact with OpenAI models in the [Azure documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/).
@@ -159,6 +159,8 @@ private async Task DoQuickCaptureAsync()
 
     await _ops.UIOperations.DisplayBusyState.ExecuteAsync();
 
+    var systemPrompt = "You are a helpful assistant knowledgeable about trees";
+
     var queries = new List<string>
     {
         """
@@ -178,7 +180,7 @@ private async Task DoQuickCaptureAsync()
     };
 
     // highlight-next-line
-    var response = await _openAIAssistant.QueryImageAsync(fileData.Data, queries);
+    var response = await _openAIAssistant.QueryImageAsync(fileData.Data, queries, systemPrompt);
     Dictionary<string, object?> attributes = GetAttributesFromResponse(response.Content[0].Text);
 
     // Create the new feature
@@ -197,9 +199,9 @@ private async Task DoQuickCaptureAsync()
 }
 ```
 
-Line 52 has the layer ID for our sample trees layer. You'd want to replace it with your own layer. Although you could have a more complicated use case where the layer is populated dynamically, this process tends to work best with a specific known layer, so that you can tell the AI model exactly the attribute names you're looking for and what the values should look like. The prompt, starting on line 66, illustrates this: the keys listed there correspond exactly to the tree layer's attribute names. This makes it easy to convert the json response from the AI service directly into a feature without having to do any extra parsing.
+Line 52 has the layer ID for our sample trees layer. You'd want to replace it with your own layer. Although you could have a more complicated use case where the layer is populated dynamically, this process tends to work best with a specific known layer, so that you can tell the AI model exactly the attribute names you're looking for and what the values should look like. The prompt, starting on line 68, illustrates this: the keys listed there correspond exactly to the tree layer's attribute names. This makes it easy to convert the json response from the AI service directly into a feature without having to do any extra parsing.
 
-We found that the AI Model did a fine job of inferring what kind of value we were looking for for most of the attributes just based on the name. However, for the "Health" attribute, the model was giving us responses that referred to the health of the species of tree in general, rather than doing a specific assessment for the individual specimen in the photo. For example, it would give us "this is a hardy species but is susceptible to root rot", rather than "this tree shows signs of a caterpillar infestation". Hence we included a note in the prompt clarifying the intention of that field (line 74). If you have a similar setup, where your attribute names may not be intuitive, or perhaps the values have to be constrained to a certain data type like enum values, you can elaborate on that here.
+We found that the AI Model did a fine job of inferring what kind of value we were looking for for most of the attributes just based on the name. However, for the "Health" attribute, the model was giving us responses that referred to the health of the species of tree in general, rather than doing a specific assessment for the individual specimen in the photo. For example, it would give us "this is a hardy species but is susceptible to root rot", rather than "this tree shows signs of a caterpillar infestation". Hence we included a note in the prompt clarifying the intention of that field (line 76). If you have a similar setup, where your attribute names may not be intuitive, or perhaps the values have to be constrained to a certain data type like enum values, you can elaborate on that here.
 
 To get the image, we'll use the Mobile's [TakePhoto operation](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#operation-photos.take-photo). In this sample we also have the option of launching a file picker, to make testing easier.
 
@@ -207,6 +209,6 @@ To get the image, we'll use the Mobile's [TakePhoto operation](https://developer
 Be sure you allow your SDK apps to access the camera and/or file picker in your app, [as required for each platform](https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/appmodel/permissions?view=net-maui-9.0&tabs=android#platform-differences).
 :::
 
-Starting on line 178 is where we we call the AI service, get the attributes from the AI response, and create a feature. Note that we convert the feature into [a VertiGIS Feature](https://developers.vertigisstudio.com/docs/web/api-objects/#feature) type: this enables us to work with it more easily in other Mobile SDK functions, such as [adding the attachment](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#command-edit.add-attachment) (line 187) and [activating feature editing](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#command-edit.display-update-feature) (line 193).
+Starting on line 81 is where we we call the AI service, get the attributes from the AI response, and create a feature. Note that we convert the feature into [a VertiGIS Feature](https://developers.vertigisstudio.com/docs/web/api-objects/#feature) type: this enables us to work with it more easily in other Mobile SDK functions, such as [adding the attachment](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#command-edit.add-attachment) (line 89) and [activating feature editing](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#command-edit.display-update-feature) (line 94).
 
 Our documentation page [Edit the Layout and App Config](https://developers.vertigisstudio.com/docs/mobile/sdk-edit-layout-app-config) explains the final piece of the puzzle, which is setting up your SDK app to point to your webmap, with the trees layer in this sample, and defining the layout (including adding a place to launch our custom AI command).

@@ -10,7 +10,7 @@ tags: [mobile, sdk, samples, ai]
 import Link from "@docusaurus/Link";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 
-AI has been a hot topic lately, and naturally the question has come up of how we can use AI with Studio products. With the Mobile SDK, it�s already possible to integrate AI into a custom app. In this blog post I'll describe an example of just that, where we�ll use AI image recognition to help create features.
+AI has been a hot topic lately, and naturally the question has come up of how we can use AI with Studio products. With the Mobile SDK, it's already possible to integrate AI into a custom app. In this blog post I'll describe an example of just that, where we'll use AI image recognition to help create features.
 
 <!--truncate-->
 
@@ -24,7 +24,7 @@ In this sample, we use AI image recognition to populate attributes in a new feat
 4. Create a feature from these attributes, with the image as an attachment
 5. Have the user review the generated feature and modify any fields if desired
 
-There are several advantages to this kind of flow. For one thing, it allows you to fill in fields with data you may not know, like the scientific name of a particular tree, without having to look it up elsewhere. Another is that it speeds up the data entry process � typing on a Mobile device in particular can be cumbersome, so starting with the fields filled out just ready for you to review is a nice benefit.
+There are several advantages to this kind of flow. For one thing, it allows you to fill in fields with data you may not know, like the scientific name of a particular tree, without having to look it up elsewhere. Another is that it speeds up the data entry process—typing on a Mobile device in particular can be cumbersome, so starting with the fields filled out just ready for you to review is a nice benefit.
 
 ## Implementing the custom project
 
@@ -102,7 +102,7 @@ You can learn more about how to interact with OpenAI models in the [Azure docume
 
 Integrating the AI service with Mobile and creating the feature happens in [QuickCaptureService.cs](https://github.com/Felicity-R/vertigis-mobile-custom-extension-with-AI/blob/ba4628ce91746c2da887f1549c7d930239cf3cdb/App1/QuickCaptureService.cs).
 
-First, we [create the service](https://developers.vertigisstudio.com/docs/mobile/sdk-services-create) and [set up a custom command](https://developers.vertigisstudio.com/docs/mobile/sdk-services-create#create-a-custom-command). This command can then be invoked from the I Want To� menu or from a button within the Mobile app, for example.
+First, we [create the service](https://developers.vertigisstudio.com/docs/mobile/sdk-services-create) and [set up a custom command](https://developers.vertigisstudio.com/docs/mobile/sdk-services-create#create-a-custom-command). This command can then be invoked from the I Want To... menu or from a button within the Mobile app, for example.
 
 ```cs
 // highlight-next-line
@@ -195,9 +195,9 @@ await _ops.EditOperations.DisplayUpdateFeature.ExecuteAsync(vertiGISFeature);
 
 Line 146 has the layer id for our sample trees layer. Although you could have a more complicated use case where the layer is populated dynamically, this process tends to work best with a specific known layer, so that you can tell the AI model exactly the attribute names you're looking for and what the values should look like. The prompt, starting on line 160, illustrates this: the keys listed there correspond exactly to the tree layer's attribute names. This makes it easy to convert the json response from the AI service directly into a feature without having to do any extra parsing.
 
-We found that the AI Model did a fine job of inferring what kind of value we were looking for for most of the attributes just based on the name. However, for the �Health� attribute, the model was giving us responses that referred to the health of the species of tree in general, rather than doing a specific assessment for the individual specimen in the photo. For example, it would give us �this is a hardy species but is susceptible to root rot�, rather than �this tree shows signs of a caterpillar infestation�. Hence we included a note in the prompt clarifying the intention of that field (line 168). If you have a similar setup, where your attribute names may not be intuitive, or perhaps the values have to be constrained to a certain data type like enum values, you can elaborate on that here.
+We found that the AI Model did a fine job of inferring what kind of value we were looking for for most of the attributes just based on the name. However, for the "Health" attribute, the model was giving us responses that referred to the health of the species of tree in general, rather than doing a specific assessment for the individual specimen in the photo. For example, it would give us �this is a hardy species but is susceptible to root rot�, rather than �this tree shows signs of a caterpillar infestation�. Hence we included a note in the prompt clarifying the intention of that field (line 168). If you have a similar setup, where your attribute names may not be intuitive, or perhaps the values have to be constrained to a certain data type like enum values, you can elaborate on that here.
 
-To get the image, we�ll use the Mobile�s [TakePhoto operation](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#operation-photos.take-photo). In this sample we also have the option of launching a file picker, to make testing easier.
+To get the image, we'll use the Mobile's [TakePhoto operation](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#operation-photos.take-photo). In this sample we also have the option of launching a file picker, to make testing easier.
 
 :::note
 Be sure you allow your SDK apps to access the camera and/or file picker in your app, [as required for each platform](https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/appmodel/permissions?view=net-maui-9.0&tabs=android#platform-differences).

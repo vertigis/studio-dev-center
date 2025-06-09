@@ -91,7 +91,7 @@ internal class OpenAIAssistant
     }
 ```
 
-Note that there are variables for a deployment name, endpoint URL and a key at the top of the file (liens 10-12). You will need to have your own values there in order to actually make the AI queries.
+Note that there are variables for a deployment name, endpoint URL and a key at the top of the file (lines 10-12). You will need to have your own values there in order to actually make the AI queries.
 From line 34 to 49, we configure the chat client with a message and image which will be passed in by the caller - in QuickCaptureService.cs - described in the next section.
 The system prompt on line 36 provides the model with context for any the queries we will be making.
 The ResponseFormat option being set to json on line 52 will make parsing the response easier.
@@ -102,7 +102,7 @@ You can learn more about how to interact with OpenAI models in the [Azure docume
 
 Integrating the AI service with Mobile and creating the feature happens in [QuickCaptureService.cs](https://github.com/Felicity-R/vertigis-mobile-custom-extension-with-AI/blob/ba4628ce91746c2da887f1549c7d930239cf3cdb/App1/QuickCaptureService.cs).
 
-First, we [create the service](https://developers.vertigisstudio.com/docs/mobile/sdk-services-create) and [set up a custom command](https://developers.vertigisstudio.com/docs/mobile/sdk-services-create#create-a-custom-command). This command can then be invoked from the I Want To... menu or from a button within the Mobile app, for example.
+First, we [create the service](https://developers.vertigisstudio.com/docs/mobile/sdk-services-create) and [set up a custom command](https://developers.vertigisstudio.com/docs/mobile/sdk-services-create#create-a-custom-command). This command can then be invoked from the I Want To... menu, or from a button within the Mobile app, for example.
 
 ```cs
 // highlight-next-line

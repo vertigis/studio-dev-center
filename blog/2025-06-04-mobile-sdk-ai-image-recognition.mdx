@@ -10,7 +10,7 @@ tags: [mobile, sdk, samples, ai]
 import Link from "@docusaurus/Link";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 
-AI has been a hot topic lately, and naturally the question has come up of how we can use AI with Studio products. With the Mobile SDK, it's already possible to integrate AI into a custom app. In this blog post I'll describe an example of just that, where we'll use AI image recognition to help create features.
+AI has been a hot topic lately. Naturally, the question has come up of how we can use AI with Studio products. With the Mobile SDK, it's already possible to integrate AI into a custom app. In this blog post I'll describe an example of just that, where we'll use AI image recognition to help create features.
 
 <!--truncate-->
 
@@ -40,7 +40,7 @@ The AI service is set up in [OpenAIAssistant.cs](https://github.com/Felicity-R/v
 internal class OpenAIAssistant
 {
 	// highlight-next-line
-    /** INSERT YOUR OWN NAME / ENDPOINT / KEY HERE **/
+    /** INSERT YOUR OWN DEPLOYMENT NAME / ENDPOINT / KEY HERE **/
     private const string deploymentName = "";
     private const string endpoint = "";
     private const string key = "";
@@ -82,10 +82,11 @@ internal class OpenAIAssistant
             var userChatMessage = new UserChatMessage(query);
             chatMessages.Add(userChatMessage);
         }
+        // highlight-end
 
+        // highlight-next-line
         var chatCompletionOptions = new ChatCompletionOptions() { ResponseFormat = ChatResponseFormat.CreateJsonObjectFormat()};
         ChatCompletion chatCompletion = await chatClient.CompleteChatAsync(chatMessages, chatCompletionOptions);
-        // highlight-end
         return chatCompletion;
     }
 }
@@ -102,7 +103,7 @@ You can learn more about how to interact with OpenAI models in the [Azure docume
 
 Integrating the AI service with Mobile and creating the feature happens in [QuickCaptureService.cs](https://github.com/Felicity-R/vertigis-mobile-custom-extension-with-AI/blob/ba4628ce91746c2da887f1549c7d930239cf3cdb/App1/QuickCaptureService.cs).
 
-First, we [create the service](https://developers.vertigisstudio.com/docs/mobile/sdk-services-create) and [set up a custom command](https://developers.vertigisstudio.com/docs/mobile/sdk-services-create#create-a-custom-command). This command can then be invoked from the I Want To... menu, or from a button within the Mobile app, for example.
+First, we [create the service](https://developers.vertigisstudio.com/docs/mobile/sdk-services-create) and [set up a custom command](https://developers.vertigisstudio.com/docs/mobile/sdk-services-create#create-a-custom-command). This command can then be invoked from the I Want To... menu or from a button within the Mobile app, for example.
 
 ```cs
 // highlight-next-line
@@ -119,7 +120,7 @@ namespace App1
 
         public QuickCaptureService(CommonAppDependencies deps)
         {
-            // Save some object we'll want later
+            // Save some objects we'll want later
             _ops = deps.Operations;
             _dialog = deps.DialogController;
             _mapRepo = deps.MapRepo;
@@ -140,23 +141,25 @@ namespace App1
 
 Then we can fill in the contents of DoQuickCaptureAsync; the command implementation.
 
-```cs showLineNumbers=50
-// Get the map (the first/only available map), and the layer we want to add to
-var map = _mapRepo.AllMaps.EnumerateExisting().First().MapExtension;
-// highlight-next-line
-var layerExt = map.LayerExtensions.FindByLayerId("1968288a255-layer-2"); // 1968288a255-layer-2 = the trees layer
-var table = layerExt.GetFeatureTable();
+```cs showLineNumbers=48
+private async Task DoQuickCaptureAsync()
+{
+    // Get the map (the first/only available map), and the layer we want to add to
+    var map = _mapRepo.AllMaps.EnumerateExisting().First().MapExtension;
+    // highlight-next-line
+    var layerExt = map.LayerExtensions.FindByLayerId("1968288a255-layer-2"); // 1968288a255-layer-2 = the trees layer
+    var table = layerExt.GetFeatureTable();
 
-// Get current location (will place feature there)
-var position = await _ops.GeolocationOperations.GetPosition.ExecuteAsync();
-position = HandleZAndMValues(table, position);
+    // Get current location (will place feature there)
+    var position = await _ops.GeolocationOperations.GetPosition.ExecuteAsync();
+    position = HandleZAndMValues(table, position);
 
-// highlight-next-line
-EnhancedFileData fileData = await GetPhotoFromUser();
+    // highlight-next-line
+    EnhancedFileData fileData = await GetPhotoFromUser();
 
-await _ops.UIOperations.DisplayBusyState.ExecuteAsync();
+    await _ops.UIOperations.DisplayBusyState.ExecuteAsync();
 
-var queries = new List<string>
+    var queries = new List<string>
     {
         """
         // highlight-start
@@ -174,28 +177,29 @@ var queries = new List<string>
         """,
     };
 
-// highlight-next-line
-var response = await _openAIAssistant.QueryImageAsync(fileData.Data, queries);
-Dictionary<string, object?> attributes = GetAttributesFromResponse(response.Content[0].Text);
+    // highlight-next-line
+    var response = await _openAIAssistant.QueryImageAsync(fileData.Data, queries);
+    Dictionary<string, object?> attributes = GetAttributesFromResponse(response.Content[0].Text);
 
-// Create the new feature
-var vertiGISFeature = await GetNewFeature(layerExt, table, position, attributes);
+    // Create the new feature
+    var vertiGISFeature = await GetNewFeature(layerExt, table, position, attributes);
 
-// Add the photo as an attachment on the feature
-var attachmentArgs = new AddAttachmentArgs(fileData, [vertiGISFeature], map);
-// highlight-next-line
-await _ops.EditOperations.AddAttachment.ExecuteAsync(attachmentArgs);
+    // Add the photo as an attachment on the feature
+    var attachmentArgs = new AddAttachmentArgs(fileData, [vertiGISFeature], map);
+    // highlight-next-line
+    await _ops.EditOperations.AddAttachment.ExecuteAsync(attachmentArgs);
 
-await _ops.ResultsOperations.DisplayDetails.ExecuteAsync(vertiGISFeature);
+    await _ops.ResultsOperations.DisplayDetails.ExecuteAsync(vertiGISFeature);
 
-// Launch the feature editing form so user can tweak values if necessary
-// highlight-next-line
-await _ops.EditOperations.DisplayUpdateFeature.ExecuteAsync(vertiGISFeature);
+    // Launch the feature editing form so user can tweak values if necessary
+    // highlight-next-line
+    await _ops.EditOperations.DisplayUpdateFeature.ExecuteAsync(vertiGISFeature);
+}
 ```
 
-Line 52 has the layer id for our sample trees layer. You'd want to replace it with your own layer. Although you could have a more complicated use case where the layer is populated dynamically, this process tends to work best with a specific known layer, so that you can tell the AI model exactly the attribute names you're looking for and what the values should look like. The prompt, starting on line 66, illustrates this: the keys listed there correspond exactly to the tree layer's attribute names. This makes it easy to convert the json response from the AI service directly into a feature without having to do any extra parsing.
+Line 52 has the layer ID for our sample trees layer. You'd want to replace it with your own layer. Although you could have a more complicated use case where the layer is populated dynamically, this process tends to work best with a specific known layer, so that you can tell the AI model exactly the attribute names you're looking for and what the values should look like. The prompt, starting on line 66, illustrates this: the keys listed there correspond exactly to the tree layer's attribute names. This makes it easy to convert the json response from the AI service directly into a feature without having to do any extra parsing.
 
-We found that the AI Model did a fine job of inferring what kind of value we were looking for for most of the attributes just based on the name. However, for the "Health" attribute, the model was giving us responses that referred to the health of the species of tree in general, rather than doing a specific assessment for the individual specimen in the photo. For example, it would give us �this is a hardy species but is susceptible to root rot�, rather than �this tree shows signs of a caterpillar infestation�. Hence we included a note in the prompt clarifying the intention of that field (line 74). If you have a similar setup, where your attribute names may not be intuitive, or perhaps the values have to be constrained to a certain data type like enum values, you can elaborate on that here.
+We found that the AI Model did a fine job of inferring what kind of value we were looking for for most of the attributes just based on the name. However, for the "Health" attribute, the model was giving us responses that referred to the health of the species of tree in general, rather than doing a specific assessment for the individual specimen in the photo. For example, it would give us "this is a hardy species but is susceptible to root rot", rather than "this tree shows signs of a caterpillar infestation". Hence we included a note in the prompt clarifying the intention of that field (line 74). If you have a similar setup, where your attribute names may not be intuitive, or perhaps the values have to be constrained to a certain data type like enum values, you can elaborate on that here.
 
 To get the image, we'll use the Mobile's [TakePhoto operation](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#operation-photos.take-photo). In this sample we also have the option of launching a file picker, to make testing easier.
 

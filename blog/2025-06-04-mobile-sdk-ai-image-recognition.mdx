@@ -140,7 +140,7 @@ namespace App1
 
 Then we can fill in the contents of DoQuickCaptureAsync; the command implementation.
 
-```cs showlinenumbers=42
+```cs showLineNumbers=50
 // Get the map (the first/only available map), and the layer we want to add to
 var map = _mapRepo.AllMaps.EnumerateExisting().First().MapExtension;
 // highlight-next-line
@@ -193,9 +193,9 @@ await _ops.ResultsOperations.DisplayDetails.ExecuteAsync(vertiGISFeature);
 await _ops.EditOperations.DisplayUpdateFeature.ExecuteAsync(vertiGISFeature);
 ```
 
-Line 146 has the layer id for our sample trees layer. Although you could have a more complicated use case where the layer is populated dynamically, this process tends to work best with a specific known layer, so that you can tell the AI model exactly the attribute names you're looking for and what the values should look like. The prompt, starting on line 160, illustrates this: the keys listed there correspond exactly to the tree layer's attribute names. This makes it easy to convert the json response from the AI service directly into a feature without having to do any extra parsing.
+Line 52 has the layer id for our sample trees layer. You'd want to replace it with your own layer. Although you could have a more complicated use case where the layer is populated dynamically, this process tends to work best with a specific known layer, so that you can tell the AI model exactly the attribute names you're looking for and what the values should look like. The prompt, starting on line 66, illustrates this: the keys listed there correspond exactly to the tree layer's attribute names. This makes it easy to convert the json response from the AI service directly into a feature without having to do any extra parsing.
 
-We found that the AI Model did a fine job of inferring what kind of value we were looking for for most of the attributes just based on the name. However, for the "Health" attribute, the model was giving us responses that referred to the health of the species of tree in general, rather than doing a specific assessment for the individual specimen in the photo. For example, it would give us �this is a hardy species but is susceptible to root rot�, rather than �this tree shows signs of a caterpillar infestation�. Hence we included a note in the prompt clarifying the intention of that field (line 168). If you have a similar setup, where your attribute names may not be intuitive, or perhaps the values have to be constrained to a certain data type like enum values, you can elaborate on that here.
+We found that the AI Model did a fine job of inferring what kind of value we were looking for for most of the attributes just based on the name. However, for the "Health" attribute, the model was giving us responses that referred to the health of the species of tree in general, rather than doing a specific assessment for the individual specimen in the photo. For example, it would give us �this is a hardy species but is susceptible to root rot�, rather than �this tree shows signs of a caterpillar infestation�. Hence we included a note in the prompt clarifying the intention of that field (line 74). If you have a similar setup, where your attribute names may not be intuitive, or perhaps the values have to be constrained to a certain data type like enum values, you can elaborate on that here.
 
 To get the image, we'll use the Mobile's [TakePhoto operation](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#operation-photos.take-photo). In this sample we also have the option of launching a file picker, to make testing easier.
 

@@ -38,57 +38,57 @@ The AI service is set up in [OpenAIAssistant.cs](https://github.com/Felicity-R/v
 
 ```cs showLineNumbers=7
 internal class OpenAIAssistant
+{
+	// highlight-next-line
+    /** INSERT YOUR OWN NAME / ENDPOINT / KEY HERE **/
+    private const string deploymentName = "";
+    private const string endpoint = "";
+    private const string key = "";
+
+    private AzureOpenAIClient _openAIClient;
+
+    public OpenAIAssistant()
     {
-		// highlight-next-line
-        /** INSERT YOUR OWN NAME / ENDPOINT / KEY HERE **/
-        private const string deploymentName = "";
-        private const string endpoint = "";
-        private const string key = "";
-
-        private AzureOpenAIClient _openAIClient;
-
-        public OpenAIAssistant()
-        {
-            _openAIClient = new AzureOpenAIClient(new Uri(endpoint), new AzureKeyCredential(key));
-        }
-
-        public async Task<ChatCompletion> QueryImageAsync(byte[] imageData, List<string> queries)
-        {
-            // Limit image to 2MB for quick response and less tokens used
-            if (imageData.Length > 2097152)
-            {
-                throw new ArgumentException("Image exceeded 2MB, try downsizing the image");
-            }
-
-            if (imageData.Length == 0)
-            {
-                throw new ArgumentException("Image is invalid");
-            }
-
-            // highlight-start
-            var chatClient = _openAIClient.GetChatClient(deploymentName);
-            var chatContent = ChatMessageContentPart.CreateImagePart(imageBytes: BinaryData.FromBytes(imageData), "image/png");
-            var systemPrompt = new SystemChatMessage("You are a helpful assistant knowledgeable about trees");
-            var imagePrompt = new UserChatMessage(chatContent);
-
-            var chatMessages = new List<ChatMessage>
-            {
-                systemPrompt,
-                imagePrompt,
-            };
-
-            foreach (var query in queries)
-            {
-                var userChatMessage = new UserChatMessage(query);
-                chatMessages.Add(userChatMessage);
-            }
-
-            var chatCompletionOptions = new ChatCompletionOptions() { ResponseFormat = ChatResponseFormat.CreateJsonObjectFormat()};
-            ChatCompletion chatCompletion = await chatClient.CompleteChatAsync(chatMessages, chatCompletionOptions);
-            // highlight-end
-            return chatCompletion;
-        }
+        _openAIClient = new AzureOpenAIClient(new Uri(endpoint), new AzureKeyCredential(key));
     }
+
+    public async Task<ChatCompletion> QueryImageAsync(byte[] imageData, List<string> queries)
+    {
+        // Limit image to 2MB for quick response and less tokens used
+        if (imageData.Length > 2097152)
+        {
+            throw new ArgumentException("Image exceeded 2MB, try downsizing the image");
+        }
+
+        if (imageData.Length == 0)
+        {
+            throw new ArgumentException("Image is invalid");
+        }
+
+        // highlight-start
+        var chatClient = _openAIClient.GetChatClient(deploymentName);
+        var chatContent = ChatMessageContentPart.CreateImagePart(imageBytes: BinaryData.FromBytes(imageData), "image/png");
+        var systemPrompt = new SystemChatMessage("You are a helpful assistant knowledgeable about trees");
+        var imagePrompt = new UserChatMessage(chatContent);
+
+        var chatMessages = new List<ChatMessage>
+        {
+            systemPrompt,
+            imagePrompt,
+        };
+
+        foreach (var query in queries)
+        {
+            var userChatMessage = new UserChatMessage(query);
+            chatMessages.Add(userChatMessage);
+        }
+
+        var chatCompletionOptions = new ChatCompletionOptions() { ResponseFormat = ChatResponseFormat.CreateJsonObjectFormat()};
+        ChatCompletion chatCompletion = await chatClient.CompleteChatAsync(chatMessages, chatCompletionOptions);
+        // highlight-end
+        return chatCompletion;
+    }
+}
 ```
 
 Note that there are variables for a deployment name, endpoint URL and a key at the top of the file (lines 10-12). You will need to have your own values there in order to actually make the AI queries.

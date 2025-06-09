@@ -28,13 +28,13 @@ There are several advantages to this kind of flow. For one thing, it allows you 
 
 ## Implementing the custom project
 
-We have [a Quickstart project](https://github.com/vertigis/vertigis-mobile-quickstart) already available on GitHub to help expedite the process of creating a custom Studio Mobile app. The code for this AI demo builds on the Quickstart as a base. You can find [the full project on GitHub](https://github.com/Felicity-R/vertigis-mobile-custom-extension-with-AI).
+We have [a Quickstart project](https://github.com/vertigis/vertigis-mobile-quickstart) already available on GitHub to help expedite the process of creating a custom Studio Mobile app. The code for this AI demo builds on the Quickstart as a base. You can find [the full project on GitHub](https://github.com/vertigis/vertigis-mobile-custom-extension-with-AI).
 
 ### The AI Service
 
 Our sample here uses a model from [Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview). Note that this model was not specifically trained to identify trees, though the results are still quite good. However, bear in mind that for your own real-life use cases you may want to use your own model rather than a generic one like this, in order to get better accuracy; particularly if your domain requires more niche expertise. That is outside the scope of this sample.
 
-The AI service is set up in [OpenAIAssistant.cs](https://github.com/Felicity-R/vertigis-mobile-custom-extension-with-AI/blob/ba4628ce91746c2da887f1549c7d930239cf3cdb/App1/OpenAIAssistant.cs).
+The AI service is set up in [OpenAIAssistant.cs](https://github.com/vertigis/vertigis-mobile-custom-extension-with-AI/blob/master/App1/OpenAIAssistant.cs).
 
 ```cs showLineNumbers=7
 internal class OpenAIAssistant
@@ -101,7 +101,7 @@ You can learn more about how to interact with OpenAI models in the [Azure docume
 
 ### The Mobile integration
 
-Integrating the AI service with Mobile and creating the feature happens in [QuickCaptureService.cs](https://github.com/Felicity-R/vertigis-mobile-custom-extension-with-AI/blob/ba4628ce91746c2da887f1549c7d930239cf3cdb/App1/QuickCaptureService.cs).
+Integrating the AI service with Mobile and creating the feature happens in [QuickCaptureService.cs](https://github.com/vertigis/vertigis-mobile-custom-extension-with-AI/blob/master/App1/QuickCaptureService.cs).
 
 First, we [create the service](https://developers.vertigisstudio.com/docs/mobile/sdk-services-create) and [set up a custom command](https://developers.vertigisstudio.com/docs/mobile/sdk-services-create#create-a-custom-command). This command can then be invoked from the I Want To... menu or from a button within the Mobile app, for example.
 

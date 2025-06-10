@@ -1,1 +1,0 @@
-"use strict";(globalThis.webpackChunkvertigis_studio_dev_center=globalThis.webpackChunkvertigis_studio_dev_center||[]).push([[462],{8808:e=>{e.exports=JSON.parse('{"label":"maui","permalink":"/blog/tags/maui","allTagsPath":"/blog/tags","count":1,"unlisted":false}')}}]);

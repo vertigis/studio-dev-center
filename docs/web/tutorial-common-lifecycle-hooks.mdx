@@ -1,0 +1,155 @@
+---
+title: Common lifecycle hooks for starting Workflows.
+description: VertiGIS Studio Web - Learn what lifecycle hooks are available and when to use them.
+---
+
+import useBaseUrl from "@docusaurus/useBaseUrl";
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import UseCaseCard from "../../src/components/UseCaseCard";
+import UseCaseContainer from "../../src/components/UseCaseContainer";
+
+This article will tell you about common lifecycle hooks within Web and when you should use them for starting workflows.
+
+# Services > App > Events >
+
+### Application Initializing
+
+Event gets executed when Web begins to initialize. Commands or workflows must not contain blocking actions such as alerts or user-facing forms; these will prevent the application from loading. This can be useful for launching workflows that are going to impact the initial state of the application (such as initial layout).
+
+### Application Initialized
+
+Event gets executed when Web has initialized. Commands or workflows must not contain blocking actions such as alerts or user-facing forms; these will prevent the application from loading in Designer.
+
+# Components > Map > Events >
+
+### Map Initialized
+
+Event that gets triggered when the map is initialized. The map is initialized when it is loaded for the first time, a user signs in or out, or a map area is activated or deactivated. This can be useful for displaying a workflow that presents UI such as a form or alert or prompt.
+
+# Services > Launch Link Workflows
+
+Using the Launch Link service, you can add and remove workflows to the app that can be optionally specified and run by URL parameter. If specified these workflows are run at the same time as the Map Initialized Event.
+
+You can generate these URLs via Web Designers App Launch Link Dialog. (Deploy > Development > 3 Dot Menu > Get Links)
+
+<img
+    src={useBaseUrl("img/web-workflow-lifecycle-launch-link-1.png")}
+/>
+
+<img
+    src={useBaseUrl("img/web-workflow-lifecycle-launch-link-2.png")}
+/>
+
+# Event Service
+
+You can configure a workflow to run on any VertiGIS Studio Web event by registering an event listener in the Event service. [Events and Operations](https://developers.vertigisstudio.com/docs/web/api-commands-operations-events/#events)
+
+Warning: Do not configure an event listener for any workflow that contains alerts or workflow forms. Special consideration should be given to the performance of a workflow that is triggered by a Web Event that is likely to run often as this could degrade the user experience.
+
+# Different ways to launch a new workflow. When to use which and why?
+
+## Run Workflow Command (workflow.run)
+
+Used to start a workflow on user activity, often executed from IWTM or button component. This is the most common way to launch a workflow, you will use a variant of this command unless you need to utilize a result from the workflow.
+
+Variants: Run Asynchronously, use this flag if want the command to return immediately and not wait on the workflow to finish. This may be useful if your workflow.run is in a command chain that you want to complete without waiting for the workflow to complete.
+
+## Evaluate Workflow Operation (workflow.evaluate)
+
+Workflows can be configured to return a result on completion. If you want to use this value in Web you need to configure the workflow to be run as an operation. This is accomplished by manually configuring the command chain in App Designers commands control in advanced mode, and changing the command name from `workflow.run` to `workflow.evaluate`.
+
+```json title="Advanced Mode Configuration"
+[
+    {
+        "name": "workflow.evaluate",
+        "arguments": {
+          ...
+        }
+    }
+]
+```
+
+## ui.activate command workflow component
+
+Another common pattern for launching a workflow is to configure the workflow in a dedicated form (see different ways to control where the workflow form shows up), and to set it as initially hidden. You can then configure the \*Show Component tool (ui.activate command) via any other method, for example a new item in the I want to menu. Once run the form should activate and run the configured workflow.
+
+image
+
+# Different ways to control where workflow forms show up.
+
+## Dedicated workflow form
+
+Workflow forms components allow you to configure an optional persistent workflow. This workflow will be launched when the form is activated, and the form will be deactivated when the workflow completes. This form will only be used for the dedicated workflow and not considered for displaying any other workflow form.
+
+<img src={useBaseUrl("img/web-workflow-lifecycle-form-1.png")} />
+
+## Workflow Target
+
+When you configure a workflow to be executed as an action in a button or menu item you are given the choice of target containers, by default the Target is set to ‘Auto’ which will select the first Workflow form container in the layout that does not have a persistent workflow.
+
+Optionally you can target any other layout component that supports children, including tabs, panels, stacks, etc.
+
+### WebMaps in Workflow
+
+If you want to interact with the WebMap in your web application, this is easily accomplished using workflows `Get Map` activity.
+This activity gives you access to both the esri map or scene, esri view and the VertiGIS Web map extension object that wraps the map and provides access to VertiGIS Web specific functionality.
+
+For example, in workflow:
+
+```js title="Workflow snippet"
+=map1.extenstion
+=map1.view
+=map1.map
+```
+
+### Esri Graphics and Web Features
+
+Commonly you may write a workflow that accepts an input of Web features and want to work with Esri graphics or have a workflow that produces Graphics and want Web to interact with them (for example display in the Results List or Table of Feature Summary). Web exposes operations to handle these conversions:
+
+## Graphic to Feature
+
+This can be accomplished using webs `results.from-graphics` operation.
+
+## Feature to Graphic
+
+This can be accomplished using webs `results.to-graphics` operation.
+
+These two operations allow you convert between graphics and features easily, but when you are converting from a Graphic that was created in workflow you will need to provide Web with some additional information in order to associate the new Feature with the correct web featuresource (layer sublayer, etc) This will allow Web to properly resolve the correct Popup Configuration, Related Records etc.
+
+In order to accomplish this you will need to specify the map and layer to the `results.from-graphics` operation.
+
+Operation Name: `results.from-graphics`
+
+Operation Parameter:
+
+```js title="Workflow snippet"
+{
+    graphics: [g1, g2, …],
+    layer: $layer1.layer,
+    map: $map1.map.map,
+}
+```
+
+## Passing application items to workflow
+
+It is easy to pass web items to workflows using webs model item:// URI. You can obtain this from App Designer by clicking on the components setting Cog in App Designer, and copying the model URI from the popup dialog.
+
+<img src={useBaseUrl("img/web-workflow-lifecycle-web-items-1.png")} />
+
+You can then use this value when configuring your workflows input arguments. E
+
+```json title="Advanced Mode Configuration"
+[
+  {
+    "name": "workflow.run",
+    "arguments": {
+      "commandArgumentInput": "context",
+      "inputs": {
+        "map": "item://map-extension/default"
+      }
+      ...
+    }
+  }
+]
+```

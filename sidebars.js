@@ -51,6 +51,7 @@ module.exports = {
                 "web/tutorial-run-workflow-app-config",
                 "web/tutorial-display-custom-form",
                 "web/tutorial-change-default-map-click-behavior",
+                "web/tutorial-common-lifecycle-hooks",
                 "web/tutorial-implement-custom-activity",
                 "web/tutorial-implement-custom-form-elements",
             ],

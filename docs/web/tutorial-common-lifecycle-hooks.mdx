@@ -5,6 +5,8 @@ description: VertiGIS Studio Web - Learn what lifecycle hooks are available and 
 
 import useBaseUrl from "@docusaurus/useBaseUrl";
 
+# Lifecycle Hooks for Starting Workflows
+
 This article will tell you about common lifecycle hooks within Web and when you should use them for starting workflows.
 
 # Services > App > Events >
@@ -21,11 +23,15 @@ This event gets executed when Web has initialized. Commands or workflows used he
 
 ## Map Initialized
 
-This is an event that gets triggered when the map is initialized. The map is initialized when it is loaded for the first time, a user signs in or out, or a map area is activated or deactivated. This can be useful for displaying a workflow that presents UI such as a form or alert or prompt.
+This is an event that gets triggered when the map is initialized. The map is initialized when it is loaded for the first time, a user signs in or out, or in Mobile when map area is activated or deactivated. This can be useful for displaying a workflow that presents UI such as a form or alert or prompt.
 
 # Services > Launch Link Workflows
 
 Using the Launch Link service you can add and remove workflows to the app that can be optionally specified and run by URL parameter. The launch link workflow is run at the same time as the Map Initialized Event.
+
+<img
+    src={useBaseUrl("img/web-workflow-lifecycle-launch-link-3.png")}
+/>
 
 You can generate these URLs via Web Designers App Launch Link Dialog. (Deploy > Development > 3 Dot Menu > Get Links)
 
@@ -43,7 +49,7 @@ Use the generated link to run the specified workflow at startup.
 
 You can configure a workflow to run on any VertiGIS Studio Web event by registering an event listener in the Event service. [Events and Operations](https://developers.vertigisstudio.com/docs/web/api-commands-operations-events/#events) [Generic Event Listener](https://developers.vertigisstudio.com/blog/2023/03/01/mobile-generic-event-listener/)
 
-Warning: Do not configure an event listener for any workflow that contains alerts or workflow forms that run during application initialization. Special consideration should be given to the performance of a workflow that is triggered by a Web Event that is likely to run often as this could degrade the user experience.
+Warning: In general configuring an event listener for a workflow that contains alerts or forms can be undesirable, special consideration should also be given to the performance of a workflow that is triggered by an Event that is likely to run often as this could degrade the user experience.
 
 # Different ways to launch a new workflow. When to use which and why?
 
@@ -68,13 +74,11 @@ Workflows can be configured to return a result on completion. If you want to use
 ]
 ```
 
-## ui.activate command workflow component
+## ui.activate Command Workflow Component
 
-Another common pattern for launching a workflow is to configure the workflow in a dedicated form (see different ways to control where the workflow form shows up), and to set it as initially hidden. You can then configure the \*Show Component tool (ui.activate command) via any other method, for example a new item in the I want to menu. Once run the form should activate and run the configured workflow.
+Another common pattern for launching a workflow is to configure the workflow in a dedicated form (see different ways to control where the workflow form shows up), and to set it as initially hidden. You can then configure the Show Component tool (ui.activate command) via any other method (for example a new item in the I want to menu). Once run the form should activate and run the configured workflow.
 
-image
-
-# Different Ways To Control Where Workflow Forms Show Up
+# Different Ways to Control Where Workflow Forms Show Up
 
 ## Dedicated workflow form
 
@@ -127,7 +131,7 @@ Operation Name: `results.from-graphics`
 }
 ```
 
-## Passing application items to workflow
+## Passing Application Items to workflow
 
 It is easy to pass Web items to workflows using Webs model item:// URI. You can obtain this from App Designer by clicking on the component's setting Cog in App Designer, and copying the model URI from the popup dialog.
 

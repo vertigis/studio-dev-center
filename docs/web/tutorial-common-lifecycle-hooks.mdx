@@ -4,10 +4,6 @@ description: VertiGIS Studio Web - Learn what lifecycle hooks are available and 
 ---
 
 import useBaseUrl from "@docusaurus/useBaseUrl";
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
-import UseCaseCard from "../../src/components/UseCaseCard";
-import UseCaseContainer from "../../src/components/UseCaseContainer";
 
 This article will tell you about common lifecycle hooks within Web and when you should use them for starting workflows.
 
@@ -15,17 +11,17 @@ This article will tell you about common lifecycle hooks within Web and when you 
 
 ## Application Initializing
 
-Event gets executed when Web begins to initialize. Commands or workflows must not contain blocking actions such as alerts or user-facing forms; these will prevent the application from loading. This can be useful for launching workflows that are going to impact the initial state of the application (such as initial layout).
+Event gets executed when Web begins to initialize. Commands or workflows used here must not contain blocking actions such as alerts or user-facing forms; these will prevent the application from loading. This can be useful for launching workflows that are going to impact the initial state of the application (such as initial layout).
 
 ## Application Initialized
 
-Event gets executed when Web has initialized. Commands or workflows must not contain blocking actions such as alerts or user-facing forms; these will prevent the application from loading in Designer.
+This event gets executed when Web has initialized. Commands or workflows used here must not contain blocking actions such as alerts or user-facing forms; these will prevent the application from loading in Designer.
 
 # Components > Map > Events >
 
 ## Map Initialized
 
-Event that gets triggered when the map is initialized. The map is initialized when it is loaded for the first time, a user signs in or out, or a map area is activated or deactivated. This can be useful for displaying a workflow that presents UI such as a form or alert or prompt.
+This is an event that gets triggered when the map is initialized. The map is initialized when it is loaded for the first time, a user signs in or out, or a map area is activated or deactivated. This can be useful for displaying a workflow that presents UI such as a form or alert or prompt.
 
 # Services > Launch Link Workflows
 
@@ -45,9 +41,9 @@ Use the generated link to run the specified workflow at startup.
 
 # Event Service
 
-You can configure a workflow to run on any VertiGIS Studio Web event by registering an event listener in the Event service. [Events and Operations](https://developers.vertigisstudio.com/docs/web/api-commands-operations-events/#events)
+You can configure a workflow to run on any VertiGIS Studio Web event by registering an event listener in the Event service. [Events and Operations](https://developers.vertigisstudio.com/docs/web/api-commands-operations-events/#events) [Generic Event Listener](https://developers.vertigisstudio.com/blog/2023/03/01/mobile-generic-event-listener/)
 
-Warning: Do not configure an event listener for any workflow that contains alerts or workflow forms. Special consideration should be given to the performance of a workflow that is triggered by a Web Event that is likely to run often as this could degrade the user experience.
+Warning: Do not configure an event listener for any workflow that contains alerts or workflow forms that run during application initialization. Special consideration should be given to the performance of a workflow that is triggered by a Web Event that is likely to run often as this could degrade the user experience.
 
 # Different ways to launch a new workflow. When to use which and why?
 
@@ -78,7 +74,7 @@ Another common pattern for launching a workflow is to configure the workflow in 
 
 image
 
-# Different ways to control where workflow forms show up.
+# Different Ways To Control Where Workflow Forms Show Up
 
 ## Dedicated workflow form
 
@@ -133,7 +129,7 @@ Operation Name: `results.from-graphics`
 
 ## Passing application items to workflow
 
-It is easy to pass web items to workflows using webs model item:// URI. You can obtain this from App Designer by clicking on the components setting Cog in App Designer, and copying the model URI from the popup dialog.
+It is easy to pass Web items to workflows using Webs model item:// URI. You can obtain this from App Designer by clicking on the component's setting Cog in App Designer, and copying the model URI from the popup dialog.
 
 <img src={useBaseUrl("img/web-workflow-lifecycle-web-items-1.png")} />
 

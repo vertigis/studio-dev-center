@@ -23,11 +23,11 @@ This event gets executed when Web has initialized. Commands or Workflows used he
 
 ## Map Initialized
 
-This is an event that gets triggered when the map is initialized. The map is initialized when it is loaded for the first time, a user signs in or out, or in Mobile when map area is activated or deactivated. This can be useful for displaying a Workflow that presents UI such as a form or alert or prompt.
+This is an event that gets triggered when the map is initialized. The map is initialized when it is loaded for the first time, a user signs in or out, or in Mobile when map area is activated or deactivated. This can be useful for displaying a Workflow that presents UI such as a form or for a Workflow that depends upon map data.
 
 # Services > Launch Link Workflows
 
-Using the Launch Link service you can add and remove Workflows to the app that can be optionally specified and run by URL parameter. The launch link Workflow is run at the same time as the Map Initialized Event.
+Using the Launch Link service you can add and remove Workflows to the app that can be optionally specified and run by URL parameter. The launch link Workflow is run at the same time as the Map Initialized Event. This can be useful for passing in information such as an asset id and then using a Workflow to have Web start with that asset already centered and selected.
 
 <img
     src={useBaseUrl("img/web-workflow-lifecycle-launch-link-3.png")}
@@ -82,7 +82,7 @@ Another common pattern for launching a Workflow is to configure the Workflow in 
 
 ## Dedicated Workflow form
 
-Workflow forms components allow you to configure an optional persistent Workflow. This Workflow will be launched when the form is activated, and the form will be deactivated when the Workflow completes. This form will only be used for the dedicated Workflow and not considered for displaying any other Workflow form.
+Workflow forms components allow you to configure an optional persistent Workflow. This Workflow will be launched when the form is activated, and the form will be deactivated when the Workflow completes. This form will only be used for the dedicated Workflow and not considered for displaying any other Workflow form. This can allow you to use a Workflow form and have it appear as an always-running integrated part of a Web UI.
 
 <img src={useBaseUrl("img/web-workflow-lifecycle-form-1.png")} />
 

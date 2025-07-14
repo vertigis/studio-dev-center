@@ -49,7 +49,8 @@ Use the generated link to run the specified workflow at startup.
 
 You can configure a Workflow to run on any VertiGIS Studio Web [Event](https://developers.vertigisstudio.com/docs/Web/api-commands-operations-events/#events) by registering an event listener in the [Event service](https://developers.vertigisstudio.com/blog/2023/03/01/mobile-generic-event-listener/).
 
-Warning: In general configuring an event listener for a Workflow that contains alerts or forms can be undesirable, special consideration should also be given to the performance of a Workflow that is triggered by an Event that is likely to run often as this could degrade the user experience.
+:::danger Warning: In general configuring an event listener for a Workflow that contains alerts or forms can be undesirable, special consideration should also be given to the performance of a Workflow that is triggered by an Event that is likely to run often as this could degrade the user experience.
+:::
 
 # Different ways to launch a new Workflow. When to use which and why?
 
@@ -61,7 +62,7 @@ Variants: Run Asynchronously, use this flag if want the command to return immedi
 
 ## Evaluate Workflow Operation (workflow.evaluate)
 
-Workflows can be configured to return a result on completion. If you want to use this value in Web you need to configure the Workflow to be run as an operation. This is accomplished by manually configuring the command chain in App Designer's commands control in advanced mode, and changing the command name from `workflow.run` to `workflow.evaluate`.
+Workflows can be configured to return a result on completion. If you want to use this value in Web you need to configure the Workflow to be run as an operation. This is accomplished by manually configuring the command chain in App Designer's commands control in advanced mode, and changing the command name from `workflow.run` to `workflow.evaluate`. Note that Mobile does not support `workflow.evaluate` and its implementation of `workflow.run` returns a result.
 
 ```json title="Advanced Mode Configuration"
 [
@@ -76,26 +77,26 @@ Workflows can be configured to return a result on completion. If you want to use
 
 ## ui.activate Command Workflow Component
 
-Another common pattern for launching a Workflow is to configure the Workflow in a dedicated form (see different ways to control where the Workflow form shows up), and to set it as initially hidden. You can then configure the Show Component tool (ui.activate command) via any other method (for example a new item in the I want to menu). Once run the form should activate and run the configured Workflow.
+Another common pattern for launching a Workflow is to configure the Workflow in a dedicated form (see different ways to control where the Workflow form shows up), and to set it as initially hidden. You can then configure the "Show Component" tool (ui.activate command) via any other method (for example a new item in the I Want to menu). Once run the form should activate and run the configured Workflow.
 
 # Different Ways to Control Where Workflow Forms Show Up
 
 ## Dedicated Workflow form
 
-Workflow forms components allow you to configure an optional persistent Workflow. This Workflow will be launched when the form is activated, and the form will be deactivated when the Workflow completes. This form will only be used for the dedicated Workflow and not considered for displaying any other Workflow form. This can allow you to use a Workflow form and have it appear as an always-running integrated part of a Web UI.
+Workflow forms components allow you to configure an optional persistent Workflow. This Workflow will be launched when the form is activated, and the form will be deactivated when the Workflow completes. This form will only be used for the dedicated Workflow and not considered for displaying any other Workflow form. This can allow you to use a Workflow form and have it appear as an always-running integrated part of a Web UI. Note this behavior is not consistent with Mobile where forms with a persistent Workflow can still be targeted by other Workflows.
 
 <img src={useBaseUrl("img/web-workflow-lifecycle-form-1.png")} />
 
 ## Workflow Target
 
-When you configure a Workflow to be executed as an action in a button or menu item you are given the choice of target containers, by default the Target is set to ‘Auto’ which will select the first Workflow form container in the layout that does not have a persistent Workflow.
+When you configure a Workflow to be executed as an action in a button or menu item you are given the choice of target container. By default the Target is set to ‘Auto’ which will select the first Workflow form container in the layout that does not have a persistent Workflow.
 
 Optionally you can target any other layout component that supports children, including tabs, panels, stacks, etc.
 
 ## WebMaps in Workflow
 
-If you want to interact with the WebMap in your Web application, this is easily accomplished using Workflows `Get Map` activity.
-This activity gives you access to both the esri map or scene, esri view and the VertiGIS Web map extension object that wraps the map and provides access to VertiGIS Web specific functionality.
+If you want to interact with the WebMap in your Web application, this is easily accomplished using Workflow's `Get Map` activity.
+This activity gives you access to both the Esri map or scene, Esri view and the VertiGIS Web MapExtension object that wraps the map and provides access to VertiGIS Web specific functionality.
 
 For example, in Workflow:
 
@@ -117,7 +118,7 @@ This can be accomplished using Web's `results.from-graphics` operation.
 
 This can be accomplished using Web's `results.to-graphics` operation.
 
-These two operations allow you convert between graphics and features easily, but when you are converting from a Graphic that was created in Workflow you will need to provide Web with some additional information in order to associate the new Feature with the correct Web featuresource (layer sublayer, etc) This will allow Web to properly resolve the correct Popup Configuration, Related Records etc.
+These two operations allow you convert between Graphics and Features easily, but when you are converting from a Graphic that was created in Workflow you will need to provide Web with some additional information in order to associate the new Feature with the correct Web FeatureSource (Layer, Sublayer, etc.). This will allow Web to properly resolve the correct Popup Configuration, Related Records etc.
 
 In order to accomplish this you will need to specify the map and layer to the `results.from-graphics` operation.
 
@@ -133,7 +134,7 @@ Operation Name: `results.from-graphics`
 
 ## Passing Application Items to Workflow
 
-It is easy to pass Web items to workflows using Web's model item:// URI. You can obtain this from App Designer by clicking on the components setting Cog in App Designer, and copying the model URI from the popup dialog.
+It is easy to pass Web items to Workflows using Web's model item:// URI. You can obtain this from App Designer by clicking on the components setting Cog in App Designer, and copying the model URI from the popup dialog.
 
 <img src={useBaseUrl("img/web-workflow-lifecycle-web-items-1.png")} />
 

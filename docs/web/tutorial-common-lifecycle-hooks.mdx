@@ -49,7 +49,7 @@ Use the generated link to run the specified workflow at startup.
 
 You can configure a Workflow to run on any VertiGIS Studio Web [Event](https://developers.vertigisstudio.com/docs/Web/api-commands-operations-events/#events) by registering an event listener in the [Event service](https://developers.vertigisstudio.com/blog/2023/03/01/mobile-generic-event-listener/).
 
-:::danger Warning: In general configuring an event listener for a Workflow that contains alerts or forms can be undesirable, special consideration should also be given to the performance of a Workflow that is triggered by an Event that is likely to run often as this could degrade the user experience.
+:::danger Warning: In general configuring an event listener for a Workflow that contains alerts or forms can be undesirable. Special consideration should also be given to the performance of a Workflow that is triggered by an Event that is likely to run often, as this could degrade the user experience.
 :::
 
 # Different ways to launch a new Workflow. When to use which and why?
@@ -58,7 +58,7 @@ You can configure a Workflow to run on any VertiGIS Studio Web [Event](https://d
 
 Used to start a Workflow on user activity, often executed from IWTM, menu, or button component. This is the most common way to launch a Workflow; you will generally use a variant of this command unless you need to utilize a result from the Workflow.
 
-Variants: Run Asynchronously, use this flag if want the command to return immediately and not wait on the Workflow to finish. This may be useful if your workflow.run is in a command chain that you want to continue to completion without waiting for the Workflow to finish.
+Variants: Run Asynchronously, use this flag if you want the command to return immediately and not wait on the Workflow to finish. This may be useful if your workflow.run is in a command chain that you want to continue to completion without waiting for the Workflow to finish.
 
 ## Evaluate Workflow Operation (workflow.evaluate)
 

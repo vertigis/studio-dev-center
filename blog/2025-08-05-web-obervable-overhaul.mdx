@@ -20,7 +20,7 @@ If you want to know what the end result is and what the new functionality and in
 
 Prior to the ArcGIS Maps SDK for JavaScript (ArcGIS JS SDK) version 4.32 release, almost every class in the ArcGIS JS SDK had a `.watch` method. This method was inherited from the base class `Accessor` that most classes in the ArcGIS JS SDK ultimately inherit from. With the release of 4.32, the `.watch` method on `Accessor` was deprecated in favour of using their `reactiveUtils` utility functions instead as these were the utilities that replaced the `watchUtils` the ArcGIS JS SDK had at initial release.
 
-When VertiGIS Studio Web (Web) was first developed, we followed the watch pattern that had been established by the ArcGIS JS SDK. Doing this allowed for a more seamless experience when developing Web SDK applications, you could follow the same pattern and the watch utilities were compatible.
+When VertiGIS Studio Web (Web) was first developed, we followed the watch pattern that had been established by the ArcGIS JS SDK. Doing this allowed for a more seamless experience when developing Web SDK applications; you could follow the same pattern and the watch utilities were compatible.
 
 When `watchUtils` was deprecated and `reactiveUtils` support was added, we had to make a decision of how we would support this change going forward. Because only `watchUtils` support was being removed, and the `.watch` method on `Accessor` was remaining, it was decided to leave the `.watch` method on our classes as well but also add support for using our classes with `reactiveUtils`. By doing this we were able to support `reactiveUtils` without any breaking changes to our APIs. You can read about the `watchUtils` to `reactiveUtils` change in the ArcGIS JS SDK here: [Why you should be using reactiveUtils instead of watchUtils](https://www.esri.com/arcgis-blog/products/js-api-arcgis/developers/reactiveUtils-and-why-you-should-be-using-them-instead-of-watchutils-with-the-arcgis-maps-sdk-for-javascript).
 
@@ -61,7 +61,7 @@ With these issues in mind, particularly the performance hit, we’ve been wantin
 
 Over the years we have seen many uses of `reactiveUtils`, both in our codebase and across various Web SDK applications built internally and externally, and we have learned a lot about how to use it well, where it shines, and where we wish we had something slightly different.
 
-Let’s talk about the pros. The interface is simple and somewhat familiar to JS developers. Callbacks are commonplace in JS and by utilizing them for the watch value callback the `watch` function from `reactiveUtils` is easy to use. Autocomplete and renaming properties/methods work well in IDEs and there’s flexibility, allowing you to do more than just return a property value, you can return calculations from multiple properties and all of that would be tracked and trigger the callback when those properties change. If using TypeScript, as we recommend and use in our codebase, the return value from the watch value callback is typed properly when passed to the callback, making development that much easier and less error prone.
+Let’s talk about the pros. The interface is simple and somewhat familiar to JS developers. Callbacks are commonplace in JS and by utilizing them for the watch value callback the `watch` function from `reactiveUtils` is easy to use. Autocomplete and renaming properties/methods work well in IDEs and there’s flexibility, allowing you to do more than just return a property value: you can return calculations from multiple properties and all of that would be tracked and trigger the callback when those properties change. If using TypeScript, as we recommend and use in our codebase, the return value from the watch value callback is typed properly when passed to the callback, making development that much easier and less error prone.
 
 But there are some downsides we’ve found, and some are harder to spot than others.
 The first issue that caught us quite a few times is that the property you are watching, the entire object chain, may not actually be watchable and there’s nothing in the IDE, types from TypeScript, or even at runtime that will tell you that the watch you setup isn’t going to do anything.
@@ -95,7 +95,7 @@ function myLeakyFunc(
     someObservableObject: object
 ) {
     // The lexical scope created at this level
-    // includes both `someLargeObject and `someObservableObject`.
+    // includes both `someLargeObject` and `someObservableObject`.
 
     // This lexical scope is captured by all 3 anonymous
     // functions' closures and will live for as long as the
@@ -114,7 +114,7 @@ function myLeakyFunc(
 }
 ```
 
-On the surface this seems innocent enough. We have a large object that needs to be used in an anonymous function and a watch that needs to watch a property on a completely separate observable object and the anonymous function is returned for use by the caller as well as the watch handle for cleanup when no longer needed. But sadly this has the potential to create a whole host of memory leaks depending on the browser engine and garbage collector being used.
+On the surface this seems innocent enough. We have a large object that needs to be used in an anonymous function and a watch that needs to watch a property on a completely separate observable object, and the anonymous function is returned for use by the caller as well as the watch handle for cleanup when no longer needed. But sadly this has the potential to create a whole host of memory leaks depending on the browser engine and garbage collector being used.
 
 When JavaScript creates closures for functions, those closures are created using the lexical environment for where that function is created. When functions exist at the same lexical environment level, they share the same lexical scope. In this case, both `myFunc`, the watch value callback, and the watch callback all share the same lexical scope. This means that any objects that are needed for one of these anonymous functions are included in the closure for the other functions, even though they don’t use the value. This means that, even if the returned `myFunc` goes out of scope by the running program and is cleaned up by the GC, the watch is still holding onto the large object because the large object was included in the lexical scope that the watch callbacks’ closures captured. This also happens the other way around, where `myFunc` will hold the observable object alive even when we cleanup the watch by calling `remove` on the returned handle when we were done with it.
 
@@ -124,7 +124,7 @@ While this last example is a basic one, it is easy to imagine how quickly these 
 
 With the removal of `.watch` from the ArcGIS JS SDK classes it makes sense for us to remove our implementation of `.watch` as well, given that our `.watch` is tied into the ArcGIS JS SDK implementation. This would be a breaking change in the Web SDK which we do try to approach with much caution. While the removal of `.watch` from the ArcGIS JS SDK is going to be a breaking change for Web SDK developers, and there isn’t anything we can do about that, we always look carefully at any breaking changes we’re going to make to our APIs to ensure that they are truly in the best interests of progressing the ease of future development.
 
-Removing `.watch` would leave us relaying on `reactiveUtils` for observable functionality, and as you’ve seen reading through this, perhaps that isn’t the best approach for Web, with the use of the JS Proxy and various performance and memory issues. After much discussion, since we were going to have to make a breaking change to the Web SDK anyway with the removal of `.watch`, we decided to look into what it might look like if we revisited property observability with a fresh approach.
+Removing `.watch` would leave us relying on `reactiveUtils` for observable functionality, and as you’ve seen reading through this, perhaps that isn’t the best approach for Web, with the use of the JS Proxy and various performance and memory issues. After much discussion, since we were going to have to make a breaking change to the Web SDK anyway with the removal of `.watch`, we decided to look into what it might look like if we revisited property observability with a fresh approach.
 
 ## Shaping the New Watch System
 
@@ -137,7 +137,7 @@ We compiled a wish list of everything we would want in a property observability 
 3. Will error at compile time with TypeScript if given objects or properties that cannot be watched.
 4. Will error or warn at runtime if trying to watch objects or properties that cannot be watched.
 5. Will not leak memory, even when misused.
-6. Will not do anything functional when nothing is watching a property that is watchable. IE: no tracking announcements, no change notifications to nowhere, etc.
+6. Will not do anything functional when nothing is watching a property that is watchable. i.e.: no tracking announcements, no change notifications to nowhere, etc.
 7. Will provide auto-completions with TypeScript for properties that are watchable.
 8. Will provide correct types with TypeScript for values passed to any callbacks.
 9. Remove the need for a root base class that everything must inherit from so that we can be selective about classes that can be observable, not everything needs to be watched.
@@ -168,16 +168,16 @@ The original `.watch` functions used a string to specify paths to properties, bu
 
 So, along with the object to be watched we decided a string property path would be our best option. With modern TypeScript, we can now build out a complex, template string recursive type that can build out the available watch options for nested watch property paths. There is a bit of a performance hit in IDEs when this recursive type encounters large deeply nested objects, so after dialing in the type performance we had to limit the depth of recursion to three for full type checking. But we expect that with the new [native TypeScript](https://devblogs.microsoft.com/typescript/typescript-native-port/) compiler that’s in the works, this performance issue will get much better and we will likely be able to expand the depth of the type checking further.
 
-Aside from the minor IDE performance issue, there is another IDE related drawback to the string property path, you won’t be able to use rename functionality and have that update the string references nor will a reference lookup find watches for the properties being watched. But we decided these IDE drawbacks can be lived with, given the memory management advantage of this pattern.
+Aside from the minor IDE performance issue, there is another IDE related drawback to the string property path: you won’t be able to use rename functionality and have that update the string references, nor will a reference lookup find watches for the properties being watched. But we decided these IDE drawbacks can be lived with, given the memory management advantage of this pattern.
 
-After dialing in the types and starting to spread around the new watch, we did encounter one other quirk. When attempting to pass `this` as the object being watched, TypeScript wasn’t happy. Turns out, when you’re using constrained generic types for typing arguments and you pass `this` to one of those arguments TypeScript won’t infer the type of `this`. They have their reasons, but it is a bit inconvenient in our use case. We debated on how to handle this, and tried a number of different ways to workaround it, but in the end we couldn’t find anything better than just casting `this` when passed. Bt, we also realized that in a lot of cases we see where `this` is being passed as the watch object, a watch really shouldn’t be used. Using the watch system to know when a property changes that you have control of is pretty heavy handed; a better approach would be to do whatever action you want in a setter instead.
+After dialing in the types and starting to spread around the new watch, we did encounter one other quirk. When attempting to pass `this` as the object being watched, TypeScript wasn’t happy. Turns out, when you’re using constrained generic types for typing arguments and you pass `this` to one of those arguments TypeScript won’t infer the type of `this`. They have their reasons, but it is a bit inconvenient in our use case. We debated on how to handle this, and tried a number of different ways to workaround it, but in the end we couldn’t find anything better than just casting `this` when passed. But, we also realized that in a lot of cases we see where `this` is being passed as the watch object, a watch really shouldn’t be used. Using the watch system to know when a property changes that you have control of is pretty heavy handed; a better approach would be to do whatever action you want in a setter instead.
 
 ### No Base Class? Let’s try Decorators … (spoiler, we didn’t use decorators)
 
 Wish list #9 would have us remove the `Observable` base class from all of our classes so that we can be more targeted about what is actually observable and what is not. To do this we would need some way to add functionality to a class without inheritance. This sounds like exactly what decorators are designed to do.
 The first iteration of the new observable implementation was built as a class decorator. This would fulfill wish list item #9 and #11 (no base class and not specifying exact properties that are observable, respectively).
 
-However, we ran into some immediate problems around TypeScript typing. Mainly, TypeScript doesn’t augment the types of a class (or anything) that uses a decorator that, from the JavaScript perspective, does augment the class with new functionality. This created a typing problem, to satisfy wish list item #12 (opt in observability) we would need an extra interface that implementors would also have to add to their observable classes to ensure that the class is observable. It looked something like this:
+However, we ran into some immediate problems around TypeScript typing. Mainly, TypeScript doesn’t augment the types of a class (or anything) that uses a decorator that, from the JavaScript perspective, does augment the class with new functionality. This created a typing problem: to satisfy wish list item #12 (opt in observability) we would need an extra interface that implementors would also have to add to their observable classes to ensure that the class is observable. It looked something like this:
 
 ```ts
 interface IObservable {
@@ -617,9 +617,9 @@ The returned handle from `createIHandle` holds a reference to the iterable and w
 
 ### What did we Deprecate?
 
-All classes that were inheriting from `Observable` (@vertigis/arcgis-extensions/support/Observable.ts) no longer inherit from `Observable`. Most have been updated to use the new mixin, however `SerializableBase` has not been updated to use the mixin as it did not make sense for this class to be observable on its own. Every class, including `SerializableBase`, that no longer inherit from `Observable` has had deprecated methods added to temporarily provide the previous methods from `Observable`. Support for `reactiveUtils` for all classes that were previously inheriting from `Observable` will still work as well during the transition period.
+All classes that were inheriting from `Observable` (@vertigis/arcgis-extensions/support/Observable.ts) no longer inherit from `Observable`. Most have been updated to use the new mixin, however `SerializableBase` has not been updated to use the mixin as it did not make sense for this class to be observable on its own. Every class, including `SerializableBase`, that no longer inherits from `Observable` has had deprecated methods added to temporarily provide the previous methods from `Observable`. Support for `reactiveUtils` for all classes that were previously inheriting from `Observable` will still work as well during the transition period.
 
-If you’re unsure if you have any references to anything that will be removed, you can check the browser console, all deprecated functions, classes, and modules that are still in use are logged there as warnings.
+If you’re unsure if you have any references to anything that will be removed, you can check the browser console; all deprecated functions, classes, and modules that are still in use are logged there as warnings.
 
 <table>
     <tr>

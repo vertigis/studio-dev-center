@@ -1,0 +1,850 @@
+---
+title: VertiGIS Studio Web 5.37 Observable Overhaul
+author: Brenda Parker
+authorTitle: Software Developer
+authorURL: https://github.com/bparker-dev
+authorImageURL: https://github.com/bparker-dev.png
+tags: [web, sdk]
+---
+
+The recent deprecation of the `.watch` method in the ArcGIS Maps SDK for JavaScript caused a cascade effect on key underlying property observability behavior in VertiGIS Studio Web.
+This blog post is the fully story of how this one change caused us to rethink property observability and what changes can be expected with VertiGIS Studio Web 5.37.
+
+<!--truncate-->
+
+:::note
+If you want to know what the end result is and what the new functionality and interfaces look like, jump to the last section [The New Watch System](2025-08-05-web-obervable-overhaul.mdx#the-new-watch-system). If you’re curious about why we did this and how we got to the end result, read on.
+:::
+
+## ArcGIS Maps SDK for JavaScript `.watch` Deprecation
+
+Prior to the ArcGIS Maps SDK for JavaScript (ArcGIS JS SDK) version 4.32 release, almost every class in the ArcGIS JS SDK had a `.watch` method. This method was inherited from the base class `Accessor` that most classes in the ArcGIS JS SDK ultimately inherit from. With the release of 4.32, the `.watch` method on `Accessor` was deprecated in favour of using their `reactiveUtils` utility functions instead as these were the utilities that replaced the `watchUtils` the ArcGIS JS SDK had at initial release.
+
+When VertiGIS Studio Web (Web) was first developed, we followed the watch pattern that had been established by the ArcGIS JS SDK. Doing this allowed for a more seamless experience when developing Web SDK applications; you could follow the same pattern and the watch utilities were compatible.
+
+When `watchUtils` was deprecated and `reactiveUtils` support was added, we had to make a decision of how we would support this change going forward. Because only `watchUtils` support was being removed, and the `.watch` method on `Accessor` was remaining, it was decided to leave the `.watch` method on our classes as well but also add support for using our classes with `reactiveUtils`. By doing this we were able to support `reactiveUtils` without any breaking changes to our APIs. You can read about the `watchUtils` to `reactiveUtils` change in the ArcGIS JS SDK here: [Why you should be using reactiveUtils instead of watchUtils](https://www.esri.com/arcgis-blog/products/js-api-arcgis/developers/reactiveUtils-and-why-you-should-be-using-them-instead-of-watchutils-with-the-arcgis-maps-sdk-for-javascript).
+
+Now, with the deprecation of the `.watch` method on `Accessor`, the last vestige of the `watchUtils` is finally being removed from the ArcGIS JS SDK. But as much of our code still uses the `.watch` method pattern, we finally had to confront a breaking change.
+
+## How the Removal of One Method Snowballed into an Overhaul
+
+Why not just remove the one deprecated pattern and leave the `reactiveUtils` support? Good question. That was definitely an option. But the support for `reactiveUtils` and how it was implemented had some major side effects that we’ve been trying to deal with ever since.
+
+### `reactiveUtils` Inside VertiGIS Studio Web
+
+To understand why the deprecation of `.watch` cascaded into an overhaul of our property watch system, you have to understand how we’re currently supporting the use of our classes with the ArcGIS JS SDK’s `reactiveUtils` and how `reactiveUtils` work.
+
+All of the ArcGIS JS SDK’s classes (or at least most) are compatible with `reactiveUtils`; you can use them with `reactiveUtils` without thinking about it and it will just work. However, if you try to use your own class with `reactiveUtils` it isn’t going to do anything.
+
+For properties to be "watchable" with `reactiveUtils`, your property needs to be able to "announce" itself to the ArcGIS JS SDK `reactiveUtils` system whenever it is accessed, not just when it changes. To do this you would normally need to add a decorator the ArcGIS JS SDK provides to your property (See [Property](https://developers.arcgis.com/javascript/latest/api-reference/esri-core-accessorSupport-decorators.html#property)). This decorator adds the necessary code to the property to make the property "watchable".
+Having to add this decorator to every property in Web would have been a daunting task, but that wasn’t the only problem we faced.
+
+At the time, to use those decorators you needed to set your `tsconfig` with `useDefineForClassFields` to `false`. Setting this to `false` is only meant for pre-TC39 projects as part of migration and this compiler option now defaults to true since ES2022 when not specified. We did not like the idea of using an old compiler option to use `reactiveUtils` with our classes.
+
+So if we didn't want to find every single property in our classes to decorate and we didn't want to use the old compiler option, we needed another solution. Enter, the [JS Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)... and some dicey JS.
+
+If we could wrap our classes in a JS Proxy we would be able to use its traps for ‘get’ and ‘set’ which would give us the ability to "announce" access and changes of a property to the underlying system supporting `reactiveUtils`. We already had a core base class called `Observable` that was handling the old `watchUtils` style watches and all classes in Web ultimately inherited from this base class, so the proxy was added to the constructor of this class.
+
+Now, the classes and interfaces necessary to be able to tell `reactiveUtils` about properties are not exposed publicly from the ArcGIS JS SDK, but being JS everything is technically accessible. We did some reverse engineering to discover how to tell `reactiveUtils` when a property was accessed or changed and implemented that in the proxy traps. This effectively allowed every property on all of our classes to participate in the `reactiveUtils` watch system.
+
+### The Downsides of Using JS Proxy with Classes in Web
+
+For the most part, the JS Proxy implementation has been very effective. So effective, in fact, that it seems to be doing magic, and that magic has created some very hard to find bugs over the years.
+
+Because the JS Proxy traps all properties on the object, this means that all data properties, accessor properties, and **methods** must run through the ‘get’ and ‘set’ traps. Additionally, every time an accessor property was accessed (getter), every single underlying property and method that was on one of our classes that was invoked in the property getter would announce itself to the `reactiveUtils` watch system. This cascade of property tracking made it easy to create a new property without needing to worry about the watch system and what it needs to know about to watch that property for changes. However, this amount of magic is costly, and performance takes a significant hit for this convenience. Memory usage also suffers with the amount of extra things being tracked that don’t necessarily need to be. On top of this, because this was implemented in the base class that everything in Web inherits from, it made everything in Web watchable, even when it didn’t need to be, creating even more overhead.
+
+There are other development level inconveniences. The amount of "magic" happening for watches meant that when the "magic" didn’t work, developers would spend an inordinate amount of time trying to figure out why, instead of understanding the limitations of the watch system and when they needed to perform some extra calls to ensure that watches would work properly. It would even result in some interesting workarounds to what should have been a simple fix. Using the proxy also made it so that JS’s private property `#prop` couldn’t be used as these properties are not available on JS Proxies, limiting use of a built-in modern JS feature in our codebase. The main inconvenience though, is during debugging. JS Proxies add an extra layer to objects to sift through when trying to debug your code, and if every single class is a proxy, that’s a lot of extra layers to go through to get to the information you’re looking for, subsequently burning development time.
+
+With these issues in mind, particularly the performance hit, we’ve been wanting to remove the use of the JS Proxy from our classes for some time, but we’ve never had a good path forward that would allow us to continue providing property change watch support with `reactiveUtils`.
+
+### The Pros and Cons of `reactiveUtils`
+
+Over the years we have seen many uses of `reactiveUtils`, both in our codebase and across various Web SDK applications built internally and externally, and we have learned a lot about how to use it well, where it shines, and where we wish we had something slightly different.
+
+Let’s talk about the pros. The interface is simple and somewhat familiar to JS developers. Callbacks are commonplace in JS and by utilizing them for the watch value callback the `watch` function from `reactiveUtils` is easy to use. Autocomplete and renaming properties/methods work well in IDEs and there’s flexibility, allowing you to do more than just return a property value: you can return calculations from multiple properties and all of that would be tracked and trigger the callback when those properties change. If using TypeScript, as we recommend and use in our codebase, the return value from the watch value callback is typed properly when passed to the callback, making development that much easier and less error prone.
+
+But there are some downsides we’ve found, and some are harder to spot than others.
+The first issue that caught us quite a few times is that the property you are watching, the entire object chain, may not actually be watchable and there’s nothing in the IDE, types from TypeScript, or even at runtime that will tell you that the watch you setup isn’t going to do anything.
+
+The callback in this code will never execute:
+
+```ts
+const myObj = { testProp = "test1" };
+watch(
+    () => myObj.testProp,
+    // This callback will never fire because the
+    // object being watched isn't watchable.
+    (value) => console.log(value)
+);
+myObj.testProp = "test2";
+```
+
+While this is a contrived example, it is easy to see where someone can accidentally fall into this trap when you’re working with many nested properties on a mix of objects from different sources. There have been a number of times where a watch would be added that looks like it is needed and everything seems to be working as intended but the watch itself never actually does anything because it is watching something that is unwatchable and the intended behavior is actually occurring due to another piece of code. While having a watch that does nothing may not seem so bad on the surface, it does clutter up code and change people’s expectations of how something is supposed to be working. There is also another drawback we discovered.
+
+Creating a new watch does impact performance. When you spend a minute to think about it, of course it does! You’re executing a function that is going to do something, it must do work which takes some amount of time. But it isn’t always something that is considered; executing code to setup something that will ultimately never perform the action it is supposed to is, of course, going to impact performance. With watch from `reactiveUtils` not being able to tell us if the thing we’re watching is actually watchable, we could be adding a small performance hit to something and if that small performance hit happens 100,000 times, well... you get the idea.
+
+Another thing we've noticed was a recurring misuse of `watch` from `reactiveUtils`. `watch` will return a handle that is supposed to be called to cleanup the watch when it is no longer needed. While this pattern of cleaning up a handler (or listener) is extremely prevalent in development, we’ve found that this is easily missed with `reactiveUtils` use, and have been known to miss it ourselves from time to time, causing memory leaks.
+
+There is one more consideration that is easily missed when constructing watches using `reactiveUtils`, and to understand this, you need to know how JavaScript closures and lexical scoping work.
+
+Let’s take the following code as an example:
+
+```ts
+function myLeakyFunc(
+    someLargeObject: object,
+    someObservableObject: object
+) {
+    // The lexical scope created at this level
+    // includes both `someLargeObject` and `someObservableObject`.
+
+    // This lexical scope is captured by all 3 anonymous
+    // functions' closures and will live for as long as the
+    // anonymous functions are referenced.
+
+    const myFunc = () => {
+        console.log(someLargeObject);
+    };
+
+    const handle = watch(
+        () => someObservableObject.prop,
+        (newPropValue) => console.log(newPropValue)
+    );
+
+    return [myFunc, handle];
+}
+```
+
+On the surface this seems innocent enough. We have a large object that needs to be used in an anonymous function and a watch that needs to watch a property on a completely separate observable object, and the anonymous function is returned for use by the caller as well as the watch handle for cleanup when no longer needed. But sadly this has the potential to create a whole host of memory leaks depending on the browser engine and garbage collector being used.
+
+When JavaScript creates closures for functions, those closures are created using the lexical environment for where that function is created. When functions exist at the same lexical environment level, they share the same lexical scope. In this case, both `myFunc`, the watch value callback, and the watch callback all share the same lexical scope. This means that any objects that are needed for one of these anonymous functions are included in the closure for the other functions, even though they don’t use the value. This means that, even if the returned `myFunc` goes out of scope by the running program and is cleaned up by the GC, the watch is still holding onto the large object because the large object was included in the lexical scope that the watch callbacks’ closures captured. This also happens the other way around, where `myFunc` will hold the observable object alive even when we cleanup the watch by calling `remove` on the returned handle when we were done with it.
+
+While this last example is a basic one, it is easy to imagine how quickly these closure leaks can become a problem in modern JavaScript development.
+
+### So, Back to the Removal of `.watch`
+
+With the removal of `.watch` from the ArcGIS JS SDK classes it makes sense for us to remove our implementation of `.watch` as well, given that our `.watch` is tied into the ArcGIS JS SDK implementation. This would be a breaking change in the Web SDK which we do try to approach with much caution. While the removal of `.watch` from the ArcGIS JS SDK is going to be a breaking change for Web SDK developers, and there isn’t anything we can do about that, we always look carefully at any breaking changes we’re going to make to our APIs to ensure that they are truly in the best interests of progressing the ease of future development.
+
+Removing `.watch` would leave us relying on `reactiveUtils` for observable functionality, and as you’ve seen reading through this, perhaps that isn’t the best approach for Web, with the use of the JS Proxy and various performance and memory issues. After much discussion, since we were going to have to make a breaking change to the Web SDK anyway with the removal of `.watch`, we decided to look into what it might look like if we revisited property observability with a fresh approach.
+
+## Shaping the New Watch System
+
+### The Wish List
+
+We compiled a wish list of everything we would want in a property observability implementation, knowing that we likely would need to compromise in some places.
+
+1. Does not use a JS Proxy.
+2. A watch system that would remain stable with the same interface if the ArcGIS JS SDK ever changes their watch system again.
+3. Will error at compile time with TypeScript if given objects or properties that cannot be watched.
+4. Will error or warn at runtime if trying to watch objects or properties that cannot be watched.
+5. Will not leak memory, even when misused.
+6. Will not do anything functional when nothing is watching a property that is watchable. i.e.: no tracking announcements, no change notifications to nowhere, etc.
+7. Will provide auto-completions with TypeScript for properties that are watchable.
+8. Will provide correct types with TypeScript for values passed to any callbacks.
+9. Remove the need for a root base class that everything must inherit from so that we can be selective about classes that can be observable, not everything needs to be watched.
+10. Does not use private/internal code from a third-party library or the ArcGIS JS SDK.
+11. Does not require any form of specifying the exact properties that will be observable when creating a new class or updating an existing one.
+12. Observability must be opted into by the class implementor.
+13. Can accept objects from the ArcGIS JS SDK that are watchable.
+
+And as a must have: Allows us to provide a smooth transition for Web SDK apps with full backwards compatibility for, at minimum, a couple of full release cycles.
+
+This seemed like a pretty daunting wish list. But we had a few ideas, and JavaScript is inherently extremely flexible.
+
+### `reactiveUtils` Support – Or Lack Thereof
+
+There was one thing that stood out to us with our wish list though; we would not be able to support using our classes with the ArcGIS JS SDK’s `reactiveUtils` with any new system we came up with that lacked a JS Proxy. `reactiveUtils` inherently requires the running of property access tracking code when you have no idea if something is watching a property or not, which conflicts with wish list item #6 (no extra code execution). And even if we could come up with something, we’d still end up breaking wish list item #1 (no JS Proxy) and #10 (no third-party private code use). Wish list item #5 (no memory leaks) would also continue to be an issue, and there would be the threat of wish list item #2 (stable interface) not being met.
+
+Because of these reasons, we decided to proceed with a proof-of-concept (POC) that would not include support for using our classes with `reactiveUtils` functions. We would work in support after if the POC was viable for backwards compatibility, but if the implementation made it past POC the expectation to be set was that support for `reactiveUtils` would be removed.
+
+### Typing the New Watch Function
+
+A number of our wish list items are related to TypeScript and typing watch functionality so we can surface mistakes at compile time and in an IDE well before code tries to run.
+
+The `reactiveUtils` pattern does get part way there, but as we’ve explored, it won’t tell you if you’re watching something that shouldn’t be watched because there is no way to interrogate the objects being used in the watch value callback. To compound the type issues with the `reactiveUtils` watch pattern, we were also thinking about how to deal with accidental/misuse caused memory leaks. We knew we were going to have to have some form of callback for the watch property value change, but if we could control how the property value is accessed before executing that callback and wrap the main object reference in a `WeakRef`, we’d be able to manage the watch’s object references in a more efficient and less prone to leaks way.
+
+With these things in mind, we decided that our best option was to create a utility function, separate from any classes and require the object to be watched to be passed to it, which will allow us to control how the watch system holds a reference to that watched object.
+
+The original `.watch` functions used a string to specify paths to properties, but it was just a string, causing mistypes and refactors to break watches without anything surfacing the issue in a timely manner. Those `.watch` functions were written quite awhile ago, when TypeScript wasn’t very good at recursive typing, and template string types didn’t exist.
+
+So, along with the object to be watched we decided a string property path would be our best option. With modern TypeScript, we can now build out a complex, template string recursive type that can build out the available watch options for nested watch property paths. There is a bit of a performance hit in IDEs when this recursive type encounters large deeply nested objects, so after dialing in the type performance we had to limit the depth of recursion to three for full type checking. But we expect that with the new [native TypeScript](https://devblogs.microsoft.com/typescript/typescript-native-port/) compiler that’s in the works, this performance issue will get much better and we will likely be able to expand the depth of the type checking further.
+
+Aside from the minor IDE performance issue, there is another IDE related drawback to the string property path: you won’t be able to use rename functionality and have that update the string references, nor will a reference lookup find watches for the properties being watched. But we decided these IDE drawbacks can be lived with, given the memory management advantage of this pattern.
+
+After dialing in the types and starting to spread around the new watch, we did encounter one other quirk. When attempting to pass `this` as the object being watched, TypeScript wasn’t happy. Turns out, when you’re using constrained generic types for typing arguments and you pass `this` to one of those arguments TypeScript won’t infer the type of `this`. They have their reasons, but it is a bit inconvenient in our use case. We debated on how to handle this, and tried a number of different ways to workaround it, but in the end we couldn’t find anything better than just casting `this` when passed. But, we also realized that in a lot of cases we see where `this` is being passed as the watch object, a watch really shouldn’t be used. Using the watch system to know when a property changes that you have control of is pretty heavy handed; a better approach would be to do whatever action you want in a setter instead.
+
+### No Base Class? Let’s try Decorators … (spoiler, we didn’t use decorators)
+
+Wish list #9 would have us remove the `Observable` base class from all of our classes so that we can be more targeted about what is actually observable and what is not. To do this we would need some way to add functionality to a class without inheritance. This sounds like exactly what decorators are designed to do.
+The first iteration of the new observable implementation was built as a class decorator. This would fulfill wish list item #9 and #11 (no base class and not specifying exact properties that are observable, respectively).
+
+However, we ran into some immediate problems around TypeScript typing. Mainly, TypeScript doesn’t augment the types of a class (or anything) that uses a decorator that, from the JavaScript perspective, does augment the class with new functionality. This created a typing problem: to satisfy wish list item #12 (opt in observability) we would need an extra interface that implementors would also have to add to their observable classes to ensure that the class is observable. It looked something like this:
+
+```ts
+interface IObservable {
+    __isObservable: true;
+}
+```
+
+Now, having to spread that around everywhere whenever you used the decorator was going to be very annoying. So, we decided that perhaps, at this moment in time, decorators were not the answer to our problem.
+
+### Enter the Mixin Pattern
+
+Decorators are really just a another way of using the mixin pattern, so we switched gears and gave that a try instead, and it ended up working out really well. With the mixin pattern we were able to wrap any class with our observable implementation, even base classes that a class is inheriting from. It also allowed us to type the returned class so TypeScript would understand that this class is observable so we could surface the type errors we were hoping to without needing to expose an extra interface.
+
+This still requires using the mixin as a base class in most use cases, but because it is a mixin, you can use it to wrap a base class you are already inheriting from, effectively allowing multiple inheritance. While it doesn’t get rid of the base class requirement if the mixin is used this way, it does get rid of the problem that we were trying to solve when we wished for the watch system to not use a base class.
+
+As with everything, there is one drawback to this pattern. If you have constructed a class hierarchy that requires a generic type be passed from a child class to a parent class, TypeScript will not be happy with that.
+
+After reviewing this issue, it was decided this was an acceptable drawback. In most cases, there are other ways to workaround this using base types or type overrides in the child class and this situation does not occur commonly in our Web SDK patterns.
+
+### How do you Watch a Property for Changes Without a JS Proxy?
+
+A JS Proxy has its uses, and observability is one of them, but we’ve found that in Web it just doesn’t scale well. Then the question became, how do you watch a property for changes while satisfying wish list item #11 and not requiring developers to specify every single property they want to be able to watch?
+
+Looking at this problem at the very basic level, we want to be able to call a function (the watch callback) whenever a property is set to a new value. If doing this for just one class, you’d likely consider adding a call to property setters. This thought is what lead us to our implementation.
+
+JavaScript objects allow you to redefine property descriptors so long as the descriptor is configurable. Since all of the objects we work with have configurable descriptors we realized that we could redefine the properties on demand to augment their setter (or if they don’t have one add a setter) to include code to handle calling watch callbacks when the property value changes. A quick POC of this proved its viability. This admittedly may seem a little hacky, but if done thoughtfully and carefully we would be able to create a watch system that only ever does work if something creates a watch instead of having to assume there might be a watch.
+
+Classes from the ArcGIS JS SDK are a bit different. We felt that since it already has a watch system (`reactiveUtils`) and all the underlying code of that system would be run anyway, we might as well defer to it when we encounter an ArcGIS JS SDK object that is watchable. By controlling how `reactiveUtils` is used with ArcGIS JS SDK objects under the hood of the new watch system, we can control when a watch needs to be created and manage the accessed objects with `WeakRef`s for better memory management.
+
+### Backwards Compatibility and the Consequences
+
+At this point we had a pretty good looking POC, everything in our codebase was swapped over and all was well with our automated tests and initial basic testing. But there would be no way we could release this as is as it would break almost every single Web SDK built app out there. We had to come up with a plan for a non-breaking transition.
+
+Deprecating the old `.watch` functions on our classes instead of removing them outright and swapping the underlying code to the new watch system was fairly straightforward. We just had to change some places where we were throwing exceptions in our new code to log warnings instead and add some extra null checks. We deprecated some other utility functions as well in favour of the new observable system functions.
+
+The real challenge was going to be `reactiveUtils` support. We ran through a number of different ways to try to add it into the new system without using a JS Proxy, but nothing was going to work 100% of the time. We had to add the proxy back… This meant that some of our innovations for better memory management and improved performance would not be able to make the first release of the new observable system, but backwards compatibility was non-negotiable.
+
+### If You’ve Been Keeping Score
+
+If we look through our wish list items, it looks like we managed to tick everything off the list! Well, almost… the improved memory management and performance will have to wait until we can remove the support added for backwards compatibility and `reactiveUtils`. We’ll also need to wait for the native TypeScript compiler to dial in the type checking even further. We also didn’t fully get rid of a base class, but we did solve the problem that wish list item was for with the mixin pattern allowing for multiple inheritance. But overall, we managed to accomplish what we set out to do.
+
+## The New Watch System
+
+We’ve completely overhauled how watching objects for property changes works in the VertiGIS Studio Web SDK (Web SDK). This new functionality is going to be more performant and use less memory than the previous versions (once the old code and support for backwards compatibility is removed) and will create a stable interface for us to continuously improve and add to the property watch system.
+
+This new system will reduce the number of common errors we see when using the currently available property watch systems. We did have to deprecate a number of things from the old systems that will be removed, so make sure to review the list and update your Web SDK apps soon. While we are giving a transition period of a couple full release cycles, it is better to jump on this change sooner rather than later.
+
+### New Module: observableUtils
+
+We’ve added a new module that contains all of the new observable functionality called `observableUtils`.
+
+You can import `observableUtils` functions from @vertigis/arcgis-extensions.
+
+```ts
+import { watch } from "@vertigis/arcgis-extensions/support/observableUtils";
+```
+
+<table>
+    <tr>
+        <th>Function</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td>`observable`</td>
+        <td>The mixin used to add observability to a class.</td>
+    </tr>
+    <tr>
+        <td>`watch`</td>
+        <td>
+            Watches a specific property or property path for changes.
+        </td>
+    </tr>
+    <tr>
+        <td>`notifyChange`</td>
+        <td>
+            Tells the watch system that the given property may have
+            changed and needs to be checked.
+        </td>
+    </tr>
+    <tr>
+        <td>`onWatch`</td>
+        <td>Allows you to react to something watching a property.</td>
+    </tr>
+    <tr>
+        <td>`watchEach`</td>
+        <td>Watches a property on each item in a collection.</td>
+    </tr>
+    <tr>
+        <td>`watchEvent`</td>
+        <td>
+            Attaches an event listener to the watched property and
+            removes the old listener whenever the property changes.
+        </td>
+    </tr>
+    <tr>
+        <td>`once`</td>
+        <td>
+            Async watch that allows you to await for a property to
+            change.
+        </td>
+    </tr>
+    <tr>
+        <td>`when`</td>
+        <td>
+            Watches a property or property path for the value to
+            become truthy.
+        </td>
+    </tr>
+    <tr>
+        <td>`whenOnce`</td>
+        <td>
+            Async when that allows you to await for a property to
+            become truthy.
+        </td>
+    </tr>
+    <tr>
+        <td>`createIHandle`</td>
+        <td>
+            Helper utility to create a new IHandle from an iterable of
+            IHandles.
+        </td>
+    </tr>
+</table>
+
+#### Observable Mixin
+
+To add observability to a class there are a few different ways to use the new mixin to accomplish this, but we’ve found the cleanest approach, and the one that gets you the best type checking by TypeScript, is to extend the mixin, or wrap a base class being extended with the mixin.
+
+```ts
+class MyClassNoBaseClass extends observable() {}
+
+class MyClassWithBaseClass extends observable(BaseClass) {}
+```
+
+This will make your class observable so it can be used with the other `observableUtils` functions.
+
+#### `watch`
+
+This is the main watch function, it is also what backs `useWatch` and most if its variants. This function supports watching any classes from the Web SDK that are observable, any classes from the ArcGIS JS SDK that inherit from Accessor which indicates that they are observable, and any custom classes that you create that use the observable mixin.
+
+`watch` watches a property for changes. This can be a property on the given object or a property on a nested object if the nested object is also observable. It will call the given callback whenever the property value for the given path changes. The callback, however, will not be invoked if the value is set to the same value or the value ultimately has not changed. This includes if a parent property in a nested property path changes but the resulting value is the same as the previous value.
+
+```ts
+class MyObservable extends observable() {
+    private _backingFieldForGetter = "backingFieldForGetter";
+    dataProperty: string = "dataProperty";
+
+    get getter() {
+      return this._backingFieldForGetter;
+    }
+}
+
+const myObservable = new MyObservable();
+watch(myObservable, "getter", callback);
+watch(myObservable, "dataProperty", callback);
+
+class MyClass extends observable() {
+   private _backingFieldForAccessor = new MyObservable();
+
+   get getterSetter {
+     return this._backingFieldForAccessor;
+   }
+   set getterSetter(value: MyObservable) {
+     this._backingFieldForAccessor = value;
+   }
+}
+
+const myClass = new MyClass();
+watch(myClass, "getterSetter", callback);
+watch(myClass, "getterSetter.getter", callback);
+watch(myClass, "getterSetter.dataProperty", callback);
+```
+
+`watch` returns an IHandle that should be removed once the watch is no longer needed.
+
+```ts
+const handle = watch(myClass, "getterSetter", callback);
+// Call remove on the handle when you no longer need the watch.
+handle.remove();
+```
+
+The `watch` function accepts some options to modify its behavior.
+
+<table>
+    <tr>
+        <th>Option</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td>`sync`</td>
+        <td>
+            Whether or not the callback will be called synchronously.
+            Default is false.
+        </td>
+    </tr>
+    <tr>
+        <td>`once`</td>
+        <td>
+            If true, the callback will only be called once on the very
+            first property change. Default is false.
+        </td>
+    </tr>
+    <tr>
+        <td>`initial`</td>
+        <td>
+            If true, the callback will be called with the initial
+            value of the property. In this case, both the newValue and
+            oldValue properties will contain the initial value.
+            Default is false.
+        </td>
+    </tr>
+</table>
+
+```ts
+watch(myClass, "myProp", callback, {
+    sync: true,
+    initial: true,
+    once: true,
+});
+```
+
+In regards to the `sync` option, it is recommended to avoid using this when possible and instead allow your callback to be invoked async. Reacting to property changes asynchronously gives more room for the JS event loop to continue with other async work including user interactions, creating a better user experience.
+
+#### `notifyChange`
+
+`notifyChange` allows you to tell the watch system that a property may have changed. When `notifyChange` is called for a property, the watch system will check if the property value has indeed changed, if it has it will trigger the watches for that property as appropriate, else it will do nothing.
+
+For the most part, the watch system handles basic property updates itself without needing `notifyChange` to be called manually. There are some cases though where the watch system cannot determine on its own if the value of a property has changed. It is important to be aware of these cases and handle them properly.
+
+The most common case is when an accessor property’s backing property is updated directly instead of using a setter. It is common to see this with getter only properties. In this scenario, the watch system has no way to know that the backing property was updated, and that the accessor’s value has changed.
+
+```ts
+class MyClass extends observable() {
+    private _myBackingProperty: number = 0;
+
+    get myProp() {
+        return this._myBackingProperty;
+    }
+
+    doSomething() {
+        this._myBackingProperty++;
+        // We need to announce a change for the prop `myProp`
+        // because we have updated its backing property.
+        notifyChange(this, "myProp");
+    }
+}
+```
+
+Other cases where notifyChange needs to be called are similar and usually involve a getter that derives its value from other properties either on the current object, on referenced objects, or from static or global properties.
+
+#### `onWatch`
+
+Sometimes, you need to know when a property is being watched. This is what `onWatch` is for, it calls a callback whenever the specified property on an object starts being watched.
+
+The function came about from a common pattern we saw in our codebase where we would create a watch to call notifyChange on a local property. By wrapping this pattern in this function we’re now able to avoid the overhead of watching a property to call `notifyChange` for another property when no one is actually watching the property we are notifying for.
+
+```ts
+class MyClass extends observable() {
+    _foo = "foo";
+    _bar = "bar";
+    get foo() {
+        return `${this._foo} ${this._bar}`;
+    }
+    get bar() {
+        return this._bar;
+    }
+    set bar(value: string) {
+        this._bar = value;
+    }
+}
+
+const myClass = new MyClass();
+
+const handle = onWatch(myClass, "foo", () =>
+    watch(myClass, "bar", () => notifyChange(myClass, "foo"), {
+        // We use sync: true here so the notify is synchronous.
+        // This ensures that any watches on the property being
+        // changed can respond sync or async as they are configured.
+        sync: true,
+    })
+);
+
+// Call remove on the returned handle when the onWatch is no longer needed.
+handle.remove();
+```
+
+`onWatch` expects the callback it is given to return an IHandle, the handle returned by the callback will be called when the property `onWatch` is monitoring is no longer being watched by anything.
+
+#### `watchEach`
+
+When you need to watch for changes on objects in a `Collection`, you can use `watchEach`. `watchEach` allows you to watch a `Collection` or specify a path to a property on an object that contains a `Collection` and watch for changes to a property that exists on the items in the `Collection`.
+
+```ts
+class MyObservable extends observable() {
+    property: string = "testProperty";
+}
+
+class MyClass extends observable() {
+    collection: Collection<MyObservable> = new Collection();
+}
+
+const myClass = new MyClass();
+const handle1 = watchEach(
+    myClass,
+    "collection.[].property",
+    (newValue, oldValue) => {}
+);
+
+const myCollection = new Collection<MyObservable>();
+const handle2 = watchEach(
+    myCollection,
+    "[].property",
+    (newValue, oldValue) => {}
+);
+
+// Call remove on the returned handle when the watchEach is no longer needed.
+handle1.remove();
+handle2.remove();
+```
+
+The `[].` syntax was created to help the watch system determine where the `Collection` starts so it can iterate over the `Collection` to watch the items in it as appropriate.
+
+#### `watchEvent`
+
+There are times when you want to subscribe to an event on the value of a property, but that property’s value can change. `watchEvent` is a convenience function that makes handling this case a bit easier than managing the watch and event subscriptions yourself.
+
+```ts
+// The watch callback is optional. It is called when the value of the watched property changes.
+const handle = watchEvent(
+    myObj,
+    "myProp",
+    ["change", eventCallback],
+    watchCallback
+);
+
+// Call remove on the returned handle when the `watchEvent` is no longer needed.
+handle.remove();
+```
+
+#### `once`
+
+This is a convenience function to make it easier to `await` for a property change if you only need to wait for one change. You can pass an `AbortSignal` to the options to cancel waiting, in which case the returned promise will be aborted.
+
+```ts
+await once(obj, "myProp", { signal });
+```
+
+#### `when`
+
+`when` allows you to react to a property becoming truthy. (Truthy and falsy are common terms in JavaScript, if unfamiliar see [Truthy](https://developer.mozilla.org/en-US/docs/Glossary/Truthy) and [Falsy](https://developer.mozilla.org/en-US/docs/Glossary/Falsy)). `when` will invoke the given callback whenever the property’s value becomes truthy.
+
+```ts
+class MyClass extends observable() {
+    myProp: string | undefined = undefined;
+}
+
+const obj = new MyClass();
+
+const handle = when(obj, "myProp", callback);
+
+// Setting the property value to a falsy value will not invoke the callback.
+obj.myProp = "";
+
+// Setting the property value to a truthy value will invoke the callback.
+obj.myProp = "test value";
+
+// Call remove on the returned handle when the `when` is no longer needed.
+handle.remove();
+```
+
+If the value of the property being watched is already truthy, the callback will be invoked immediately.
+
+The `when` function accepts some options to modify its behavior.
+
+<table>
+    <tr>
+        <th>Option</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td>`sync`</td>
+        <td>
+            Whether or not the callback will be called synchronously.
+            Default is false.
+        </td>
+    </tr>
+    <tr>
+        <td>`once`</td>
+        <td>
+            If true, the callback will only be called once on the very
+            first property change. Default is false.
+        </td>
+    </tr>
+    <tr>
+        <td>`invert`</td>
+        <td>
+            If true, the callback will be called when the property
+            value becomes falsy. Default is false.
+        </td>
+    </tr>
+</table>
+
+```ts
+when(myClass, "myProp", callback, {
+    sync: true,
+    invert: true,
+    once: true,
+});
+```
+
+In regards to the `sync` option, it is recommended to avoid using this when possible and instead allow your callback to be invoked async. Reacting to property changes asynchronously gives more room for the JS event loop to continue with other async work including user interactions, creating a better user experience.
+
+#### `whenOnce`
+
+This is a convenience function to make it easier to `await` for a property to become truthy if you only need to wait for one change. You can pass an `AbortSignal` to the options to cancel waiting, in which case the returned promise will be aborted.
+
+```ts
+await whenOnce(obj, "myProp", { signal });
+```
+
+#### `createIHandle`
+
+Creating a number of watches in one place is fairly common, which results in having a number of returned handles to deal with. To help simplify some situations we’ve added this utility function `createIHandle` that takes an `Iterable<IHandle>` and returns a single `IHandle`. This is useful when combined with `onWatch` but also other scenarios.
+
+```ts
+onWatch(this, "myProp", () => {
+  const handles: IHandle[] = [];
+  handles.push(
+    watch(otherObj, "otherProp", () => notifyChange(this, "myProp");
+    watch(anotherObj, "anotherProp", () => notifyChange(this, "myProp");
+  );
+  return createIHandle(handles);
+});
+```
+
+The returned handle from `createIHandle` holds a reference to the iterable and will remove the handles currently held in the iterable when called, allowing you to update the iterable with new handles or remove old ones but still use the same returned handle to remove whatever is left in the iterable.
+
+### What did we Deprecate?
+
+All classes that were inheriting from `Observable` (@vertigis/arcgis-extensions/support/Observable.ts) no longer inherit from `Observable`. Most have been updated to use the new mixin, however `SerializableBase` has not been updated to use the mixin as it did not make sense for this class to be observable on its own. Every class, including `SerializableBase`, that no longer inherits from `Observable` has had deprecated methods added to temporarily provide the previous methods from `Observable`. Support for `reactiveUtils` for all classes that were previously inheriting from `Observable` will still work as well during the transition period.
+
+If you’re unsure if you have any references to anything that will be removed, you can check the browser console; all deprecated functions, classes, and modules that are still in use are logged there as warnings.
+
+<table>
+    <tr>
+        <th>Deprecation</th>
+        <th>Replacement</th>
+    </tr>
+    <tr>
+        <td>
+            `Observable`
+            (@vertigis/arcgis-extensions/support/Observable.ts)
+        </td>
+        <td>
+            `observable`
+            (@vertigis/arcgis-extensions/support/observableUtils.ts)
+        </td>
+    </tr>
+    <tr>
+        <td>
+            `Observable.watch`
+            (@vertigis/arcgis-extensions/support/Observable.ts)
+        </td>
+        <td>
+            `watch`
+            (@vertigis/arcgis-extensions/support/observableUtils.ts)
+        </td>
+    </tr>
+    <tr>
+        <td>
+            `Observable_watchProperty`
+            (@vertigis/arcgis-extensions/support/Observable.ts)
+        </td>
+        <td>
+            `watch`
+            (@vertigis/arcgis-extensions/support/observableUtils.ts)
+        </td>
+    </tr>
+    <tr>
+        <td>
+            `Observable.notifyChange`
+            (@vertigis/arcgis-extensions/support/Observable.ts)
+        </td>
+        <td>
+            `notifyChange`
+            (@vertigis/arcgis-extensions/support/observableUtils.ts)
+        </td>
+    </tr>
+    <tr>
+        <td>
+            `Observable.get`
+            (@vertigis/arcgis-extensions/support/Observable.ts)
+        </td>
+        <td>No replacement. Access the property directly instead.</td>
+    </tr>
+    <tr>
+        <td>
+            `Observable.set`
+            (@vertigis/arcgis-extensions/support/Observable.ts)
+        </td>
+        <td>No replacement. Access the property directly instead.</td>
+    </tr>
+    <tr>
+        <td>
+            `watchEach`
+            (@vertigis/arcgis-extensions/utilities/watch.ts)
+        </td>
+        <td>
+            `watchEach`
+            (@vertigis/arcgis-extensions/support/observableUtils.ts)
+        </td>
+    </tr>
+    <tr>
+        <td>
+            `watchCollectionPropertyEach`
+            (@vertigis/arcgis-extensions/utilities/watch.ts)
+        </td>
+        <td>
+            `watchEach`
+            (@vertigis/arcgis-extensions/support/observableUtils.ts)
+        </td>
+    </tr>
+    <tr>
+        <td>
+            `ObservableWeakSet`
+            (@vertigis/arcgis-extensions/utilities/ObservableWeakSet.ts)
+        </td>
+        <td>
+            No replacement. This class did not make sense. You can't
+            observe a weak set for changes.
+        </td>
+    </tr>
+</table>
+
+#### `reactiveUtils` Support
+
+At the time of writing this, `reactiveUtils` will still work with VertiGIS Studio Web (Web) classes. We’ve ensured backwards compatibility for the moment.
+However, moving forward, we do plan to remove support for `reactiveUtils` from Web entirely, so using `reactiveUtils` inside of Web or the Web SDK is now considered deprecated. Instead, Web SDK developers should use `observableUtils` only, even with ArcGIS JS SDK classes. This will insulate everyone from changes to the ArcGIS JS SDK watch system in the future and will eventually allow us to clean up a lot of memory leaks. It should also improve performance of Web and Web SDK apps once backwards compatibility is removed.
+
+#### Certain `useWatch` and `useWatch` Variant Overloads
+
+As a consequence of the new watch pattern and the deprecation of using `reactiveUtils` inside Web, the `useWatch` overloads that use the watch value callback pattern similar to `reactiveUtils` `watch` have been deprecated. We’ve also deprecated passing an array of property paths to `useWatch` and some specific `useWatch` variants, however we have maintained the array pattern for `useWatchAndRerender`.
+
+We’ve also deprecated the `useWatch` callback that has the `propertyName` and `target`. In future, `useWatch` will only pass the `newValue` and `oldValue` arguments to the callback.
+
+```ts
+/** Deprecated */
+useWatch(() => myObj.myProp, callback);
+/** Use instead */
+useWatch(myObj, "myProp", callback);
+
+/** Deprecated */
+useWatch(myObj, ["myProp1", "myProp2"], callback);
+/** Use instead */
+useWatch(myObj, "myProp1", callback);
+useWatch(myObj, "myProp2", callback);
+
+/** Deprecated */
+useWatchAndRerender(() => myObj.myProp);
+/** Use instead */
+useWatchAndRerender(myObj, "myProp");
+
+/** Deprecated */
+useWatchInit(() => myObj.myProp, callback);
+/** Use instead */
+useWatchInit(myObj, "myProp", callback);
+
+/** Deprecated */
+useWatchInit(myObj, ["myProp1", "myProp2"], callback);
+/** Use instead */
+useWatchInit(myObj, "myProp1", callback);
+useWatchInit(myObj, "myProp2", callback);
+
+/** Deprecated */
+useWatchEach(() => myObj.myProp, callback);
+/** Use instead */
+useWatchEach(myObj, "myProp", callback);
+
+/** Deprecated */
+useWatchEach(myObj, ["myProp1", "myProp2"], callback);
+/** Use instead */
+useWatchEach(myObj, "myProp1", callback);
+useWatchEach(myObj, "myProp2", callback);
+
+/** Deprecated */
+useWatchEachAndRerender(() => myObj.myProp);
+/** Use instead */
+useWatchEachAndRerender(myObj, "myProp");
+```
+
+### Common Anti-Patterns to Avoid
+
+We’ve seen various different anti-patterns over the years with the previous watch system that will likely continue with the new one. We’re calling them out here to try to make people aware of these anti-patterns and their consequences of being used.
+
+Also, with the addition of new watch functionality, there are also some new anti-patterns we expect to see come up from time to time that should also be avoided.
+
+#### Watching a Property on `this`
+
+Please pay close attention to watches that use `this` as the watch object. This is an anti-pattern and should be avoided.
+
+```ts
+watch(this as MyClass, "myProp", callback);
+```
+
+While it is simple to create a watch and sometimes more complicated to get the right behavior with other options, it is still less performant to use the watch system for watching a property on `this` than other options, like using an accessor property instead and calling your callback equivalent in the setter, even with our new watch system.
+
+#### `watch` Callback Invokes `notifyChange`
+
+Using a watch with `notifyChange` for a property on the current object when not wrapped in `onWatch` is now an anti-pattern.
+
+```ts
+// This is an anti-pattern.  Wrap this in onWatch instead.
+watch(this.obj, "objProp", () => notifyChange(this, "myProp"));
+```
+
+The above is always watching and notifying about those properties, even if no one cares. While this is a common pattern, and needed in most cases where it is used, we’ve introduced a new function called `onWatch` to assist with this situation and make it more performant by only initiating the watch once it is actually needed making this pattern a new anti-pattern. See [`onWatch`](2025-08-05-web-obervable-overhaul.mdx#onwatch) for an example of the new pattern to use.
+
+#### Calling `notifyChange` in a Setter for the Property Being Set
+
+There is no need to call `notifyChange` inside a setter for the property the setter is for. Doing so creates a bit of extra work that is not necessary.
+
+```ts
+class MyClass extends observable() {
+    get myProp() {
+        return this._backingProp;
+    }
+    set myProp(value: number) {
+        this._backingProp = value;
+        // There is no need to call this notifyChange for this property.
+        // The watch system is able to detect this change on its own.
+        notifyChange(this, "myProp");
+
+        // We do need to call notifyChange for myOtherProp though.
+        notifyChange(this, "myOtherProp");
+    }
+
+    get myOtherProp() {
+        return this._backingProp + 1;
+    }
+}
+```
+
+#### Using `onCollectionPropertyChange` But Ignoring the Passed Event Object
+
+If you're using `onCollectionPropertyChange` (@vertigis/arcgis-extensions/utilities/watch.ts) to detect changes but the actual change event value was being ignored, please use `watchEvent` (@vertigis/arcgis-extensions/support/observableUtils.ts) instead as it will have better performance when the underlying watched property changes.
+
+```ts
+function collectionPropertyChange() {
+    console.log(
+        "do something that doesn’t require the change event value"
+    );
+}
+
+/** Do not do this **/
+onCollectionPropertyChange(
+    myObj,
+    "myCollectionProp",
+    collectionPropertyChange
+);
+
+/** Instead, do this **/
+watchEvent(
+    myObj,
+    "myCollectionProp",
+    ["change", collectionPropertyChange],
+    collectionPropertyChange
+);
+```
+
+`watchEvent` has two callbacks, one for the event and one for when the property being watched changes. By using the same callback for both, the callback will be invoked when the property value itself changes as well as the when the event is fired, creating the equivalent behavior of `onCollectionPropertyChange`, but without the difference being calculated between the two different `Collection`s when the property value changes.

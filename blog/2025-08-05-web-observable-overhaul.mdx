@@ -13,7 +13,7 @@ This blog post is the fully story of how this one change caused us to rethink pr
 <!--truncate-->
 
 :::note
-If you want to know what the end result is and what the new functionality and interfaces look like, jump to the last section [The New Watch System](2025-08-05-web-obervable-overhaul.mdx#the-new-watch-system). If you’re curious about why we did this and how we got to the end result, read on.
+If you want to know what the end result is and what the new functionality and interfaces look like, jump to the last section [The New Watch System](2025-08-05-web-observable-overhaul.mdx#the-new-watch-system). If you’re curious about why we did this and how we got to the end result, read on.
 :::
 
 ## ArcGIS Maps SDK for JavaScript `.watch` Deprecation
@@ -793,7 +793,7 @@ Using a watch with `notifyChange` for a property on the current object when not 
 watch(this.obj, "objProp", () => notifyChange(this, "myProp"));
 ```
 
-The above is always watching and notifying about those properties, even if no one cares. While this is a common pattern, and needed in most cases where it is used, we’ve introduced a new function called `onWatch` to assist with this situation and make it more performant by only initiating the watch once it is actually needed making this pattern a new anti-pattern. See [`onWatch`](2025-08-05-web-obervable-overhaul.mdx#onwatch) for an example of the new pattern to use.
+The above is always watching and notifying about those properties, even if no one cares. While this is a common pattern, and needed in most cases where it is used, we’ve introduced a new function called `onWatch` to assist with this situation and make it more performant by only initiating the watch once it is actually needed making this pattern a new anti-pattern. See [`onWatch`](2025-08-05-web-observable-overhaul.mdx#onwatch) for an example of the new pattern to use.
 
 #### Calling `notifyChange` in a Setter for the Property Being Set
 

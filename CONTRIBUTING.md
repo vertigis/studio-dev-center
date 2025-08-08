@@ -1,6 +1,6 @@
 # Contributing Guidelines
 
-You might want to make yourself familiar with [Docusaurus v2](https://v2.docusaurus.io/) to make significant changes to the website. If you only want to make content changes you will find the page source within the `docs` folder.
+You might want to make yourself familiar with [Docusaurus](https://docusaurus.io/docs/) to make significant changes to the website. If you only want to make content changes you will find the page source within the `docs` folder.
 
 ## Cloning the repository
 

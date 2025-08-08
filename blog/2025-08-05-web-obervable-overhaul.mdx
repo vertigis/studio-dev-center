@@ -606,8 +606,8 @@ Creating a number of watches in one place is fairly common, which results in hav
 onWatch(this, "myProp", () => {
   const handles: IHandle[] = [];
   handles.push(
-    watch(otherObj, "otherProp", () => notifyChange(this, "myProp");
-    watch(anotherObj, "anotherProp", () => notifyChange(this, "myProp");
+    watch(otherObj, "otherProp", () => notifyChange(this, "myProp"));
+    watch(anotherObj, "anotherProp", () => notifyChange(this, "myProp"));
   );
   return createIHandle(handles);
 });

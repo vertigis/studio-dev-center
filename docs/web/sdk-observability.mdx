@@ -3,10 +3,10 @@ title: Observability
 description: VertiGIS Studio Web - Learn how to react to object property changes
 ---
 
-Being able to react to property changes on objects is integral to interacting with ArcGIS Maps SDK for JavaScript objects as well as VertiGIS Studio Web objects. To do so in a component, you would use `useWatch` or one of its counterparts, as detailed in [Component Hooks](sdk-components-hooks.mdx), but sometimes you need to be able to react to changes from within other objects or you want one of your custom classes that doesn't inherit from a Web SDK base class to be able to participate in the Web SDK's observability system.
+Being able to react to property changes on objects is integral to interacting with ArcGIS Maps SDK for JavaScript objects as well as VertiGIS Studio Web objects. To do so in a component, you would use `useWatch` or one of its counterparts, as detailed in [Component Hooks](sdk-components-hooks.mdx). However, sometimes you need to be able to react to changes from within other objects, or you want one of your custom classes that doesn't inherit from a Web SDK base class to be able to participate in the Web SDK's observability system.
 
 :::warning
-The ArcGIS Maps SDK for JavaScript provides `reactiveUtils` to support this functionality, however, `reactiveUtils` support within the VertiGIS Studio Web SDK is unsupported. Instead, use the utility functions detailed here for both VertiGIS Studio Web SDK objects and ArcGIS Maps SDK for JavaScript objects.
+The ArcGIS Maps SDK for JavaScript provides `reactiveUtils` to support this functionality. However, `reactiveUtils` support within the VertiGIS Studio Web SDK is unsupported. Instead, use the utility functions detailed here for both VertiGIS Studio Web SDK objects and ArcGIS Maps SDK for JavaScript objects.
 :::
 
 :::info
@@ -19,9 +19,9 @@ To use the VertiGIS Studio Web SDK observability system, you will use functions 
 
 ## Create an Observable Custom Class
 
-Base classes in the Web SDK, typically, already implement observability and most Web SDK objects are observable. For instance, if you inherit from `ServiceBase` or `ComponentModelBase` your new class will already be observable and can be used with the observable utility functions from [`observableUtils`](sdk-observability.mdx#the-observableutils-module) and [component Hooks](sdk-components-hooks.mdx) without additional configuration.
+Base classes in the Web SDK, typically, already implement observability and most Web SDK objects are observable. For instance, if you inherit from `ServiceBase` or `ComponentModelBase` your new class will already be observable and can be used with the observable utility functions from [`observableUtils`](sdk-observability.mdx#the-observableutils-module) and [component hooks](sdk-components-hooks.mdx) without additional configuration.
 
-But, if you have a class that doesn't inherit from a Web SDK base class and would like it to be usable with the observable system you can extend from a mixin class [`observable`](sdk-observability.mdx#observable-mixin) to add observability to your class.
+But, if you have a class that doesn't inherit from a Web SDK base class and would like it to be usable with the observable system, you can extend from a mixin class [`observable`](sdk-observability.mdx#observable-mixin) to add observability to your class.
 
 ```ts
 import { observable } from "@vertigis/arcgis-extensions/support/observableUtils";
@@ -32,7 +32,7 @@ export MyCustomClass extends observable() {
 
 ```
 
-If your custom class needs to extend from a different base class you can wrap that base class with [`observable`](sdk-observability.mdx#observable-mixin) while still extending your other base class.
+If your custom class needs to extend from a different base class, you can wrap that base class with [`observable`](sdk-observability.mdx#observable-mixin) while still extending your other base class.
 
 ```ts
 import { observable } from "@vertigis/arcgis-extensions/support/observableUtils";

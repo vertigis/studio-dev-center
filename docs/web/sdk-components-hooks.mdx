@@ -3,7 +3,7 @@ title: Component Hooks
 description: VertiGIS Studio Web - Learn about the React hooks used to react to changes on a component's model
 ---
 
-VertiGIS Studio Web provides a number of [React hooks](https://reactjs.org/docs/hooks-intro.html) to ease development of custom components bound to [models](sdk-components-reference.mdx#models). These hooks make it simple to follow the recommended [observable properties pattern](https://developers.arcgis.com/javascript/latest/guide/programming-patterns/#properties) for model interactions within your functional components.
+VertiGIS Studio Web provides a number of [React hooks](https://reactjs.org/docs/hooks-intro.html) to ease development of custom components bound to [models](sdk-components-reference.mdx#models). These hooks make it simple to follow the recommended [observable properties pattern](sdk-observability.mdx) for model interactions within your functional components.
 
 ## `useWatchAndRerender`
 
@@ -64,7 +64,11 @@ Watches a collection for change events and triggers a re-render. Conceptually eq
 
 ## `useWatch`
 
-Watches an object for changes in one or more properties and triggers a callback.
+Watches a property of an object that is [observable](sdk-observability.mdx) for changes and triggers a callback.
+
+## `useWatchInit`
+
+Watches a property of an object that is [observable](sdk-observability.mdx) for changes and triggers a callback. The callback will also be invoked immediately on first render.
 
 ## `useSubscribeAndRerender`
 

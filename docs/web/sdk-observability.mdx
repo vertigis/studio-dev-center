@@ -1,0 +1,670 @@
+---
+title: Observability
+description: VertiGIS Studio Web - Learn how to react to object property changes
+---
+
+Being able to react to property changes on objects is integral to interacting with ArcGIS Maps SDK for JavaScript objects as well as VertiGIS Studio Web objects. To do so in a component, you would use `useWatch` or one of its counterparts, as detailed in [Component Hooks](sdk-components-hooks.mdx). However, sometimes you need to be able to react to changes from within other objects, or you want one of your custom classes that doesn't inherit from a Web SDK base class to be able to participate in the Web SDK's observability system.
+
+:::warning
+The ArcGIS Maps SDK for JavaScript provides `reactiveUtils` to support this functionality. However, `reactiveUtils` support within the VertiGIS Studio Web SDK is unsupported. Instead, use the utility functions detailed here for both VertiGIS Studio Web SDK objects and ArcGIS Maps SDK for JavaScript objects.
+:::
+
+:::info
+Introduced with VertiGIS Studio Web 5.37.
+
+If you're curious about how the observability system was developed, read about it at [VertiGIS Studio Web 5.37 Observable Overhaul](https://developers.vertigisstudio.com/blog/2025/08/05/web-observable-overhaul).
+:::
+
+To use the VertiGIS Studio Web SDK observability system, you will use functions from the [`observableUtils`](sdk-observability.mdx#the-observableutils-module) module from `@vertigis/arcgis-extensions`. We'll go over some basic examples first before we dive into all the functionality the module provides.
+
+## Create an Observable Custom Class
+
+Base classes in the Web SDK, typically, already implement observability and most Web SDK objects are observable. For instance, if you inherit from `ServiceBase` or `ComponentModelBase` your new class will already be observable and can be used with the observable utility functions from [`observableUtils`](sdk-observability.mdx#the-observableutils-module) and [component hooks](sdk-components-hooks.mdx) without additional configuration.
+
+But, if you have a class that doesn't inherit from a Web SDK base class and would like it to be usable with the observable system, you can extend from a mixin class [`observable`](sdk-observability.mdx#observable-mixin) to add observability to your class.
+
+```ts
+import { observable } from "@vertigis/arcgis-extensions/support/observableUtils";
+
+export MyCustomClass extends observable() {
+    ...
+}
+
+```
+
+If your custom class needs to extend from a different base class, you can wrap that base class with [`observable`](sdk-observability.mdx#observable-mixin) while still extending your other base class.
+
+```ts
+import { observable } from "@vertigis/arcgis-extensions/support/observableUtils";
+
+export MyBaseClass {
+    ...
+}
+
+export MyCustomClass extends observable(MyBaseClass) {
+    ...
+}
+
+```
+
+## Watch for Property Changes in a Custom Web SDK Class
+
+Various utility functions are provided for different scenarios to watch for property changes on observable objects. These functions can be used anywhere when needed by importing the [`observableUtils`](sdk-observability.mdx#the-observableutils-module) module.
+
+The following example uses [`watch`](sdk-observability.mdx#watch) to update a local property in a custom [service](sdk-services-overview.mdx).
+
+```ts
+import { watch } from "@vertigis/arcgis-extensions/support/observableUtils";
+import { ServiceBase } from "@vertigis/web/services";
+import { RegionService } from "@vertigis/web/region";
+import { FrameworkServiceType, inject } from "@vertigis/web/services";
+
+export default class CustomDataService extends ServiceBase {
+    @inject(FrameworkServiceType.REGION)
+    regionService: RegionService | undefined;
+
+    distance: string = "100 m";
+
+    private _watchHandle: IHandle | undefined;
+
+    protected override async _onInitialize(): Promise<void> {
+        await super._onInitialize();
+
+        // This will create a watch for the measurement system
+        // value of the region service and update a local property
+        // when the measurement system changes. It also sets the option
+        // `initial` to true, which means the callback will be called
+        // immediately when the watch is created so the distance is set
+        // right away to the correct string.
+        this._watchHandle = watch(
+            this.regionService,
+            "measurementSystem",
+            (newValue) => {
+                this.distance = `100 ${
+                    newValue === "metric" ? "m" : "ft"
+                }`;
+            },
+            { initial: true }
+        );
+    }
+
+    protected override async _onDestroy(): Promise<void> {
+        await super._onDestroy();
+
+        // It is best practice to remove handles created by
+        // watches when you know that you are done with them.
+        this._watchHandle?.remove();
+    }
+}
+```
+
+The above example updates `distance` whenever the `measurementSystem` changes, ensuring that `distance` returns the correct value for the current `measurementSystem`. In addition, because this class inherits from `ServiceBase`, the watch system will automatically be able to detect the change to `distance` and inform anything watching `distance` for changes that the value was updated.
+
+`distance` however, is exposed publicly to updates from outside of the class. An alternate approach that protects `distance` from outside changes uses [`onWatch`](sdk-observability.mdx#onwatch) and [`notifyChange`](sdk-observability.mdx#notifychange) to create similar behavior but with the `distance` property being a getter to protect from outside changes.
+
+```ts
+import {
+    notifyChange,
+    onWatch,
+    watch,
+} from "@vertigis/arcgis-extensions/support/observableUtils";
+import { ServiceBase } from "@vertigis/web/services";
+import { RegionService } from "@vertigis/web/region";
+import { FrameworkServiceType, inject } from "@vertigis/web/services";
+
+export default class CustomDataService extends ServiceBase {
+    @inject(FrameworkServiceType.REGION)
+    regionService: RegionService | undefined;
+
+    private _distance: string = "100";
+    private _watchHandle: IHandle | undefined;
+
+    // Because the property `distance` is a calculated value from
+    // multiple sources, the observable system has no way to know
+    // when the value it returns changes. This requires the
+    // use of `notifyChange` to tell the observable system when
+    // this getter's value may have changed.
+    get distance(): string {
+        return this.regionService &&
+            this.regionService.measurementSystem === "metric"
+            ? `${this._distance} m`
+            : `${this._distance} ft`;
+    }
+
+    protected override async _onInitialize(): Promise<void> {
+        await super._onInitialize();
+
+        // Using `onWatch` tells the watch system to only
+        // attach the given `watch` if something is also watching
+        // `distance`. This ensures that no work is done if nothing
+        // is watching `distance` for changes.
+        this._watchHandle = onWatch(this, "distance", () =>
+            watch(this.regionService, "measurementSystem", () =>
+                notifyChange(this, "distance")
+            )
+        );
+    }
+
+    protected override async _onDestroy(): Promise<void> {
+        await super._onDestroy();
+
+        // It is best practice to remove handles created by
+        // watches when you know that you are done with them.
+        this._watchHandle?.remove();
+    }
+}
+```
+
+## The `observableUtils` Module
+
+The `observableUtils` module contains the utilities available to the Web SDK to observe properties on objects for changes.
+
+You can import `observableUtils` functions from `@vertigis/arcgis-extensions`.
+
+```ts
+import { watch } from "@vertigis/arcgis-extensions/support/observableUtils";
+```
+
+Multiple functions are provided to cover various use cases:
+
+<table>
+    <tr>
+        <th>Function</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td>`observable`</td>
+        <td>
+            The mixin used to add observability to a class. See
+            [Create an Observable Custom
+            Class](sdk-observability.mdx#create-an-observable-custom-class)
+            for examples.
+        </td>
+    </tr>
+    <tr>
+        <td>`watch`</td>
+        <td>
+            Watches a specific property or property path for changes.
+        </td>
+    </tr>
+    <tr>
+        <td>`notifyChange`</td>
+        <td>
+            Tells the watch system that the given property may have
+            changed and needs to be checked.
+        </td>
+    </tr>
+    <tr>
+        <td>`onWatch`</td>
+        <td>Allows you to react to something watching a property.</td>
+    </tr>
+    <tr>
+        <td>`watchEach`</td>
+        <td>Watches a property on each item in a collection.</td>
+    </tr>
+    <tr>
+        <td>`watchEvent`</td>
+        <td>
+            Attaches an event listener to the watched property and
+            removes the old listener whenever the property changes.
+        </td>
+    </tr>
+    <tr>
+        <td>`once`</td>
+        <td>
+            Async watch that allows you to await for a property to
+            change.
+        </td>
+    </tr>
+    <tr>
+        <td>`when`</td>
+        <td>
+            Watches a property or property path for the value to
+            become truthy.
+        </td>
+    </tr>
+    <tr>
+        <td>`whenOnce`</td>
+        <td>
+            Async when that allows you to await for a property to
+            become truthy.
+        </td>
+    </tr>
+    <tr>
+        <td>`createIHandle`</td>
+        <td>
+            Helper utility to create a new IHandle from an iterable of
+            IHandles.
+        </td>
+    </tr>
+</table>
+
+### Observable Mixin
+
+To add observability to a class there are a few different ways to use the new mixin to accomplish this, but we’ve found the cleanest approach, and the one that gets you the best type checking by TypeScript, is to extend the mixin, or wrap a base class being extended with the mixin.
+
+```ts
+class MyClassNoBaseClass extends observable() {}
+
+class MyClassWithBaseClass extends observable(BaseClass) {}
+```
+
+This will make your class observable so it can be used with the other `observableUtils` functions.
+
+### `watch`
+
+This is the main watch function; it is also what backs `useWatch` (see [Component Hooks](sdk-components-hooks.mdx)) and most if its variants. This function supports watching any classes from the Web SDK that are observable, any classes from the ArcGIS Maps SDK for JavaScript that inherit from `Accessor` which indicates that they are observable, and any custom classes that you create that use the [observable mixin](sdk-observability.mdx#observable-mixin).
+
+`watch` watches a property for changes. This can be a property on the given object or a property on a nested object if the nested object is also observable. It will call the given callback whenever the property value for the given path changes. The callback, however, will not be invoked if the value is set to the same value or the value ultimately has not changed. This includes if a parent property in a nested property path changes but the resulting value is the same as the previous value.
+
+```ts
+class MyObservable extends observable() {
+    private _backingFieldForGetter = "backingFieldForGetter";
+    dataProperty: string = "dataProperty";
+
+    get getter() {
+      return this._backingFieldForGetter;
+    }
+}
+
+const myObservable = new MyObservable();
+watch(myObservable, "getter", callback);
+watch(myObservable, "dataProperty", callback);
+
+class MyClass extends observable() {
+   private _backingFieldForAccessor = new MyObservable();
+
+   get getterSetter {
+     return this._backingFieldForAccessor;
+   }
+   set getterSetter(value: MyObservable) {
+     this._backingFieldForAccessor = value;
+   }
+}
+
+const myClass = new MyClass();
+watch(myClass, "getterSetter", callback);
+watch(myClass, "getterSetter.getter", callback);
+watch(myClass, "getterSetter.dataProperty", callback);
+```
+
+`watch` returns an IHandle that should be removed once the watch is no longer needed.
+
+```ts
+const handle = watch(myClass, "getterSetter", callback);
+// Call remove on the handle when you no longer need the watch.
+handle.remove();
+```
+
+The `watch` function accepts some options to modify its behavior.
+
+<table>
+    <tr>
+        <th>Option</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td>`sync`</td>
+        <td>
+            Whether or not the callback will be called synchronously.
+            Default is false.
+        </td>
+    </tr>
+    <tr>
+        <td>`once`</td>
+        <td>
+            If true, the callback will only be called once on the very
+            first property change. Default is false.
+        </td>
+    </tr>
+    <tr>
+        <td>`initial`</td>
+        <td>
+            If true, the callback will be called with the initial
+            value of the property. In this case, both the newValue and
+            oldValue properties will contain the initial value.
+            Default is false.
+        </td>
+    </tr>
+</table>
+
+```ts
+watch(myClass, "myProp", callback, {
+    sync: true,
+    initial: true,
+    once: true,
+});
+```
+
+In regards to the `sync` option, it is recommended to avoid using this when possible and instead allow your callback to be invoked asynchronously. Reacting to property changes asynchronously gives more room for the JS event loop to continue with other async work, including user interactions, creating a better user experience.
+
+### `notifyChange`
+
+`notifyChange` allows you to tell the watch system that a property may have changed. When `notifyChange` is called for a property, the watch system will check if the property value has indeed changed, if it has it will trigger the watches for that property as appropriate, else it will do nothing.
+
+For the most part, the watch system handles basic property updates itself without needing `notifyChange` to be called manually. There are some cases though where the watch system cannot determine on its own if the value of a property has changed. It is important to be aware of these cases and handle them properly.
+
+The most common case is when an accessor property’s backing property is updated directly instead of using a setter. It is common to see this with getter only properties. In this scenario, the watch system has no way to know that the backing property was updated, and that the accessor’s value has changed.
+
+```ts
+class MyClass extends observable() {
+    private _myBackingProperty: number = 0;
+
+    get myProp() {
+        return this._myBackingProperty;
+    }
+
+    doSomething() {
+        this._myBackingProperty++;
+        // We need to announce a change for the prop `myProp`
+        // because we have updated its backing property.
+        notifyChange(this, "myProp");
+    }
+}
+```
+
+Other cases where `notifyChange` needs to be called are similar and usually involve a getter that derives its value from other properties either on the current object, on referenced objects, or from static or global properties.
+
+### `onWatch`
+
+Sometimes, you need to know when a property is being watched. This is what `onWatch` is for, it calls a callback whenever the specified property on an object starts being watched.
+
+The most common use case for this function is to call `notifyChange` for the local property when another property from another observable object changes. By wrapping the `watch` and `notifyChange` in `onWatch` you avoid the overhead of watching a property to call `notifyChange` for another property when no one is actually watching the property you are notifying for.
+
+```ts
+class MyClass extends observable() {
+    _prop1 = "prop1";
+    _prop2 = "prop2";
+    get prop1() {
+        return `${this._prop1} ${this._prop2}`;
+    }
+    get prop2() {
+        return this._prop2;
+    }
+    set prop2(value: string) {
+        this._prop2 = value;
+    }
+}
+
+const myClass = new MyClass();
+
+const handle = onWatch(myClass, "prop1", () =>
+    watch(myClass, "prop2", () => notifyChange(myClass, "prop1"), {
+        // We use sync: true here so the notify is synchronous.
+        // This ensures that any watches on the property being
+        // changed can respond sync or async as they are configured.
+        sync: true,
+    })
+);
+
+// Call remove on the returned handle when the onWatch is no longer needed.
+handle.remove();
+```
+
+`onWatch` expects the callback it is given to return an `IHandle`, the handle returned by the callback will be invoked when the property `onWatch` is monitoring is no longer being watched by anything.
+
+### `watchEach`
+
+When you need to watch for changes on objects in a `Collection`, you can use `watchEach`. `watchEach` allows you to watch a `Collection` or specify a path to a property on an object that contains a `Collection` and watch for changes to a property that exists on the items in the `Collection`.
+
+```ts
+class MyObservable extends observable() {
+    property: string = "testProperty";
+}
+
+class MyClass extends observable() {
+    collection: Collection<MyObservable> = new Collection();
+}
+
+const myClass = new MyClass();
+const handle1 = watchEach(
+    myClass,
+    "collection.[].property",
+    (newValue, oldValue) => {}
+);
+
+const myCollection = new Collection<MyObservable>();
+const handle2 = watchEach(
+    myCollection,
+    "[].property",
+    (newValue, oldValue) => {}
+);
+
+// Call remove on the returned handle when the watchEach is no longer needed.
+handle1.remove();
+handle2.remove();
+```
+
+### `watchEvent`
+
+There are times when you want to subscribe to an event on the value of a property, but that property’s value can change. `watchEvent` is a convenience function that makes handling this case a bit easier than managing the watch and event subscriptions yourself.
+
+```ts
+const handle = watchEvent(
+    myObj,
+    "myProp",
+    ["change", eventCallback],
+    // The watch callback is optional. It is called when the value of the watched property changes.
+    watchCallback
+);
+
+// Call remove on the returned handle when the `watchEvent` is no longer needed.
+handle.remove();
+```
+
+### `once`
+
+This is a convenience function to make it easier to `await` for a property change if you only need to wait for one change. You can pass an `AbortSignal` to the options to cancel waiting, in which case the returned promise will be rejected.
+
+```ts
+await once(obj, "myProp", { signal });
+```
+
+### `when`
+
+`when` allows you to react to a property becoming truthy. (Truthy and falsy are common terms in JavaScript, if unfamiliar see [Truthy](https://developer.mozilla.org/en-US/docs/Glossary/Truthy) and [Falsy](https://developer.mozilla.org/en-US/docs/Glossary/Falsy)). `when` will invoke the given callback whenever the property’s value becomes truthy.
+
+If the value of the property being watched is already truthy, the callback will be invoked immediately.
+
+```ts
+class MyClass extends observable() {
+    myProp: string | undefined = undefined;
+}
+
+const obj = new MyClass();
+
+const handle = when(obj, "myProp", callback);
+
+// Setting the property value to a falsy value will not invoke the callback.
+obj.myProp = "";
+
+// Setting the property value to a truthy value will invoke the callback.
+obj.myProp = "test value";
+
+// Call remove on the returned handle when the `when` is no longer needed.
+handle.remove();
+```
+
+The `when` function accepts some options to modify its behavior.
+
+<table>
+    <tr>
+        <th>Option</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td>`sync`</td>
+        <td>
+            Whether or not the callback will be called synchronously.
+            Default is false.
+        </td>
+    </tr>
+    <tr>
+        <td>`once`</td>
+        <td>
+            If true, the callback will only be called once on the very
+            first property change. Default is false.
+        </td>
+    </tr>
+    <tr>
+        <td>`invert`</td>
+        <td>
+            If true, the callback will be called when the property
+            value becomes falsy. Default is false.
+        </td>
+    </tr>
+</table>
+
+```ts
+when(myClass, "myProp", callback, {
+    sync: true,
+    invert: true,
+    once: true,
+});
+```
+
+In regards to the `sync` option, it is recommended to avoid using this when possible and instead allow your callback to be invoked asynchronously. Reacting to property changes asynchronously gives more room for the JS event loop to continue with other async work, including user interactions, creating a better user experience.
+
+### `whenOnce`
+
+This is a convenience function to make it easier to `await` for a property to become truthy if you only need to wait for one change. You can pass an `AbortSignal` to the options to cancel waiting, in which case the returned promise will be rejected.
+
+```ts
+await whenOnce(obj, "myProp", { signal });
+```
+
+### `createIHandle`
+
+Creating a number of watches in one place is fairly common, which results in having a number of returned handles to deal with. To help simplify some situations, `createIHandle` takes an `Iterable<IHandle>` and returns a single `IHandle`. This is useful when combined with `onWatch` but also other scenarios.
+
+```ts
+onWatch(this, "myProp", () => {
+  const handles: IHandle[] = [];
+  handles.push(
+    watch(otherObj, "otherProp", () => notifyChange(this, "myProp"));
+    watch(anotherObj, "anotherProp", () => notifyChange(this, "myProp"));
+  );
+  return createIHandle(handles);
+});
+```
+
+The returned handle from `createIHandle` holds a reference to the iterable and will remove the handles currently held in the iterable when called, allowing you to update the iterable with new handles or remove old ones but still use the same returned handle to remove whatever is left in the iterable.
+
+## Common Anti-Patterns to Avoid
+
+### Watching a Property on `this`
+
+Please pay close attention to watches that use `this` as the watch object. This is an anti-pattern and should be avoided.
+
+While it is simple to create a watch and sometimes more complicated to get the right behavior with other options, it is still less performant to use the watch system for watching a property on `this` than other options, like using an accessor property instead and calling your callback equivalent in the setter.
+
+```ts
+/** Do not do this **/
+class MyClass extends observable() {
+    private _hiddenProp!: number;
+    prop: number = 0;
+
+    constructor() {
+        watch(this as MyClass, "prop", (newValue) => {
+            this._hiddenProp = this._calcValue(newValue);
+        }, { initial: true, sync: true });
+    }
+
+    private _calcValue(value: number): number {
+        ...
+    }
+}
+
+/** Instead, do this **/
+class MyClass extends observable() {
+    private _hiddenProp: number;
+    private _backingProp: number = 0;
+
+    get prop() {
+        return this._backingProp;
+    }
+    set prop(value) {
+        this._backingProp = value;
+        this._hiddenProp = this._calcValue(value);
+    }
+
+    private _calcValue(value: number): number {
+        ...
+    }
+}
+```
+
+### `watch` Callback Invokes `notifyChange` (Without `onWatch`)
+
+Using a watch with `notifyChange` for a property on the current object when not wrapped in `onWatch` is an anti-pattern.
+
+```ts
+/** Do not do this **/
+watch(this.obj, "objProp", () => notifyChange(this, "myProp"));
+
+/** Instead, do this **/
+onWatch(this, "myProp", () =>
+    watch(this.obj, "objProp", () => notifyChange(this, "myProp"), {
+        // We use sync: true here so the notify is synchronous.
+        // This ensures that any watches on the property being
+        // changed can respond sync or async as they are configured.
+        sync: true,
+    })
+);
+```
+
+### Calling `notifyChange` in a Setter for the Property Being Set
+
+There is no need to call `notifyChange` inside a setter for the property the setter is for. Doing so creates a bit of extra work that is not necessary.
+
+```ts
+class MyClass extends observable() {
+    get myProp() {
+        return this._backingProp;
+    }
+    set myProp(value: number) {
+        this._backingProp = value;
+        // There is no need to call this notifyChange for this property.
+        // The watch system is able to detect this change on its own.
+        notifyChange(this, "myProp");
+
+        // We do need to call notifyChange for myOtherProp though.
+        notifyChange(this, "myOtherProp");
+    }
+
+    get myOtherProp() {
+        return this._backingProp + 1;
+    }
+}
+```
+
+### Using `onCollectionPropertyChange` But Ignoring the Passed Event Object
+
+`onCollectionPropertyChange` from `@vertigis/arcgis-extensions/utilities/watch` combines aspects of `Collection`s and their change event with the observable system and is useful for when property values that contain `Collection`s can be updated with completely new collections.
+
+If you're using `onCollectionPropertyChange` from `@vertigis/arcgis-extensions/utilities/watch` to detect changes but the actual change event value was being ignored, use [`watchEvent`](sdk-observability.mdx#watchevent) instead as it will have better performance when the underlying watched property changes.
+
+```ts
+function collectionPropertyChange() {
+    console.log(
+        "do something that doesn’t require the change event value"
+    );
+}
+
+/** Do not do this **/
+onCollectionPropertyChange(
+    myObj,
+    "myCollectionProp",
+    collectionPropertyChange
+);
+
+/** Instead, do this **/
+watchEvent(
+    myObj,
+    "myCollectionProp",
+    ["change", collectionPropertyChange],
+    collectionPropertyChange
+);
+```
+
+`watchEvent` has two callbacks, one for the event and one for when the property being watched changes. By using the same callback for both, the callback will be invoked when the property value itself changes as well as the when the event is fired, creating the equivalent behavior of `onCollectionPropertyChange`, but without the difference being calculated between the two different `Collection`s when the property value changes.

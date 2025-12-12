@@ -1,0 +1,142 @@
+---
+title: Managing Map Areas Through Start-up Workflows
+author: Felicity Rhone
+authorTitle: Software Developer
+authorURL: https://github.com/Felicity-R
+authorImageURL: https://github.com/felicity-r.png
+tags: [mobile, workflow, samples, offline]
+---
+
+import Link from "@docusaurus/Link";
+import useBaseUrl from "@docusaurus/useBaseUrl";
+
+Map areas are a key feature of VertiGIS Studio Mobile, enabling users to work with a map in a completely disconnected state. But how can you help ensure your
+users have the data downloaded and updated before they go into the field? In this blog post we'll look at using VertiGIS Studio Workflow to notify users
+when their data may be stale, and even to automatically trigger a download or update as soon as they open their app.
+
+<!--truncate-->
+
+## Alerting the user of stale map areas
+
+The first Workflow we'll look at checks for custom areas which have already been downloaded, calculates if the date it was last updated is past a certain
+threshold, and alerts the user if the area is stale. The Workflow can be
+[found here](https://apps.vertigisstudio.com/workflow/designer/#workflow=bce63dd2a7b748c2b2ddb1be9c6d2e82).
+
+I'll walk you through the key functionality.
+
+:::tip
+Both the Workflows here are wrapped in a _Try/Catch_ so they will stop gracefully if something goes wrong. Drill into the _Try_ block to see the main functionality.
+:::
+
+<img src={useBaseUrl("img/stale-area-notify-wf.png")} />
+
+1.  First, this Workflow runs the
+    [offline.get-custom-areas](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#operation-offline.get-custom-areas) command, and checks if
+    there are any results (if not, there's nothing more to do).
+
+        This command, and subsequently this whole Workflow, works without an Internet connection,
+
+    because it's only looking at local data on the device.
+
+2.  Next, we're going to loop over each custom map area, and build a message to display if they're stale.
+
+3.  Inside the _For Each_ loop, we first check the status of the map area to see if it is downloaded.
+
+        The status is indicated as
+
+    [a flags enum](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/enum#enumeration-types-as-bit-flags), where `2` represents
+    the `Downloaded` state and `4` represents `Active`. Hence the bitwise `&` operations in this _If_ activity checks for the presence of the `Downloaded` or `Active` state flags.
+
+4.  If the area is downloaded, we'll compare the last update date on the map area with the current date and time to see if it's stale. Workflow's _Format Date_
+    activity makes it easy to do the math with the unix timestamp, and to display the date in a friendly way, so we'll use that activity.
+
+5.  Here's where we do that math: in this example, checking if the update was more than one week ago from today.
+
+        If you have a different update schedule,
+
+    e.g. "my users should update their map areas every Monday", you could adjust the logic here.
+
+6.  Rather than displaying a separate notification for each stale area, we're going to aggregate all the stale area warnings so we can just display
+    a single notification after we've finished checking each area.
+
+7.  Here's where we run the [ui.display-notification](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations/#command-ui.display-notification) operation,
+    displaying the alert to the user (if we did indeed add any lines to the message in Step 6).
+
+        In this example, we display it at the 'warning' level. You could add some logic that displays an 'info' level notification if their map areas are only a few days stale
+
+    and a 'warning' level for older ones, or display a more obvious alert rather than just a notification, etc.
+
+Here's the result:
+
+<img src={useBaseUrl("img/update-area-wf-running-ss.png")} />
+
+## Automatically downloading areas
+
+The second Workflow we'll look at deals with preplanned areas. It will check if there are any which have not yet been downloaded. If there are, it notifies
+the user, automatically begins the download process, and opens the Map Areas panel so the user can monitor the download progress. It can be
+[found here](https://apps.vertigisstudio.com/workflow/designer/#workflow=039194f48afc45f48b5283bd8c5b58c8).
+
+<img src={useBaseUrl("img/map-area-download-wf.png")} />
+
+1.  This Workflow starts off similarly to the first one, but uses
+    [offline.get-areas](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations/#operation-offline.get-areas) instead of
+    [offline.get-custom-areas](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations/#operation-offline.get-custom-areas).
+    This returns both custom and preplanned areas.
+
+2.  We want to filter through all the map areas to find only the ones that are preplanned (which we can do by checking if the `Removable` property is false) and
+    which are in the `Available to Download` state (a value of `0` in the enum described earlier).
+
+        You could change the logic here to look for a map areas with a
+
+    specific title, if you only wanted some subset of your map areas to be automatically downloaded, for example.
+
+3.  If we have no Internet connection, the Workflow would have still gotten to this point if it found local map areas (custom, or already-downloaded preplanned areas).
+    However, we won't be able to perform a download without a connection. Inside this _Container_ activity we'll check that we are connected, and that
+    network requests are not disabled in the app settings. If the conditions are not met, we'll exit the Workflow early.
+
+4.  Now we know we can start the downloads; let's alert the user.
+
+5.  Here we'll loop over each preplanned area, and call
+    [offline.download-area](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#operation-offline.download-area)
+    via the _Run Command_ activity.
+
+        Using *Run Command* rather than *Run Operation*
+
+    here ensures that the Workflow will move on to the next activity as soon as it triggers the command, as opposed to waiting for the operation (i.e. the whole download process)
+    to complete.
+    This enables us to get multiple downloads all running in parallel.
+
+        If you wanted to modify this Workflow to also update areas which are already downloaded,
+
+    you could adjust the filter in Step 2 to include these map areas (see the check from Step 3 in the first Workflow) and call the
+    [offline.update-area](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#operation-offline.update-area)
+    command in this loop as well.
+
+6.  Finally, we'll call [ui.activate](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#command-ui.activate)
+    to automatically open the Offline Areas panel. Now the user can watch their downloads proceed, and if they want to manually
+    start downloading a custom map area at the same time or something, they can do so.
+
+:::note
+Note that the argument to ui.activate in this sample Workflow,
+"item://offline/map-areas", is using the default item id ("map-areas") for the Offline Areas panel from the Mobile Default app template from Designer.
+If your component's id is different, you'll have to change this argument. You can check the id by clicking the cog icon at the top of the component's
+configuration panel in Designer.
+
+<img src={useBaseUrl("img/designer-item-id-cog.png")} />
+:::
+
+## Running the Workflows on start-up
+
+Both of the above Workflows are designed to run from the same point: from the 'Map Initialized' event. This is because the first step, checking for map areas,
+needs to access the map.
+The configuration for this can be found in Designer, under the Map Component's Events configuration section.
+
+<img src={useBaseUrl("img/map-initialized-designer.png")} />
+
+Once you've added your Workflow there, it will run every time the user launches or refreshes the app.
+Since neither of these Workflows displays a Workflow Form, set the Target property to 'None'. This prevents a panel from unnecessarily appearing in the taskbar
+to host your Workflow.
+
+<img src={useBaseUrl("img/wf-target-none-designer.png")} />
+
+Feel free to copy these Workflows and modify them as necessary for your own use cases!

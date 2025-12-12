@@ -34,17 +34,13 @@ Both the Workflows here are wrapped in a _Try/Catch_ so they will stop gracefull
     [offline.get-custom-areas](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#operation-offline.get-custom-areas) command, and checks if
     there are any results (if not, there's nothing more to do).
 
-        This command, and subsequently this whole Workflow, works without an Internet connection,
-
-    because it's only looking at local data on the device.
+    This command, and subsequently this whole Workflow, works without an Internet connection, because it's only looking at local data on the device.
 
 2.  Next, we're going to loop over each custom map area, and build a message to display if they're stale.
 
 3.  Inside the _For Each_ loop, we first check the status of the map area to see if it is downloaded.
 
-        The status is indicated as
-
-    [a flags enum](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/enum#enumeration-types-as-bit-flags), where `2` represents
+    The status is indicated as [a flags enum](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/enum#enumeration-types-as-bit-flags), where `2` represents
     the `Downloaded` state and `4` represents `Active`. Hence the bitwise `&` operations in this _If_ activity checks for the presence of the `Downloaded` or `Active` state flags.
 
 4.  If the area is downloaded, we'll compare the last update date on the map area with the current date and time to see if it's stale. Workflow's _Format Date_
@@ -52,9 +48,7 @@ Both the Workflows here are wrapped in a _Try/Catch_ so they will stop gracefull
 
 5.  Here's where we do that math: in this example, checking if the update was more than one week ago from today.
 
-        If you have a different update schedule,
-
-    e.g. "my users should update their map areas every Monday", you could adjust the logic here.
+    If you have a different update schedule, e.g. "my users should update their map areas every Monday", you could adjust the logic here.
 
 6.  Rather than displaying a separate notification for each stale area, we're going to aggregate all the stale area warnings so we can just display
     a single notification after we've finished checking each area.
@@ -62,9 +56,7 @@ Both the Workflows here are wrapped in a _Try/Catch_ so they will stop gracefull
 7.  Here's where we run the [ui.display-notification](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations/#command-ui.display-notification) operation,
     displaying the alert to the user (if we did indeed add any lines to the message in Step 6).
 
-        In this example, we display it at the 'warning' level. You could add some logic that displays an 'info' level notification if their map areas are only a few days stale
-
-    and a 'warning' level for older ones, or display a more obvious alert rather than just a notification, etc.
+    In this example, we display it at the 'warning' level. You could add some logic that displays an 'info' level notification if their map areas are only a few days stale and a 'warning' level for older ones, or display a more obvious alert rather than just a notification, etc.
 
 Here's the result:
 
@@ -86,9 +78,7 @@ the user, automatically begins the download process, and opens the Map Areas pan
 2.  We want to filter through all the map areas to find only the ones that are preplanned (which we can do by checking if the `Removable` property is false) and
     which are in the `Available to Download` state (a value of `0` in the enum described earlier).
 
-        You could change the logic here to look for a map areas with a
-
-    specific title, if you only wanted some subset of your map areas to be automatically downloaded, for example.
+    You could change the logic here to look for a map areas with a specific title, if you only wanted some subset of your map areas to be automatically downloaded, for example.
 
 3.  If we have no Internet connection, the Workflow would have still gotten to this point if it found local map areas (custom, or already-downloaded preplanned areas).
     However, we won't be able to perform a download without a connection. Inside this _Container_ activity we'll check that we are connected, and that
@@ -100,15 +90,10 @@ the user, automatically begins the download process, and opens the Map Areas pan
     [offline.download-area](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#operation-offline.download-area)
     via the _Run Command_ activity.
 
-        Using *Run Command* rather than *Run Operation*
+    Using _Run Command_ rather than _Run Operation_ here ensures that the Workflow will move on to the next activity as soon as it triggers the command, as opposed to waiting for the operation (i.e. the whole download process)
+    to complete. This enables us to get multiple downloads all running in parallel.
 
-    here ensures that the Workflow will move on to the next activity as soon as it triggers the command, as opposed to waiting for the operation (i.e. the whole download process)
-    to complete.
-    This enables us to get multiple downloads all running in parallel.
-
-        If you wanted to modify this Workflow to also update areas which are already downloaded,
-
-    you could adjust the filter in Step 2 to include these map areas (see the check from Step 3 in the first Workflow) and call the
+    If you wanted to modify this Workflow to also update areas which are already downloaded, you could adjust the filter in Step 2 to include these map areas (see the check from Step 3 in the first Workflow) and call the
     [offline.update-area](https://developers.vertigisstudio.com/docs/mobile/api-commands-operations#operation-offline.update-area)
     command in this loop as well.
 

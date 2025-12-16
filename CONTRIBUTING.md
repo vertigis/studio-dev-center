@@ -184,10 +184,7 @@ New blog posts can be created under the `blog` folder. To add a new page:
 ```
 ---
 title: New Generic Event Listener
-author: Kenneth Walker
-authorTitle: Software Developer
-authorURL: https://github.com/kewalker
-authorImageURL: https://github.com/kewalker.png
+authors: kenneth_walker
 tags: [mobile, workflow]
 ---
 
@@ -199,10 +196,10 @@ A short description that will be visible in the list of blog posts. Anything bel
 ```
 
 -   `title` becomes the prefix of the window title. For example `New Generic Event Listener`
--   `author` is the name of the person who wrote the blog post
--   `authorTitle` is the position of the person who wrote the blog post
--   `authorUrl` is a link to the author's github
--   `authorImageUrl` is a link to the author's github image
+-   `author` is the name of the person who wrote the blog post -- further details about the author are defined in the global authors.yml file.
+    -- `title` is the position of the person who wrote the blog post
+    -- `url` is a link to the author's github
+    -- `imageUrl` is a link to the author's github image
 -   `tags` is a comma separated list of tags to apply to the post - blog posts can be filtered by clicking on one of these links
 
 The remaining blog content should follow the `<!--truncate-->` tag.

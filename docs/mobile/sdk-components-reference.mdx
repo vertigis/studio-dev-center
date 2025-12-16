@@ -101,7 +101,7 @@ The preferred way to provide sub-dependencies to classes associated with compone
 
 ### XAML View
 
-XAML views and their respective "code-behind" are responsible for the presentation concerns of a component. Check out a [complete example in the SDK samples](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/Custom/XamlComponent).
+XAML views and their respective "code-behind" are responsible for the presentation concerns of a component. Check out a [complete example in the SDK samples](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/Samples/Custom/XamlComponent).
 
 XAML views can use any [XAML Controls](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/) along with built-in [VertiGIS Studio Mobile XAML Elements and styling](sdk-components-styling.mdx#using-vertigis-studio-mobile-views).
 
@@ -125,7 +125,7 @@ XAML views can use any [XAML Controls](https://learn.microsoft.com/en-us/dotnet/
 
 Component view models are responsible for populating properties with data for the view to bind to. The data for the view model is usually provided by the component class, which can consume app config or other data from the application through [dependency injection](sdk-dependency-injection.mdx). View models can use commands and operations to interact with application services and other components.
 
-Check out this example of a [component with a view model](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/CustomSamples/BreadCrumbs).
+Check out this example of a [component with a view model](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/Samples/CustomSamples/BreadCrumbs).
 
 ## Configuration Models
 
@@ -284,7 +284,7 @@ Components have an initialization method, which can be used to perform asynchron
 Always call `base.Dispose(disposing)` when overriding the `Dispose` method. `ComponentBase` already implements `IDisposable` and `IDisposableTracker`, so only override the `Dispose` method if you have created new managed resources which need to be cleaned up.
 :::
 
-To learn more about memory management in VertiGIS Studio Mobile, check out [this article](sdk-memory-leaks.mdx), and the [relevant SDK sample](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/Conceptual/Disposal).
+To learn more about memory management in VertiGIS Studio Mobile, check out [this article](sdk-memory-leaks.mdx), and the [relevant SDK sample](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/Samples/Conceptual/Disposal).
 
 ```cs
 [assembly: Component(typeof(CustomComponent), "component", XmlNamespace = XmlNamespaces.SamplesNamespace)]
@@ -368,11 +368,11 @@ class CustomComponent : ComponentBase
 
 Check out the relevant VertiGIS Studio Mobile SDK Samples:
 
--   [Custom Component](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/Custom/Component)
+-   [Custom Component](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/Samples/Custom/Component)
 
--   [Component with Configuration](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/Custom/ComponentConfiguration)
+-   [Component with Configuration](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/Samples/Custom/ComponentConfiguration)
 
--   [Component with XAML UI](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/VSM.Samples/Samples/Custom/XamlComponent)
+-   [Component with XAML UI](https://github.com/vertigis/vertigis-mobile-samples/tree/master/VSM.Samples/Samples/Custom/XamlComponent)
 
 ## Next Steps
 

@@ -1,0 +1,35 @@
+felicity_rhone:
+  name: Felicity Rhone
+  title: Software Developer
+  url: https://github.com/Felicity-R
+  image_url: https://github.com/felicity-r.png
+
+jack_basha:
+  name: Jack Basha
+  title: Quality Assurance Analyst
+  url: https://github.com/jackbasha
+  image_url: https://github.com/jackbasha.png
+
+ian_schmitz:
+  name: Ian Schmitz
+  title: Software Architect
+  url: https://github.com/ianschmitz
+  image_url: https://github.com/ianschmitz.png
+
+kenneth_walker:
+  name: Kenneth Walker
+  title: Software Developer
+  url: https://github.com/kewalker
+  image_url: https://github.com/kewalker.png
+
+michael_kowal:
+  name: Michael Kowal
+  title: Software Developer
+  url: https://github.com/MichaelKowal
+  image_url: https://github.com/MichaelKowal.png
+
+brenda_parker:
+  name: Brenda Parker
+  title: Software Developer
+  url: https://github.com/bparker-dev
+  image_url: https://github.com/bparker-dev.png

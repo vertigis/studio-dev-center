@@ -16,8 +16,9 @@ when their data may be stale, and even to automatically trigger a download or up
 ## Alerting the user of stale map areas
 
 The first Workflow we'll look at checks for custom areas which have already been downloaded, calculates if the date it was last updated is past a certain
-threshold, and alerts the user if the area is stale. The Workflow can be
-[found here](https://apps.vertigisstudio.com/workflow/designer/#workflow=bce63dd2a7b748c2b2ddb1be9c6d2e82).
+threshold, and alerts the user if the area is stale. The Workflow
+can be <a href={useBaseUrl("workflows/mobile-blog-check-custom-area-updates-wf.json")} download="mobile-blog-check-custom-area-updates-wf.json" target="\_blank">downloaded here</a> and
+imported into Designer.
 
 I'll walk you through the key functionality.
 
@@ -62,8 +63,8 @@ Here's the result:
 ## Automatically downloading areas
 
 The second Workflow we'll look at deals with preplanned areas. It will check if there are any which have not yet been downloaded. If there are, it notifies
-the user, automatically begins the download process, and opens the Map Areas panel so the user can monitor the download progress. It can be
-[found here](https://apps.vertigisstudio.com/workflow/designer/#workflow=039194f48afc45f48b5283bd8c5b58c8).
+the user, automatically begins the download process, and opens the Map Areas panel so the user can monitor the download progress. It can be downloaded for
+import <a href={useBaseUrl("workflows/mobile-blog-download-preplanned-areas-wf.json")} download="mobile-blog-download-preplanned-areas-wf.json" target="\_blank">here</a>.
 
 <img src={useBaseUrl("img/map-area-download-wf.png")} />
 

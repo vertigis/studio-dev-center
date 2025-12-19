@@ -196,7 +196,7 @@ A short description that will be visible in the list of blog posts. Anything bel
 ```
 
 -   `title` becomes the prefix of the window title. For example `New Generic Event Listener`
--   `author` is the name of the person who wrote the blog post -- further details about the author are defined in the global authors.yml file.
+-   `authors` is the name of the person who wrote the blog post -- further details about the author are defined in the global authors.yml file.
     -- `title` is the position of the person who wrote the blog post
     -- `url` is a link to the author's github
     -- `imageUrl` is a link to the author's github image

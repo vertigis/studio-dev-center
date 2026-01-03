@@ -1,0 +1,509 @@
+{
+    "_properties": { "isServerWorkflow": false },
+    "components": [
+        {
+            "id": 2,
+            "steps": [
+                {
+                    "id": 3,
+                    "inputs": {},
+                    "position": "0,0",
+                    "purpose": "start",
+                    "title": "Start",
+                    "transitions": [
+                        {
+                            "id": 53,
+                            "inputs": {},
+                            "position": "90,60 90,110",
+                            "sourceConnector": "bottom",
+                            "target": { "id": 46 }
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::TryCatch",
+                    "id": 46,
+                    "inputs": {},
+                    "name": "tryCatch1",
+                    "position": "-30,110",
+                    "title": "Try Catch"
+                }
+            ]
+        },
+        {
+            "id": 36,
+            "steps": [
+                {
+                    "id": 37,
+                    "inputs": {},
+                    "position": "0,0",
+                    "purpose": "start",
+                    "title": "Container",
+                    "transitions": [
+                        {
+                            "id": 42,
+                            "inputs": {},
+                            "position": "90,60 90,110",
+                            "sourceConnector": "bottom",
+                            "target": { "id": 41 }
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:app::RunOperation",
+                    "description": "Check if the device has a connection",
+                    "id": 41,
+                    "inputs": { "operationName": "network.has-connection" },
+                    "name": "runOperation_HasConnection",
+                    "position": "-30,110",
+                    "title": "Run Operation",
+                    "transitions": [
+                        {
+                            "id": 45,
+                            "inputs": {},
+                            "position": "90,200 90,260",
+                            "sourceConnector": "bottom",
+                            "target": { "id": 44 }
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:app::RunOperation",
+                    "description": "Check if network requests are explicitly disabled by app settings",
+                    "id": 44,
+                    "inputs": {
+                        "operationName": "network.are-web-requests-disabled"
+                    },
+                    "name": "runOperation_requestsDisabled",
+                    "position": "-30,260",
+                    "title": "Run Operation",
+                    "transitions": [
+                        {
+                            "id": 63,
+                            "inputs": {},
+                            "position": "90,360 90,400",
+                            "sourceConnector": "bottom",
+                            "target": { "id": 61 }
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::If",
+                    "description": "Connection exists",
+                    "id": 61,
+                    "inputs": {
+                        "condition": {
+                            "accessors": [
+                                "$runOperation_HasConnection",
+                                "$runOperation_requestsDisabled"
+                            ],
+                            "annotations": [
+                                { "count": 27, "index": 0, "kind": "idref" },
+                                { "count": 30, "index": 39, "kind": "idref" }
+                            ],
+                            "code": "$runOperation_HasConnection.result && !$runOperation_requestsDisabled.result",
+                            "source": "$runOperation_HasConnection.result && !$runOperation_requestsDisabled.result"
+                        }
+                    },
+                    "name": "if_connected",
+                    "position": "-30,400",
+                    "title": "If",
+                    "transitions": [
+                        {
+                            "branch": "false",
+                            "id": 73,
+                            "inputs": {},
+                            "position": "210,455 370,455 370,490",
+                            "sourceConnector": "right",
+                            "target": { "id": 69 },
+                            "targetConnector": "top"
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::Exit",
+                    "description": "No connection means we cannot start a download",
+                    "id": 65,
+                    "inputs": {},
+                    "position": "280,590",
+                    "title": "Exit"
+                },
+                {
+                    "action": "gcx:wf:core::Log",
+                    "description": "Log a warning",
+                    "id": 69,
+                    "inputs": {
+                        "level": "warning",
+                        "message": {
+                            "accessors": [],
+                            "code": "\"Unable to download preplanned map areas due to no connectivity\"",
+                            "source": "\"Unable to download preplanned map areas due to no connectivity\""
+                        }
+                    },
+                    "position": "250,490",
+                    "title": "Log",
+                    "transitions": [
+                        {
+                            "id": 79,
+                            "inputs": {},
+                            "position": "370,550 370,590",
+                            "sourceConnector": "bottom",
+                            "target": { "id": 65 }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 47,
+            "steps": [
+                {
+                    "action": "gcx:wf:core::Container",
+                    "description": "Ensure we have an internet connection",
+                    "id": 35,
+                    "inputs": {},
+                    "position": "-210,350",
+                    "title": "Container",
+                    "transitions": [
+                        {
+                            "id": 40,
+                            "inputs": {},
+                            "position": "-90,480 -90,520",
+                            "sourceConnector": "bottom",
+                            "target": { "id": 74 },
+                            "targetConnector": "top"
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:arcgis::GetMap",
+                    "id": 43,
+                    "inputs": {},
+                    "name": "map1",
+                    "position": "-300,60",
+                    "title": "Get Map",
+                    "transitions": [
+                        {
+                            "id": 82,
+                            "inputs": {},
+                            "position": "-180,120 -180,135 -30,135",
+                            "sourceConnector": "bottom",
+                            "target": { "id": 64 },
+                            "targetConnector": "left"
+                        }
+                    ]
+                },
+                {
+                    "id": 48,
+                    "inputs": {},
+                    "position": "0,0",
+                    "purpose": "start",
+                    "title": "Try",
+                    "transitions": [
+                        {
+                            "id": 81,
+                            "inputs": {},
+                            "position": "0,30 -180,30 -180,60",
+                            "sourceConnector": "left",
+                            "target": { "id": 43 },
+                            "targetConnector": "top"
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:app::RunOperation",
+                    "description": "Get map areas",
+                    "id": 64,
+                    "inputs": {
+                        "operationName": "offline.get-areas",
+                        "operationParameter": {
+                            "accessors": ["$map1"],
+                            "annotations": [
+                                { "count": 5, "index": 16, "kind": "idref" }
+                            ],
+                            "code": "{ \"mapExtension\": $map1.map.unwrap() }",
+                            "source": "{\"mapExtension\":$map1.map.unwrap() }"
+                        }
+                    },
+                    "name": "runOperation1",
+                    "position": "-30,90",
+                    "title": "Run Operation",
+                    "transitions": [
+                        {
+                            "id": 83,
+                            "inputs": {},
+                            "position": "210,135 270,135 270,200",
+                            "sourceConnector": "right",
+                            "target": { "id": 66 },
+                            "targetConnector": "top"
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::If",
+                    "description": "Has some areas",
+                    "id": 66,
+                    "inputs": {
+                        "condition": {
+                            "accessors": ["$runOperation1", "$runOperation1"],
+                            "annotations": [
+                                { "count": 14, "index": 2, "kind": "idref" },
+                                { "count": 14, "index": 27, "kind": "idref" }
+                            ],
+                            "code": "!!$runOperation1.result && $runOperation1.result.count > 0",
+                            "source": "!!$runOperation1.result && $runOperation1.result.count > 0"
+                        }
+                    },
+                    "name": "if_hasAreas",
+                    "position": "150,200",
+                    "title": "If",
+                    "transitions": [
+                        {
+                            "branch": "true",
+                            "id": 96,
+                            "inputs": {},
+                            "position": "150,255 40,260",
+                            "sourceConnector": "left",
+                            "target": { "id": 68 },
+                            "targetConnector": "right"
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::CreateValue",
+                    "description": "Filter map areas - want preplanned, and available to download",
+                    "id": 68,
+                    "inputs": {
+                        "expression": {
+                            "accessors": ["$runOperation1"],
+                            "annotations": [
+                                { "count": 14, "index": 0, "kind": "idref" }
+                            ],
+                            "code": "$runOperation1.result.filter(m => !m.Removable && (m.currentState == 0))",
+                            "source": "$runOperation1.result.filter(m => !m.Removable && (m.currentState == 0))"
+                        }
+                    },
+                    "name": "filteredAreas",
+                    "position": "-200,210",
+                    "title": "Create Value",
+                    "transitions": [
+                        {
+                            "id": 97,
+                            "inputs": {},
+                            "position": "-80,310 -80,330 270,330 270,350",
+                            "sourceConnector": "bottom",
+                            "target": { "id": 70 },
+                            "targetConnector": "top"
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::If",
+                    "description": "Has applicable areas - we will start downloading",
+                    "id": 70,
+                    "inputs": {
+                        "condition": {
+                            "accessors": ["$filteredAreas"],
+                            "annotations": [
+                                { "count": 14, "index": 0, "kind": "idref" }
+                            ],
+                            "code": "$filteredAreas.result.count > 0",
+                            "source": "$filteredAreas.result.count > 0"
+                        }
+                    },
+                    "name": "if_HasDownloadableAreas",
+                    "position": "150,350",
+                    "title": "If",
+                    "transitions": [
+                        {
+                            "branch": "true",
+                            "id": 39,
+                            "inputs": {},
+                            "position": "150,415 30,415",
+                            "sourceConnector": "left",
+                            "target": { "id": 35 }
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:app::RunOperation",
+                    "description": "Activate the map areas panel, so the user can see the downloads in progress",
+                    "id": 72,
+                    "inputs": {
+                        "operationName": {
+                            "accessors": [],
+                            "code": "\"ui.activate\"",
+                            "source": "\"ui.activate\""
+                        },
+                        "operationParameter": {
+                            "accessors": [],
+                            "code": "\"item://offline/map-areas\"",
+                            "source": "\"item://offline/map-areas\""
+                        }
+                    },
+                    "name": "runOperation2",
+                    "position": "110,710",
+                    "title": "Run Operation"
+                },
+                {
+                    "action": "gcx:wf:ui::Alert",
+                    "description": "Notify user",
+                    "id": 74,
+                    "inputs": {
+                        "text": "There are map areas which must be downloaded before you start work. Click 'OK' to initiate the download(s)."
+                    },
+                    "position": "-210,520",
+                    "title": "Alert",
+                    "transitions": [
+                        {
+                            "id": 84,
+                            "inputs": {},
+                            "position": "-90,580 -90,600 110,600",
+                            "sourceConnector": "bottom",
+                            "target": { "id": 76 },
+                            "targetConnector": "left"
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core:loop:ForEach",
+                    "description": "Begin the downloads",
+                    "id": 76,
+                    "inputs": {
+                        "items": {
+                            "accessors": ["$filteredAreas"],
+                            "annotations": [
+                                { "count": 14, "index": 0, "kind": "idref" }
+                            ],
+                            "code": "$filteredAreas.result",
+                            "source": "$filteredAreas.result"
+                        }
+                    },
+                    "name": "forEach1",
+                    "position": "110,530",
+                    "title": "For Each",
+                    "transitions": [
+                        {
+                            "id": 90,
+                            "inputs": {},
+                            "position": "230,670 230,710",
+                            "target": { "id": 72 }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 50,
+            "steps": [
+                {
+                    "id": 51,
+                    "inputs": {},
+                    "position": "0,0",
+                    "purpose": "start",
+                    "title": "Catch",
+                    "transitions": [
+                        {
+                            "id": 95,
+                            "inputs": {},
+                            "position": "90,60 90,110",
+                            "sourceConnector": "bottom",
+                            "target": { "id": 94 }
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::Log",
+                    "id": 94,
+                    "inputs": {
+                        "level": "warning",
+                        "message": {
+                            "accessors": ["$tryCatch1"],
+                            "annotations": [
+                                { "count": 10, "index": 52, "kind": "idref" }
+                            ],
+                            "code": "\"Unable to complete map area download workflow: \" + $tryCatch1.error.message",
+                            "source": "\"Unable to complete map area download workflow: \" + $tryCatch1.error.message"
+                        }
+                    },
+                    "position": "-30,110",
+                    "title": "Log"
+                }
+            ]
+        },
+        {
+            "id": 56,
+            "steps": [
+                {
+                    "id": 58,
+                    "inputs": {},
+                    "position": "0,0",
+                    "purpose": "start",
+                    "title": "For Each",
+                    "transitions": [
+                        {
+                            "id": 62,
+                            "inputs": {},
+                            "position": "90,60 90,120",
+                            "sourceConnector": "bottom",
+                            "target": { "id": 60 },
+                            "targetConnector": "top"
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:app::RunCommand",
+                    "description": "offline.download-area",
+                    "id": 60,
+                    "inputs": {
+                        "commandName": "offline.download-area",
+                        "commandParameter": {
+                            "accessors": ["$forEach1"],
+                            "annotations": [
+                                { "count": 9, "index": 16, "kind": "idref" }
+                            ],
+                            "code": "{\n    \"offlineArea\": $forEach1.item,\n    \"updatePreplannedAreaOnDownload\": true\n}",
+                            "source": "{\n\"offlineArea\":$forEach1.item,\n\"updatePreplannedAreaOnDownload\":true}"
+                        }
+                    },
+                    "position": "-30,120",
+                    "title": "Run Command"
+                }
+            ]
+        }
+    ],
+    "deploymentConfig": { "supportedApps": { "VSM": true } },
+    "designerVersion": "5.48.2+1",
+    "licenseInfo": { "licenseeId": "88cb61d6-af47-9b3e-5181-ed674c4c0815" },
+    "start": { "id": 3 },
+    "transitions": [
+        {
+            "branch": "content",
+            "id": 38,
+            "inputs": {},
+            "source": { "id": 35 },
+            "target": { "id": 37 }
+        },
+        {
+            "branch": "try",
+            "id": 49,
+            "inputs": {},
+            "source": { "id": 46 },
+            "target": { "id": 48 }
+        },
+        {
+            "branch": "catch",
+            "id": 52,
+            "inputs": {},
+            "source": { "id": 46 },
+            "target": { "id": 51 }
+        },
+        {
+            "branch": "loop",
+            "id": 78,
+            "inputs": {},
+            "source": { "id": 76 },
+            "target": { "id": 58 }
+        }
+    ]
+}

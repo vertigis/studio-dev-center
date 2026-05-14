@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { MessageSchema } from "./schema";
 import MessagingTypeSummary from "./MessagingTypeSummary";
 import MessagingDefinitionsSummary from "./MessagingDefinitionsSummary";
@@ -12,36 +12,43 @@ interface MessagingContentProps {
 export default function MessagingContent(props: MessagingContentProps) {
     const { schema, type, product } = props;
 
-    return (
-        <>
-            {(type === "argument" || type === "config") && (
-                <MessagingDefinitionsSummary
-                    schema={schema}
-                    product={product}
-                    type={type}
-                />
-            )}
-            {type === "command" && (
-                <MessagingTypeSummary
-                    schema={schema}
-                    type="command"
-                    product={product}
-                />
-            )}
-            {type === "event" && (
-                <MessagingTypeSummary
-                    schema={schema}
-                    type="event"
-                    product={product}
-                />
-            )}
-            {type === "operation" && (
-                <MessagingTypeSummary
-                    schema={schema}
-                    type="operation"
-                    product={product}
-                />
-            )}
-        </>
-    );
+    const messagingContent = useMemo(() => {
+        switch (type) {
+            case "argument":
+            case "config":
+                return (
+                    <MessagingDefinitionsSummary
+                        schema={schema}
+                        product={product}
+                        type={type}
+                    />
+                );
+            case "command":
+                return (
+                    <MessagingTypeSummary
+                        schema={schema}
+                        type="command"
+                        product={product}
+                    />
+                );
+            case "event":
+                return (
+                    <MessagingTypeSummary
+                        schema={schema}
+                        type="event"
+                        product={product}
+                    />
+                );
+            case "operation":
+                return (
+                    <MessagingTypeSummary
+                        schema={schema}
+                        type="operation"
+                        product={product}
+                    />
+                );
+        }
+    }, [schema, type, product]);
+
+    return messagingContent;
 }

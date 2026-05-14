@@ -1,5 +1,5 @@
 import Heading from "@theme/Heading";
-import React from "react";
+import React, { ReactElement, useEffect, useMemo } from "react";
 import { getDescription, listProperties } from "./MessagingArgument";
 import { MessageSchema } from "./schema";
 import {
@@ -7,6 +7,7 @@ import {
     getReferencedDefinition,
     getArgumentDefinitionLinkId,
 } from "./utils";
+import { useBaseUrlUtils } from "@docusaurus/useBaseUrl";
 
 interface MessagingDefinitionProps {
     definitionName: string;
@@ -14,31 +15,73 @@ interface MessagingDefinitionProps {
     product: "web" | "mobile";
 }
 
-export default function MessagingDefinition(props: MessagingDefinitionProps) {
+export default function MessagingDefinition(
+    props: MessagingDefinitionProps
+): ReactElement {
     const { definitionName, schema, product } = props;
 
-    const typeName = trimDefinitionsName(definitionName);
-    const parts = typeName.replace("/", ".").split(".");
-    const shortName = parts[parts.length - 1];
-    const definition = getReferencedDefinition(definitionName, schema);
-    if (!definition) {
-        return null;
-    }
+    const { withBaseUrl } = useBaseUrlUtils();
 
-    if (definition.type !== "object") {
-        console.warn(
-            "Tried to render definition for non-object type",
-            typeName
+    const typeName = useMemo(
+        () => trimDefinitionsName(definitionName),
+        [definitionName]
+    );
+    const parts = useMemo(
+        () => typeName.replace("/", ".").split("."),
+        [typeName]
+    );
+    const shortName = useMemo(() => parts[parts.length - 1], [parts]);
+    const definition = useMemo(
+        () => getReferencedDefinition(definitionName, schema),
+        [shortName]
+    );
+    const id = useMemo(() => getArgumentDefinitionLinkId(typeName), [typeName]);
+    const description = useMemo(
+        () =>
+            getDescription(
+                definition!,
+                schema,
+                "margin-bottom--md",
+                product,
+                withBaseUrl
+            ),
+        [definition, schema, product]
+    );
+    const properties = useMemo(() => {
+        if (
+            !definition?.properties ||
+            Object.keys(definition.properties).length === 0
+        ) {
+            return (
+                <em>This object doesn't currently contain any properties.</em>
+            );
+        }
+        return listProperties(
+            definition,
+            schema,
+            typeName,
+            product,
+            withBaseUrl
         );
-        return null;
-    }
+    }, [definition]);
 
-    const id = getArgumentDefinitionLinkId(typeName);
+    useEffect(() => {
+        if (definition?.type !== "object") {
+            console.warn(
+                "Tried to render definition for non-object type",
+                typeName
+            );
+        }
+    }, [definition]);
 
-    return (
+    return definition ? (
         <div className="margin-bottom--lg">
             <span>
-                <Heading as="h2" id={id}>
+                <Heading
+                    as="h2"
+                    id={id}
+                    className="messaging-definition-header"
+                >
                     {shortName}
                 </Heading>
                 {shortName !== typeName && (
@@ -47,14 +90,11 @@ export default function MessagingDefinition(props: MessagingDefinitionProps) {
                     </h5>
                 )}
             </span>
-            {getDescription(definition, schema, "margin-bottom--md", product)}
+            {description}
             <h3>Properties</h3>
-            {(!definition.properties ||
-                Object.keys(definition.properties).length === 0) && (
-                <em>This object doesn't currently contain any properties.</em>
-            )}
-            {definition.properties &&
-                listProperties(definition, schema, typeName, product)}
+            {properties}
         </div>
+    ) : (
+        <></>
     );
 }

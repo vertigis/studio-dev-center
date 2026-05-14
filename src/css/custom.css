@@ -70,6 +70,19 @@
     font-size: 0.75rem;
 }
 
+/**
+ * Tricky business: This rule makes the document fragment links push the
+ * fragment down the page by the height of this invisible element, thus
+ * accounting for the fixed header without otherwise affecting layout.
+ */
+.messaging-definition-header::before {
+    display: block;
+    content: " ";
+    margin-top: -3rem;
+    height: 3rem;
+    visibility: hidden;
+}
+
 .messaging-definition-subheader {
     font-family: monospace;
 }

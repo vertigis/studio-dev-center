@@ -1,8 +1,11 @@
 import Heading from "@theme/Heading";
-import React from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import MessagingArgument, { getDescription } from "./MessagingArgument";
 import { MessageSchema, Definition } from "./schema";
 import { getActionOrEventDefinitionLinkId, trimDefinitionsName } from "./utils";
+import { useBaseUrlUtils } from "@docusaurus/useBaseUrl";
+import { useInterval } from "./hooks";
+import { FilterStateContext } from "./FilterStateProvider";
 
 type RefDefinition = Required<Pick<Definition, "$ref">>;
 
@@ -22,81 +25,94 @@ function typeIsOptional(def: Definition | undefined): boolean | undefined {
 
 export default function MessagingTypeSummary(props: MessagingTypeSummaryProps) {
     const { schema, type, product } = props;
+
+    const { withBaseUrl } = useBaseUrlUtils();
+    const { filterText } = useContext(FilterStateContext);
+
     const definitions = schema.definitions as Record<
         string,
         Definition | undefined
     >;
-    let definitionName: string;
 
-    if (type === "command") {
-        definitionName = "viewer-spec.SingleCommand";
-    } else if (type === "operation") {
-        definitionName = "viewer-spec.SingleOperation";
-    } else {
-        definitionName = "viewer-spec.Event";
-    }
-    const names = definitions[definitionName]?.anyOf
-        ?.filter(definitionIsRef)
-        .map((def) => trimDefinitionsName(def.$ref));
+    const names = useMemo(() => {
+        let definitionName;
+        if (type === "command") {
+            definitionName = "viewer-spec.SingleCommand";
+        } else if (type === "operation") {
+            definitionName = "viewer-spec.SingleOperation";
+        } else {
+            definitionName = "viewer-spec.Event";
+        }
+        const typeNames = definitions[definitionName]?.anyOf
+            ?.filter((def) => definitionIsRef(def))
+            .map((def) => trimDefinitionsName(def.$ref));
 
-    if (!names) {
-        return null;
-    }
+        return filterText && filterText !== ""
+            ? typeNames?.filter((n) =>
+                  n.toLowerCase().includes(filterText.toLowerCase())
+              )
+            : typeNames;
+    }, [type, filterText]);
 
-    return (
-        <>
-            {names.map((key) => {
-                const item = definitions[key];
-                const linkId = getActionOrEventDefinitionLinkId(key, type);
-                const inputItem = definitions[`${key}:input`];
-                const outputItem = definitions[`${key}:output`];
+    const messagingTypeSummary = useMemo(() => {
+        return names?.map((key) => {
+            const item = definitions[key];
+            const linkId = getActionOrEventDefinitionLinkId(key, type);
+            const inputItem = definitions[`${key}:input`];
+            const outputItem = definitions[`${key}:output`];
 
-                if (!item) {
-                    return null;
-                }
+            if (!item) {
+                return null;
+            }
 
-                return (
-                    <div key={key} className="margin-bottom--lg">
-                        <Heading as="h2" id={linkId}>
-                            {key}
-                        </Heading>
-                        {getDescription(
-                            item,
-                            schema,
-                            "margin-bottom--md",
-                            product
-                        )}
-                        <div className="margin-bottom--md">
-                            <h3>{`Argument ${
-                                typeIsOptional(inputItem) === true
-                                    ? "(optional)"
-                                    : ""
-                            }`}</h3>
+            return (
+                <div key={key} className="margin-bottom--lg">
+                    <Heading
+                        as="h2"
+                        id={linkId}
+                        className="messaging-definition-header"
+                    >
+                        {key}
+                    </Heading>
+                    {getDescription(
+                        item,
+                        schema,
+                        "margin-bottom--md",
+                        product,
+                        withBaseUrl
+                    )}
+                    <div className="margin-bottom--md">
+                        <h3>{`Argument ${
+                            typeIsOptional(inputItem) === true
+                                ? "(optional)"
+                                : ""
+                        }`}</h3>
+                        <div className="margin-left--sm">
+                            <MessagingArgument
+                                definition={inputItem}
+                                schema={schema}
+                                linkId={linkId}
+                                product={product}
+                            />
+                        </div>
+                    </div>
+                    {type === "operation" && outputItem && (
+                        <>
+                            <div>Result</div>
                             <div className="margin-left--sm">
                                 <MessagingArgument
-                                    definition={inputItem}
+                                    definition={outputItem}
                                     schema={schema}
                                     linkId={linkId}
                                     product={product}
                                 />
                             </div>
-                        </div>
-                        {type === "operation" && outputItem && (
-                            <>
-                                <div>Result</div>
-                                <div className="margin-left--sm">
-                                    <MessagingArgument
-                                        definition={outputItem}
-                                        schema={schema}
-                                        linkId={linkId}
-                                        product={product}
-                                    />
-                                </div>
-                            </>
-                        )}
-                    </div>
-                );
-            })}
-        </>
-    );
+                        </>
+                    )}
+                </div>
+            );
+        });
+    }, [names, type, schema, product]);
+
+    return <>{messagingTypeSummary}</>;
 }

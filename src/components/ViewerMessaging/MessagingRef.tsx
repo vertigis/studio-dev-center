@@ -6,6 +6,7 @@ import {
     getArgumentDefinitionLink,
 } from "./utils";
 import { useBaseUrlUtils } from "@docusaurus/useBaseUrl";
+import Link from "@docusaurus/Link";
 
 interface MessagingRefProps {
     isArray?: boolean;
@@ -24,13 +25,13 @@ const getRefLinkElement = (
     <span>
         <code>
             {refUrl ? (
-                <a
+                <Link
                     href={refUrl}
                     target={refUrl.startsWith("http") ? "_blank" : "_self"}
                     onClick={() => (window.location.hash = linkId!)}
                 >
                     {shortName}
-                </a>
+                </Link>
             ) : (
                 shortName
             )}

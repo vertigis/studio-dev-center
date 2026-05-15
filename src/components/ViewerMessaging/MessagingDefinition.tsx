@@ -48,6 +48,15 @@ export default function MessagingDefinition(
         [definition, schema, product]
     );
     const properties = useMemo(() => {
+        // Special handling for enums
+        if (definition?.enum) {
+            return (
+                <code>
+                    {definition.enum.map((val) => `"${val}"`).join(" | ")}
+                </code>
+            );
+        }
+
         if (
             !definition?.properties ||
             Object.keys(definition.properties).length === 0
@@ -56,6 +65,7 @@ export default function MessagingDefinition(
                 <em>This object doesn't currently contain any properties.</em>
             );
         }
+
         return listProperties(
             definition,
             schema,
@@ -91,7 +101,7 @@ export default function MessagingDefinition(
                 )}
             </span>
             {description}
-            <h3>Properties</h3>
+            <h3>{definition.enum ? "Possible Values" : "Properties"}</h3>
             {properties}
         </div>
     ) : (

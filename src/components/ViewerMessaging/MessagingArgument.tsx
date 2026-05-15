@@ -293,10 +293,13 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
                     />
                 );
             }
-
             return (
                 <MessagingRef
-                    name={outputDefinition.$ref}
+                    name={
+                        outputDefinition.$ref === "T_13"
+                            ? "#/definitions/Feature"
+                            : outputDefinition.$ref
+                    }
                     schema={schema}
                     linkId={linkId}
                     product={product}
@@ -319,7 +322,7 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
                         <>
                             {items.map((option, index) => (
                                 // There's not a guaranteed safe identifier we can use for the key prop, fall back to index.
-                                <div key={`${option.$ref}-${index}` || index}>
+                                <div key={index}>
                                     <MessagingRef
                                         isArray
                                         name={option.$ref ?? ""}
@@ -430,7 +433,7 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
                     {types.length > 1 && <div>Any of:</div>}
                     {types.map((option, index) => (
                         // There's not a guaranteed safe identifier we can use for the key prop, fall back to index.
-                        <div key={`${option.$ref}-${index}` || index}>
+                        <div key={index}>
                             <MessagingArgument
                                 definition={option}
                                 schema={schema}

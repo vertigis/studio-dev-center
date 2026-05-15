@@ -24,26 +24,12 @@ export default function MessagingContent(props: MessagingContentProps) {
                     />
                 );
             case "command":
-                return (
-                    <MessagingTypeSummary
-                        schema={schema}
-                        type="command"
-                        product={product}
-                    />
-                );
             case "event":
-                return (
-                    <MessagingTypeSummary
-                        schema={schema}
-                        type="event"
-                        product={product}
-                    />
-                );
             case "operation":
                 return (
                     <MessagingTypeSummary
                         schema={schema}
-                        type="operation"
+                        type={type}
                         product={product}
                     />
                 );

@@ -16,11 +16,14 @@ export default function MessagingDefinitionsSummary(
     const { filterText } = useContext(FilterStateContext);
 
     const names = useMemo(() => {
-        // Grab only the `object` type definitions, everything else can be inlined.
+        // Grab only the `object` or `enum` type definitions.
         const filteredDefinitions: typeof schema.definitions = Object.entries(
             schema.definitions
         ).reduce((acc, [name, definition]) => {
-            if (definition.type === "object") {
+            if (
+                definition.type === "object" ||
+                (definition.type === "string" && definition.enum)
+            ) {
                 return { ...acc, [name]: definition };
             }
             return acc;

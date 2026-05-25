@@ -81,15 +81,16 @@ export default function MessagingRef(props: MessagingRefProps): ReactElement {
         }
 
         if (typeName.startsWith("esri") && !typeName.includes("rest-api")) {
-            const parts = typeName.replace(".", "/").split("/");
+            // esri.geometry.SpatialReference => ["geometry", "SpatialReference"];
+            const parts = typeName.split(".").slice(1);
             return getRefLinkElement(
                 isArray
                     ? `${parts[parts.length - 1]}[]`
                     : parts[parts.length - 1],
-                `https://developers.arcgis.com/javascript/latest/api-reference/${parts.join(
-                    "-"
-                )}.html`,
-                `@arcgis.core.${parts.splice(1).join(".")}`,
+                `https://developers.arcgis.com/javascript/latest/references/core/${parts.join(
+                    "/"
+                )}`,
+                `@arcgis.core.${parts.join(".")}`,
                 linkId
             ) as ReactElement;
         }

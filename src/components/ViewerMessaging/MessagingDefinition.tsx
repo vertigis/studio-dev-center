@@ -1,5 +1,5 @@
 import Heading from "@theme/Heading";
-import React, { ReactElement, useEffect, useMemo } from "react";
+import React, { ReactElement, useMemo } from "react";
 import { getDescription, listProperties } from "./MessagingArgument";
 import { MessageSchema } from "./schema";
 import {
@@ -73,15 +73,6 @@ export default function MessagingDefinition(
             product,
             withBaseUrl
         );
-    }, [definition]);
-
-    useEffect(() => {
-        if (definition?.type !== "object") {
-            console.warn(
-                "Tried to render definition for non-object type",
-                typeName
-            );
-        }
     }, [definition]);
 
     return definition ? (

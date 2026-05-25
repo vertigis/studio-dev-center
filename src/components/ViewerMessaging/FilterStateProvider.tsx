@@ -4,7 +4,6 @@ import {
     ReactElement,
     useCallback,
     useEffect,
-    useMemo,
     useRef,
     useState,
 } from "react";
@@ -17,10 +16,11 @@ export interface FilterState {
     setFilterRef?: (element: HTMLInputElement) => void;
 }
 
-const FilterPage = {
+export const FilterPage = {
     Commands: "Commands and Operations Reference",
     Events: "Events Reference",
     Arguments: "Argument Definition Reference",
+    Components: "Components and Services",
 };
 
 export const FilterStateContext = createContext<FilterState>({});
@@ -29,6 +29,7 @@ const FilterStateProvider = ({ children }: PropsWithChildren): ReactElement => {
     const [commandFilter, setCommandFilter] = useState("");
     const [eventFilter, setEventFilter] = useState("");
     const [argumentFilter, setArgumentFilter] = useState("");
+    const [componentFilter, setComponentFilter] = useState("");
     const [currentPage, setCurrentPage] = useState<string>();
     const [filterText, setFilterText] = useState("");
 
@@ -36,6 +37,7 @@ const FilterStateProvider = ({ children }: PropsWithChildren): ReactElement => {
 
     useEffect(() => {
         let newFilter: string = "";
+
         switch (currentPage) {
             case FilterPage.Commands:
                 newFilter = commandFilter;
@@ -45,6 +47,9 @@ const FilterStateProvider = ({ children }: PropsWithChildren): ReactElement => {
                 break;
             case FilterPage.Arguments:
                 newFilter = argumentFilter;
+                break;
+            case FilterPage.Components:
+                newFilter = componentFilter;
                 break;
         }
         setFilterText(newFilter);
@@ -65,6 +70,9 @@ const FilterStateProvider = ({ children }: PropsWithChildren): ReactElement => {
                     break;
                 case FilterPage.Arguments:
                     setArgumentFilter(value);
+                    break;
+                case FilterPage.Components:
+                    setComponentFilter(value);
                     break;
             }
         },

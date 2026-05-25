@@ -11,6 +11,7 @@ import {
     getReferencedDefinition,
 } from "./utils";
 import { useBaseUrlUtils, type BaseUrlOptions } from "@docusaurus/useBaseUrl";
+import markedAlert from "marked-alert";
 
 interface MessagingArgumentProps {
     definition: Definition | string | undefined;
@@ -30,20 +31,20 @@ const marked = new Marked(
         highlight(code) {
             return hljs.highlight(code, { language: "javascript" }).value;
         },
-    })
+    }),
+    markedAlert()
 );
 
-const renderMarkdown = (text: string, key?: string): JSX.Element => (
-    <span
-        key={key}
-        dangerouslySetInnerHTML={{
-            __html:
-                text.includes("|\n|") || text.includes("```")
-                    ? marked.parse(text, { async: false, breaks: true })
-                    : marked.parseInline(text, { async: false, breaks: true }),
-        }}
-    />
-);
+const renderMarkdown = (text: string, key?: string): JSX.Element => {
+    return (
+        <span
+            key={key}
+            dangerouslySetInnerHTML={{
+                __html: marked.parse(text, { async: false }),
+            }}
+        />
+    );
+};
 
 export function getDescription(
     definition: Definition,

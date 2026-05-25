@@ -91,6 +91,25 @@
     margin-bottom: 3rem;
 }
 
+.markdown-alert {
+    background-color: var(--ifm-color-danger-contrast-background);
+    padding: 2rem;
+    border-radius: 2rem;
+}
+
+.markdown-alert-title {
+    display: flex;
+}
+
+.markdown-alert svg {
+    margin-right: 1rem;
+    margin-top: 0.375rem;
+}
+
+.markdown-alert path {
+    fill: var(--docsearch-error-color);
+}
+
 /**
  * highlight.js classes, see https://highlightjs.org/examples
  */

@@ -8,22 +8,19 @@ import React, {
 import DocBreadcrumbs from "@theme-original/DocBreadcrumbs";
 import type DocBreadcrumbsType from "@theme/DocBreadcrumbs";
 import type { WrapperProps } from "@docusaurus/types";
-import { FilterStateContext } from "../../components/ViewerMessaging/FilterStateProvider";
+import {
+    FilterPage,
+    FilterStateContext,
+} from "../../components/ViewerMessaging/FilterStateProvider";
 
 type Props = WrapperProps<typeof DocBreadcrumbsType>;
-
-const filterPages = [
-    "Commands and Operations Reference",
-    "Events Reference",
-    "Argument Definition Reference",
-];
 
 export default function DocBreadcrumbsWrapper(props: Props): ReactNode {
     const { setFilterText, currentPage, setFilterRef } =
         useContext(FilterStateContext);
 
     const showFilter = useMemo(
-        () => currentPage && filterPages.includes(currentPage),
+        () => currentPage && Object.values(FilterPage).includes(currentPage),
         [currentPage]
     );
 

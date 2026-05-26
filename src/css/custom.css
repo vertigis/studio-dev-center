@@ -70,16 +70,24 @@
     font-size: 0.75rem;
 }
 
+html[data-theme="dark"] article > div {
+    background-color: var(--ifm-background-color);
+}
+
+article > div {
+    background-color: var(--ifm-background-surface-color);
+}
+
 /**
- * Tricky business: This rule makes the document fragment links push the
+ * This rule makes the document fragment links push the
  * fragment down the page by the height of this invisible element, thus
  * accounting for the fixed header without otherwise affecting layout.
  */
 .messaging-definition-header::before {
     display: block;
     content: " ";
-    margin-top: -3rem;
-    height: 3rem;
+    margin-top: -8rem;
+    height: 8rem;
     visibility: hidden;
 }
 
@@ -93,8 +101,9 @@
 
 .markdown-alert {
     background-color: var(--ifm-color-danger-contrast-background);
-    padding: 2rem;
-    border-radius: 2rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    margin-bottom: 1rem;
 }
 
 .markdown-alert-title {

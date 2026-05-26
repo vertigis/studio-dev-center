@@ -1,4 +1,4 @@
-import {
+import React, {
     createContext,
     PropsWithChildren,
     ReactElement,
@@ -12,6 +12,7 @@ import { useInterval } from "./hooks";
 export interface FilterState {
     filterText?: string;
     setFilterText?: (value: string) => void;
+    setArgumentFilter?: (value: string) => void;
     currentPage?: string;
     setFilterRef?: (element: HTMLInputElement) => void;
 }
@@ -75,6 +76,9 @@ const FilterStateProvider = ({ children }: PropsWithChildren): ReactElement => {
                     setComponentFilter(value);
                     break;
             }
+            if (filterRef.current && filterRef.current.value !== value) {
+                filterRef.current.value = value;
+            }
         },
         [currentPage]
     );
@@ -85,6 +89,7 @@ const FilterStateProvider = ({ children }: PropsWithChildren): ReactElement => {
     const contextValue: FilterState = {
         filterText,
         setFilterText: setFilterTextExternal,
+        setArgumentFilter,
         currentPage,
         setFilterRef,
     };

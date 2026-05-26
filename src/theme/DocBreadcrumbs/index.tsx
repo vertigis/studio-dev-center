@@ -36,7 +36,6 @@ export default function DocBreadcrumbsWrapper(props: Props): ReactNode {
                 overflowY: "auto",
                 position: "sticky",
                 top: "var(--ifm-navbar-height)",
-                backgroundColor: "var(--ifm-background-color)",
                 paddingTop: "1rem",
             }}
         >

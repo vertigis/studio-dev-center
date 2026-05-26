@@ -35,12 +35,31 @@ const marked = new Marked(
     markedAlert()
 );
 
+/**
+ * Render everything inline except content containing code blocks, tables, or
+ * block quotes.
+ */
+const useInline = (text: string): boolean => {
+    if (text.includes(">")) {
+        return false;
+    }
+    if (text.includes("|")) {
+        return false;
+    }
+    if (text.includes("```")) {
+        return false;
+    }
+    return true;
+};
+
 const renderMarkdown = (text: string, key?: string): JSX.Element => {
     return (
         <span
             key={key}
             dangerouslySetInnerHTML={{
-                __html: marked.parse(text, { async: false }),
+                __html: useInline(text)
+                    ? marked.parseInline(text, { async: false })
+                    : marked.parse(text, { async: false }),
             }}
         />
     );
@@ -309,11 +328,13 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
         }
         // This is a single type
         else if (outputDefinition.type) {
+            // Handle Enums
             if (outputDefinition.type === "string" && outputDefinition.enum) {
                 const enumType = (outputDefinition.enum as PrimitiveType[])
                     .map((val) => `"${val}"`)
                     .join(" | ");
                 return <code>{enumType}</code>;
+                // Handle Arrays
             } else if (
                 outputDefinition.type === "array" &&
                 outputDefinition.items
@@ -336,12 +357,18 @@ export default function MessagingArgument(props: MessagingArgumentProps) {
                         </>
                     );
                 };
+                // These are tuples and should not be rendered as a list of types.
                 if (Array.isArray(outputDefinition.items)) {
-                    return renderAnyOf(outputDefinition.items);
+                    const tupleType = `[${outputDefinition.items
+                        .map((item) => item.type)
+                        .join(", ")}]`;
+                    return <code>{tupleType}</code>;
                 }
+                // Heterogeneous array (can be any of these types)
                 if (Array.isArray(outputDefinition.items.anyOf)) {
                     return renderAnyOf(outputDefinition.items.anyOf);
                 }
+                // Array of a single (object) type
                 if (outputDefinition.items.$ref) {
                     const itemsRef = (outputDefinition.items as Definition)
                         .$ref!;

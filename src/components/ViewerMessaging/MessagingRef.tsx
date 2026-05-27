@@ -21,25 +21,23 @@ export default function MessagingRef(props: MessagingRefProps): ReactElement {
     const { isArray, name, schema, linkId, product } = props;
 
     const { withBaseUrl } = useBaseUrlUtils();
-    const { setFilterText, setArgumentFilter, currentPage } =
-        useContext(FilterStateContext);
+    const { setFilterText, setArgumentFilter } = useContext(FilterStateContext);
 
     const onRefLinkClicked = useCallback(
         (name: string, url: string) => {
             // Prepopulate the filter when linking to the definitions page. This
             // speeds things up quite a bit.
+            const typeName = name.endsWith("[]")
+                ? name.slice(0, name.length - 2)
+                : name;
             if (url.includes("api-argument-definitions")) {
-                setArgumentFilter?.(
-                    name.endsWith("[]") ? name.slice(0, name.length - 2) : name
-                );
+                setArgumentFilter?.(typeName);
             } else if (url.startsWith("#definition-")) {
-                setFilterText?.(
-                    name.endsWith("[]") ? name.slice(0, name.length - 2) : name
-                );
+                setFilterText?.(typeName);
             }
             window.location.hash = linkId ?? "";
         },
-        [linkId, currentPage, setArgumentFilter]
+        [linkId, setArgumentFilter]
     );
 
     const getRefLinkElement = useCallback(

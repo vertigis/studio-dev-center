@@ -1,10 +1,9 @@
 import Heading from "@theme/Heading";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useMemo } from "react";
 import MessagingArgument, { getDescription } from "./MessagingArgument";
 import { MessageSchema, Definition } from "./schema";
 import { getActionOrEventDefinitionLinkId, trimDefinitionsName } from "./utils";
 import { useBaseUrlUtils } from "@docusaurus/useBaseUrl";
-import { useInterval } from "./hooks";
 import { FilterStateContext } from "./FilterStateProvider";
 
 type RefDefinition = Required<Pick<Definition, "$ref">>;

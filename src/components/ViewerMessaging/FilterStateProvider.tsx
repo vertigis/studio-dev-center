@@ -1,3 +1,4 @@
+import { useLocation, useHistory } from "@docusaurus/router";
 import React, {
     createContext,
     PropsWithChildren,
@@ -7,7 +8,6 @@ import React, {
     useRef,
     useState,
 } from "react";
-import { useInterval } from "./hooks";
 
 export interface FilterState {
     filterText?: string;
@@ -18,10 +18,10 @@ export interface FilterState {
 }
 
 export const FilterPage = {
-    Commands: "Commands and Operations Reference",
-    Events: "Events Reference",
-    Arguments: "Argument Definition Reference",
-    Components: "Components and Services",
+    Commands: "api-commands-operations",
+    Events: "api-events",
+    Arguments: "api-argument-definitions",
+    Components: "api-components",
 };
 
 export const FilterStateContext = createContext<FilterState>({});
@@ -31,15 +31,27 @@ const FilterStateProvider = ({ children }: PropsWithChildren): ReactElement => {
     const [eventFilter, setEventFilter] = useState("");
     const [argumentFilter, setArgumentFilter] = useState("");
     const [componentFilter, setComponentFilter] = useState("");
-    const [currentPage, setCurrentPage] = useState<string>();
     const [filterText, setFilterText] = useState("");
+    const [currentPage, setCurrentPage] = useState("");
+    const [currentHash, setCurrentHash] = useState(window.location.hash);
 
     const filterRef = useRef<HTMLInputElement>();
+    const location = useLocation();
 
+    // Set stored filter text on page changes.
     useEffect(() => {
+        const page = location.pathname.split("/").pop();
+        if (
+            !page ||
+            !Object.values(FilterPage).includes(page) ||
+            page === currentPage
+        ) {
+            return;
+        }
+
         let newFilter: string = "";
 
-        switch (currentPage) {
+        switch (page) {
             case FilterPage.Commands:
                 newFilter = commandFilter;
                 break;
@@ -53,16 +65,25 @@ const FilterStateProvider = ({ children }: PropsWithChildren): ReactElement => {
                 newFilter = componentFilter;
                 break;
         }
+
+        setCurrentPage(page ?? "");
         setFilterText(newFilter);
+
         if (filterRef.current) {
             filterRef.current.value = newFilter;
         }
-    }, [currentPage]);
+    }, [location]);
 
     const setFilterTextExternal = useCallback(
         (value: string) => {
+            const page = location.pathname.split("/").pop();
+            if (!page || !Object.values(FilterPage).includes(page)) {
+                return;
+            }
+
             setFilterText(value);
-            switch (currentPage) {
+
+            switch (page) {
                 case FilterPage.Commands:
                     setCommandFilter(value);
                     break;
@@ -76,15 +97,43 @@ const FilterStateProvider = ({ children }: PropsWithChildren): ReactElement => {
                     setComponentFilter(value);
                     break;
             }
-            if (filterRef.current && filterRef.current.value !== value) {
+
+            if (filterRef.current) {
                 filterRef.current.value = value;
             }
         },
-        [currentPage]
+        [location]
     );
 
-    const setFilterRef = (element: HTMLInputElement) =>
-        (filterRef.current = element);
+    // Keep the filter text in sync with the hash fragment
+    const hashChangeHandler = useCallback(
+        () => setCurrentHash(window.location.hash),
+        []
+    );
+    useEffect(() => {
+        window.addEventListener("hashchange", hashChangeHandler);
+        return () =>
+            window.removeEventListener("hashchange", hashChangeHandler);
+    }, []);
+
+    useEffect(() => {
+        let name = currentHash.split("-").pop();
+        if (name?.includes(".")) {
+            name = name.split(".").pop();
+        }
+        if (name && filterText && !name.includes(filterText)) {
+            setFilterTextExternal(name);
+        }
+    }, [currentHash]);
+
+    const setFilterRef = (element: HTMLInputElement) => {
+        if (element && filterRef.current !== element) {
+            if (filterRef.current) {
+                element.value = filterRef.current.value;
+            }
+            filterRef.current = element;
+        }
+    };
 
     const contextValue: FilterState = {
         filterText,
@@ -93,16 +142,6 @@ const FilterStateProvider = ({ children }: PropsWithChildren): ReactElement => {
         currentPage,
         setFilterRef,
     };
-
-    useInterval(
-        () =>
-            setCurrentPage(
-                Array.from(
-                    document.getElementsByClassName("breadcrumbs__link")
-                ).pop()?.innerHTML
-            ),
-        300
-    );
 
     return (
         <FilterStateContext.Provider value={contextValue}>

@@ -44,7 +44,6 @@ export default function DocBreadcrumbsWrapper(props: Props): ReactNode {
                 <div style={{ marginTop: "4px" }}>Filter by name: </div>
                 <input
                     ref={setFilterRef}
-                    id="__API_Reference_Filter"
                     style={{
                         marginLeft: "1rem",
                         borderRadius: "5rem",

@@ -1,4 +1,5 @@
-import { useLocation, useHistory } from "@docusaurus/router";
+import { useLocation } from "@docusaurus/router";
+import useIsBrowser from "@docusaurus/useIsBrowser";
 import React, {
     createContext,
     PropsWithChildren,
@@ -27,13 +28,17 @@ export const FilterPage = {
 export const FilterStateContext = createContext<FilterState>({});
 
 const FilterStateProvider = ({ children }: PropsWithChildren): ReactElement => {
+    const isBrowser = useIsBrowser();
+
     const [commandFilter, setCommandFilter] = useState("");
     const [eventFilter, setEventFilter] = useState("");
     const [argumentFilter, setArgumentFilter] = useState("");
     const [componentFilter, setComponentFilter] = useState("");
     const [filterText, setFilterText] = useState("");
     const [currentPage, setCurrentPage] = useState("");
-    const [currentHash, setCurrentHash] = useState(window.location.hash);
+    const [currentHash, setCurrentHash] = useState(
+        isBrowser ? window.location.hash : ""
+    );
 
     const filterRef = useRef<HTMLInputElement>();
     const location = useLocation();
@@ -112,8 +117,9 @@ const FilterStateProvider = ({ children }: PropsWithChildren): ReactElement => {
     );
     useEffect(() => {
         window.addEventListener("hashchange", hashChangeHandler);
-        return () =>
+        return () => {
             window.removeEventListener("hashchange", hashChangeHandler);
+        };
     }, []);
 
     useEffect(() => {

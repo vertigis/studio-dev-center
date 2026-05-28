@@ -25,7 +25,7 @@ export default function MessagingRef(props: MessagingRefProps): ReactElement {
 
     const onRefLinkClicked = useCallback(
         (name: string, url: string) => {
-            // Prepopulate the filter when linking to the definitions page. This
+            // Populate the filter when linking to the definitions page. This
             // speeds things up quite a bit.
             const typeName = name.endsWith("[]")
                 ? name.slice(0, name.length - 2)

@@ -2,7 +2,7 @@ import hljs from "highlight.js/lib/core";
 import javascript from "highlight.js/lib/languages/javascript";
 import { Marked } from "marked";
 import { markedHighlight } from "marked-highlight";
-import React from "react";
+import React, { useMemo } from "react";
 import { Definition, MessageSchema, PrimitiveType } from "./schema";
 import MessagingRef from "./MessagingRef";
 import {
@@ -10,7 +10,8 @@ import {
     getArgumentDefinitionLinkId,
     getReferencedDefinition,
 } from "./utils";
-import useBaseUrl from "@docusaurus/useBaseUrl";
+import { useBaseUrlUtils, type BaseUrlOptions } from "@docusaurus/useBaseUrl";
+import markedAlert from "marked-alert";
 
 interface MessagingArgumentProps {
     definition: Definition | string | undefined;
@@ -30,25 +31,46 @@ const marked = new Marked(
         highlight(code) {
             return hljs.highlight(code, { language: "javascript" }).value;
         },
-    })
+    }),
+    markedAlert()
 );
 
-const renderMarkdown = (text: string): JSX.Element => (
-    <span
-        dangerouslySetInnerHTML={{
-            __html:
-                text.includes("|\n|") || text.includes("```")
-                    ? marked.parse(text, { async: false, breaks: true })
-                    : marked.parseInline(text, { async: false, breaks: true }),
-        }}
-    />
-);
+/**
+ * Render everything inline except content containing code blocks, tables, or
+ * block quotes.
+ */
+const useInline = (text: string): boolean => {
+    if (text.includes(">")) {
+        return false;
+    }
+    if (text.includes("|")) {
+        return false;
+    }
+    if (text.includes("```")) {
+        return false;
+    }
+    return true;
+};
+
+const renderMarkdown = (text: string, key?: string): JSX.Element => {
+    return (
+        <span
+            key={key}
+            dangerouslySetInnerHTML={{
+                __html: useInline(text)
+                    ? marked.parseInline(text, { async: false })
+                    : marked.parse(text, { async: false }),
+            }}
+        />
+    );
+};
 
 export function getDescription(
     definition: Definition,
     schema: MessageSchema,
     className: string,
-    product: "web" | "mobile"
+    product: "web" | "mobile",
+    withBaseUrl: (url: string, options?: BaseUrlOptions) => string
 ): JSX.Element | undefined {
     let { description } = definition;
     if (!description) {
@@ -86,7 +108,13 @@ export function getDescription(
             ? getReferencedDefinition(definition.$ref, schema)
             : getDefinition(linkText);
         return referencedDef
-            ? getDescription(referencedDef, schema, className, product)
+            ? getDescription(
+                  referencedDef,
+                  schema,
+                  className,
+                  product,
+                  withBaseUrl
+              )
             : undefined;
     }
 
@@ -103,7 +131,7 @@ export function getDescription(
         const isExternalLink = displayText?.startsWith("http");
         const referenceLink =
             displayText && schema.definitions[displayText]
-                ? useBaseUrl(getArgumentDefinitionLink(displayText, product))
+                ? withBaseUrl(getArgumentDefinitionLink(displayText, product)!)
                 : isExternalLink
                 ? displayText
                 : undefined;
@@ -124,44 +152,45 @@ export function getDescription(
         if (index === 0) {
             if (parts.length === 1) {
                 return [
-                    <span>{renderMarkdown(start!)}</span>,
-                    <code>{linkElement}</code>,
-                    <>{renderMarkdown(remaining?.slice(link.length)!)}</>,
+                    <span key={`${index}-a`}>{renderMarkdown(start!)}</span>,
+                    <code key={`${index}-b`}>{linkElement}</code>,
+                    renderMarkdown(
+                        remaining?.slice(link.length)!,
+                        `${index}-c`
+                    ),
                 ];
             }
             return [
-                <span>{renderMarkdown(start!)}</span>,
-                <code>{linkElement}</code>,
-                <>
-                    {renderMarkdown(
-                        description?.slice(
-                            0,
-                            description?.indexOf(parts[index + 1])
-                        )!
-                    )}
-                </>,
+                <span key={`${index}-a`}>{renderMarkdown(start!)}</span>,
+                <code key={`${index}-b`}>{linkElement}</code>,
+                renderMarkdown(
+                    description?.slice(
+                        0,
+                        description?.indexOf(parts[index + 1])
+                    )!,
+                    `${index}-c`
+                ),
             ];
         }
         if (description?.length! > 0) {
             if (index < parts.length - 1) {
                 return [
-                    <code>{linkElement}</code>,
-                    <>
-                        {renderMarkdown(
-                            description?.slice(
-                                0,
-                                description?.indexOf(parts[index + 1])
-                            )!
-                        )}
-                    </>,
+                    <code key={`${index}-a`}>{linkElement}</code>,
+                    renderMarkdown(
+                        description?.slice(
+                            0,
+                            description?.indexOf(parts[index + 1])
+                        )!,
+                        `${index}-b`
+                    ),
                 ];
             }
             return [
-                <code>{linkElement}</code>,
-                <>{renderMarkdown(remaining?.slice(link.length)!)}</>,
+                <code key={`${index}-a`}>{linkElement}</code>,
+                renderMarkdown(remaining?.slice(link.length)!, `${index}-b`),
             ];
         }
-        return [<code>{linkElement}</code>];
+        return [<code key={index}>{linkElement}</code>];
     };
 
     return (
@@ -175,7 +204,8 @@ export function listProperties(
     definition: Definition,
     schema: MessageSchema,
     typeName: string,
-    product: "web" | "mobile"
+    product: "web" | "mobile",
+    withBaseUrl: (url: string, options?: BaseUrlOptions) => string
 ) {
     if (!definition.properties) {
         return null;
@@ -218,7 +248,8 @@ export function listProperties(
                                     propDef,
                                     schema,
                                     "margin-top--sm",
-                                    product
+                                    product,
+                                    withBaseUrl
                                 )}
                             </div>
                         </div>
@@ -230,181 +261,222 @@ export function listProperties(
 }
 
 export default function MessagingArgument(props: MessagingArgumentProps) {
-    const { schema, linkId, product } = props;
+    const { schema, linkId, product, definition } = props;
 
-    let definition = props.definition;
+    const { withBaseUrl } = useBaseUrlUtils();
 
-    // These don't provide value so ignore them
-    const isCommandArgument = (definition: Definition) => {
-        return (
-            definition.properties &&
-            Object.keys(definition.properties).length === 2 &&
-            definition.required?.length === 2 &&
-            definition.required[0] === "name" &&
-            definition.required[1] === "arguments"
-        );
-    };
+    const outputMessagingArgument = useMemo(() => {
+        let outputDefinition = definition;
 
-    if (typeof definition === "string") {
-        const foundDefinition = getReferencedDefinition(definition, schema);
-        console.warn("Couldn't find definition:", definition);
-        definition = foundDefinition;
-    }
-
-    if (!definition) {
-        return (
-            <div style={{ fontStyle: "italic" }}>There are no arguments</div>
-        );
-    }
-    // This is a single type referencing another definition
-    else if (definition.$ref) {
-        const referencedDef = getReferencedDefinition(definition.$ref, schema);
-
-        // We only hyperlink to object type definitions, everything else can be inlined.
-        if (referencedDef && referencedDef.type !== "object") {
+        // These don't provide value so ignore them
+        const isCommandArgument = (definition: Definition) => {
             return (
-                <MessagingArgument
-                    definition={referencedDef}
-                    schema={schema}
-                    linkId={linkId}
-                    product={product}
-                />
+                definition.properties &&
+                Object.keys(definition.properties).length === 2 &&
+                definition.required?.length === 2 &&
+                definition.required[0] === "name" &&
+                definition.required[1] === "arguments"
             );
+        };
+
+        if (typeof outputDefinition === "string") {
+            const foundDefinition = getReferencedDefinition(
+                outputDefinition,
+                schema
+            );
+            console.warn("Couldn't find definition:", outputDefinition);
+            outputDefinition = foundDefinition;
         }
 
-        return (
-            <MessagingRef
-                name={definition.$ref}
-                schema={schema}
-                linkId={linkId}
-                product={product}
-            />
-        );
-    }
-    // This is a single type
-    else if (definition.type) {
-        if (definition.type === "string" && definition.enum) {
-            const enumType = (definition.enum as PrimitiveType[])
-                .map((val) => `"${val}"`)
-                .join(" | ");
-            return <code>{enumType}</code>;
-        } else if (definition.type === "array" && definition.items) {
-            const renderAnyOf = (items: Definition[]) => {
+        if (!outputDefinition) {
+            return (
+                <div style={{ fontStyle: "italic" }}>
+                    There are no arguments
+                </div>
+            );
+        }
+        // This is a single type referencing another definition
+        else if (outputDefinition.$ref) {
+            const referencedDef = getReferencedDefinition(
+                outputDefinition.$ref,
+                schema
+            );
+
+            // We only hyperlink to object type definitions, everything else can be inlined.
+            if (referencedDef && referencedDef.type !== "object") {
                 return (
-                    <>
-                        {items.map((option, index) => (
-                            // There's not a guaranteed safe identifier we can use for the key prop, fall back to index.
-                            <div key={`${option.$ref}-${index}` || index}>
-                                <MessagingRef
-                                    isArray
-                                    name={option.$ref ?? ""}
-                                    schema={schema}
-                                    linkId={linkId}
-                                    product={product}
-                                />
-                            </div>
-                        ))}
-                    </>
-                );
-            };
-            if (Array.isArray(definition.items)) {
-                return renderAnyOf(definition.items);
-            }
-            if (Array.isArray(definition.items.anyOf)) {
-                return renderAnyOf(definition.items.anyOf);
-            }
-            if (definition.items.$ref) {
-                const itemsRef = (definition.items as Definition).$ref!;
-                return (
-                    <MessagingRef
-                        isArray
-                        name={itemsRef}
+                    <MessagingArgument
+                        definition={referencedDef}
                         schema={schema}
                         linkId={linkId}
                         product={product}
                     />
                 );
             }
-            return <code>{(definition.items as Definition).type}[]</code>;
-        } else if (definition.type === "object") {
-            if (isCommandArgument(definition)) {
-                return null;
-            }
-            if (definition.properties) {
+            return (
+                <MessagingRef
+                    name={
+                        outputDefinition.$ref === "T_13"
+                            ? "#/definitions/Feature"
+                            : outputDefinition.$ref
+                    }
+                    schema={schema}
+                    linkId={linkId}
+                    product={product}
+                />
+            );
+        }
+        // This is a single type
+        else if (outputDefinition.type) {
+            // Handle Enums
+            if (outputDefinition.type === "string" && outputDefinition.enum) {
+                const enumType = (outputDefinition.enum as PrimitiveType[])
+                    .map((val) => `"${val}"`)
+                    .join(" | ");
+                return <code>{enumType}</code>;
+                // Handle Arrays
+            } else if (
+                outputDefinition.type === "array" &&
+                outputDefinition.items
+            ) {
+                const renderAnyOf = (items: Definition[]) => {
+                    return (
+                        <>
+                            {items.map((option, index) => (
+                                // There's not a guaranteed safe identifier we can use for the key prop, fall back to index.
+                                <div key={index}>
+                                    <MessagingRef
+                                        isArray
+                                        name={option.$ref ?? ""}
+                                        schema={schema}
+                                        linkId={linkId}
+                                        product={product}
+                                    />
+                                </div>
+                            ))}
+                        </>
+                    );
+                };
+                // These are tuples and should not be rendered as a list of types.
+                if (Array.isArray(outputDefinition.items)) {
+                    const tupleType = `[${outputDefinition.items
+                        .map((item) => item.type)
+                        .join(", ")}]`;
+                    return <code>{tupleType}</code>;
+                }
+                // Heterogeneous array (can be any of these types)
+                if (Array.isArray(outputDefinition.items.anyOf)) {
+                    return renderAnyOf(outputDefinition.items.anyOf);
+                }
+                // Array of a single (object) type
+                if (outputDefinition.items.$ref) {
+                    const itemsRef = (outputDefinition.items as Definition)
+                        .$ref!;
+                    return (
+                        <MessagingRef
+                            isArray
+                            name={itemsRef}
+                            schema={schema}
+                            linkId={linkId}
+                            product={product}
+                        />
+                    );
+                }
+                return (
+                    <code>{(outputDefinition.items as Definition).type}[]</code>
+                );
+            } else if (outputDefinition.type === "object") {
+                if (isCommandArgument(outputDefinition)) {
+                    return null;
+                }
+                if (outputDefinition.properties) {
+                    return (
+                        <>
+                            <code>object</code>
+                            {listProperties(
+                                outputDefinition,
+                                schema,
+                                linkId,
+                                product,
+                                withBaseUrl
+                            )}
+                        </>
+                    );
+                }
+                if (
+                    outputDefinition.additionalProperties &&
+                    outputDefinition.additionalProperties !== true
+                ) {
+                    if (
+                        outputDefinition.additionalProperties.type === "string"
+                    ) {
+                        return (
+                            <code>
+                                {(
+                                    outputDefinition.additionalProperties as Definition
+                                ).enum
+                                    ?.map((e) => `"${e}"`)
+                                    .join(" | ")}
+                            </code>
+                        );
+                    }
+                }
+                return <code>object</code>;
+            } else if (Array.isArray(outputDefinition.type)) {
+                // We already take care of calling out that an argument is optional
+                // if one of the allowed types is "null" so we don't need to
+                // explicitly include "null"
+                const types = outputDefinition.type.filter(
+                    (type) => type !== "null"
+                );
+                if (types.length === 0) {
+                    return null;
+                }
+                if (types.length === 1) {
+                    return <code>{types[0]}</code>;
+                }
                 return (
                     <>
-                        <code>object</code>
-                        {listProperties(definition, schema, linkId, product)}
+                        {types.map((type) => (
+                            <div key={type}>
+                                <code>{type}</code>
+                            </div>
+                        ))}
                     </>
                 );
             }
-            if (
-                definition.additionalProperties &&
-                definition.additionalProperties !== true
-            ) {
-                if (definition.additionalProperties.type === "string") {
-                    return (
-                        <code>
-                            {(
-                                definition.additionalProperties as Definition
-                            ).enum
-                                ?.map((e) => `"${e}"`)
-                                .join(" | ")}
-                        </code>
-                    );
-                }
-            }
-            return <code>object</code>;
-        } else if (Array.isArray(definition.type)) {
+
+            return <code>{outputDefinition.type}</code>;
+        }
+        // This is a union type
+        else if (outputDefinition.anyOf) {
             // We already take care of calling out that an argument is optional
             // if one of the allowed types is "null" so we don't need to
             // explicitly include "null"
-            const types = definition.type.filter((type) => type !== "null");
-            if (types.length === 0) {
-                return null;
-            }
-            if (types.length === 1) {
-                return <code>{types[0]}</code>;
-            }
+            const types = outputDefinition.anyOf.filter(
+                (def) => !((def.type as string) === "null")
+            );
             return (
                 <>
-                    {types.map((type) => (
-                        <div key={type}>
-                            <code>{type}</code>
+                    {types.length > 1 && <div>Any of:</div>}
+                    {types.map((option, index) => (
+                        // There's not a guaranteed safe identifier we can use for the key prop, fall back to index.
+                        <div key={index}>
+                            <MessagingArgument
+                                definition={option}
+                                schema={schema}
+                                linkId={linkId}
+                                product={product}
+                            />
                         </div>
                     ))}
                 </>
             );
         }
 
-        return <code>{definition.type}</code>;
-    }
-    // This is a union type
-    else if (definition.anyOf) {
-        // We already take care of calling out that an argument is optional
-        // if one of the allowed types is "null" so we don't need to
-        // explicitly include "null"
-        const types = definition.anyOf.filter(
-            (def) => !((def.type as string) === "null")
-        );
-        return (
-            <>
-                {types.length > 1 && <div>Any of:</div>}
-                {types.map((option, index) => (
-                    // There's not a guaranteed safe identifier we can use for the key prop, fall back to index.
-                    <div key={`${option.$ref}-${index}` || index}>
-                        <MessagingArgument
-                            definition={option}
-                            schema={schema}
-                            linkId={linkId}
-                            product={product}
-                        />
-                    </div>
-                ))}
-            </>
-        );
-    }
+        // Didn't contain an appropriate type. Hopefully the description was useful.
+        return <code>unknown</code>;
+    }, [schema, linkId, product, definition]);
 
-    // Didn't contain an appropriate type. Hopefully the description was useful.
-    return <code>unknown</code>;
+    return outputMessagingArgument;
 }

@@ -7,5 +7,6 @@
     },
     "files.exclude": {
         "**/.docusaurus": true
-    }
+    },
+    "js/ts.tsdk.path": "node_modules/typescript/lib"
 }

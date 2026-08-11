@@ -1,0 +1,518 @@
+{
+    "_properties": { "isServerWorkflow": false },
+    "components": [
+        {
+            "id": 1,
+            "steps": [
+                {
+                    "id": 2,
+                    "inputs": {},
+                    "position": "0,0",
+                    "purpose": "start",
+                    "title": "Start",
+                    "transitions": [
+                        {
+                            "id": 127,
+                            "inputs": {},
+                            "position": "90,60 90,110",
+                            "sourceConnector": "bottom",
+                            "target": { "id": 54 }
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::TryCatch",
+                    "id": 54,
+                    "inputs": {},
+                    "name": "tryCatch1",
+                    "position": "-30,110",
+                    "title": "Try Catch"
+                }
+            ]
+        },
+        {
+            "id": 55,
+            "steps": [
+                {
+                    "action": "gcx:wf:arcgis::GetMap",
+                    "id": 52,
+                    "inputs": {},
+                    "name": "map1",
+                    "position": "230,50",
+                    "title": "Get Map",
+                    "transitions": [
+                        {
+                            "id": 56,
+                            "inputs": {},
+                            "position": "350,110 350,130 210,130",
+                            "sourceConnector": "bottom",
+                            "target": { "id": 104 },
+                            "targetConnector": "right"
+                        }
+                    ]
+                },
+                {
+                    "id": 57,
+                    "inputs": {},
+                    "position": "0,0",
+                    "purpose": "start",
+                    "title": "Try",
+                    "transitions": [
+                        {
+                            "id": 61,
+                            "inputs": {},
+                            "position": "180,30 350,30 350,50",
+                            "sourceConnector": "right",
+                            "target": { "id": 52 },
+                            "targetConnector": "top"
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:app::RunOperation",
+                    "id": 104,
+                    "inputs": {
+                        "operationName": "offline.get-custom-areas",
+                        "operationParameter": {
+                            "accessors": ["$map1"],
+                            "annotations": [
+                                { "count": 5, "index": 16, "kind": "idref" }
+                            ],
+                            "code": "{ \"mapExtension\": $map1.map.unwrap() }",
+                            "source": "{\"mapExtension\":$map1.map.unwrap() }"
+                        }
+                    },
+                    "name": "runOperation_customAreas",
+                    "position": "-30,100",
+                    "title": "Get Custom Areas",
+                    "transitions": [
+                        {
+                            "id": 125,
+                            "inputs": {},
+                            "position": "90,160 90,200",
+                            "sourceConnector": "bottom",
+                            "target": { "id": 106 },
+                            "targetConnector": "top"
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::If",
+                    "description": "Has custom areas",
+                    "id": 106,
+                    "inputs": {
+                        "condition": {
+                            "accessors": [
+                                "$runOperation_customAreas",
+                                "$runOperation_customAreas"
+                            ],
+                            "annotations": [
+                                { "count": 25, "index": 2, "kind": "idref" },
+                                { "count": 25, "index": 38, "kind": "idref" }
+                            ],
+                            "code": "!!$runOperation_customAreas.result && $runOperation_customAreas.result.count > 0",
+                            "source": "!!$runOperation_customAreas.result && $runOperation_customAreas.result.count > 0"
+                        }
+                    },
+                    "name": "if_hasAreas",
+                    "position": "-30,200",
+                    "title": "If",
+                    "transitions": [
+                        {
+                            "branch": "true",
+                            "id": 118,
+                            "inputs": {},
+                            "position": "-30,255 -140,260",
+                            "sourceConnector": "left",
+                            "target": { "id": 110 }
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core:loop:ForEach",
+                    "description": "Custom area loop",
+                    "id": 108,
+                    "inputs": {
+                        "items": {
+                            "accessors": ["$runOperation_customAreas"],
+                            "annotations": [
+                                { "count": 25, "index": 0, "kind": "idref" }
+                            ],
+                            "code": "$runOperation_customAreas.result",
+                            "source": "$runOperation_customAreas.result"
+                        }
+                    },
+                    "name": "forEach1",
+                    "position": "-380,350",
+                    "title": "For Each",
+                    "transitions": [
+                        {
+                            "id": 47,
+                            "inputs": {},
+                            "position": "-140,420 70,420 70,450",
+                            "sourceConnector": "right",
+                            "target": { "id": 114 },
+                            "targetConnector": "top"
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::CreateValue",
+                    "description": "Initialize the message string, which we'll display after checking all the areas, if any of them are stale",
+                    "id": 110,
+                    "inputs": {
+                        "expression": {
+                            "accessors": [],
+                            "code": "\"\"",
+                            "source": "\"\""
+                        }
+                    },
+                    "name": "messageValue",
+                    "position": "-380,200",
+                    "title": "Create Value",
+                    "transitions": [
+                        {
+                            "id": 120,
+                            "inputs": {},
+                            "position": "-380,260 -400,260 -400,420 -380,420",
+                            "target": { "id": 108 }
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:app::RunOperation",
+                    "description": "Display warning notification",
+                    "id": 112,
+                    "inputs": {
+                        "operationName": "ui.display-notification",
+                        "operationParameter": {
+                            "accessors": ["$messageValue"],
+                            "annotations": [
+                                { "count": 13, "index": 46, "kind": "idref" }
+                            ],
+                            "code": "{\n    \"Message\": \"Map area update(s) required:\" + $messageValue.result,\n    \"Category\": \"Warning\"\n}",
+                            "source": "{\n\"Message\": \"Map area update(s) required:\" + $messageValue.result,\n\"Category\":\"Warning\"\n}"
+                        }
+                    },
+                    "name": "runOperation1",
+                    "position": "-230,570",
+                    "title": "Run Operation"
+                },
+                {
+                    "action": "gcx:wf:core::If",
+                    "description": "There's a message",
+                    "id": 114,
+                    "inputs": {
+                        "condition": {
+                            "accessors": ["$messageValue"],
+                            "annotations": [
+                                { "count": 13, "index": 0, "kind": "idref" }
+                            ],
+                            "code": "$messageValue.result != \"\"",
+                            "source": "$messageValue.result != \"\""
+                        }
+                    },
+                    "position": "-50,450",
+                    "title": "If",
+                    "transitions": [
+                        {
+                            "branch": "true",
+                            "id": 124,
+                            "inputs": {},
+                            "position": "-50,495 -110,495 -110,570",
+                            "target": { "id": 112 }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 60,
+            "steps": [
+                {
+                    "id": 65,
+                    "inputs": {},
+                    "position": "0,0",
+                    "purpose": "start",
+                    "title": "Catch",
+                    "transitions": [
+                        {
+                            "id": 129,
+                            "inputs": {},
+                            "position": "90,60 90,110",
+                            "sourceConnector": "bottom",
+                            "target": { "id": 128 }
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::Log",
+                    "id": 128,
+                    "inputs": {
+                        "level": "warning",
+                        "message": {
+                            "accessors": ["$tryCatch1"],
+                            "annotations": [
+                                { "count": 10, "index": 43, "kind": "idref" }
+                            ],
+                            "code": "\"Unable to check for map area updates: \" + $tryCatch1.error.message",
+                            "source": "\"Unable to check for map area updates: \" + $tryCatch1.error.message"
+                        }
+                    },
+                    "position": "-30,110",
+                    "title": "Log"
+                }
+            ]
+        },
+        {
+            "id": 70,
+            "steps": [
+                {
+                    "action": "gcx:wf:core::Annotation",
+                    "description": "300,000 ms = 5 minutes (helpful for testing)\n\n604,800,000 ms= 1 week",
+                    "id": 72,
+                    "inputs": {},
+                    "position": "90,350",
+                    "title": "Notes"
+                },
+                {
+                    "action": "gcx:wf:core::Evaluate",
+                    "description": "Add a note about this map area to our warning message, which we'll print after this loop finishes",
+                    "id": 74,
+                    "inputs": {
+                        "expression": {
+                            "accessors": [
+                                "$messageValue",
+                                "$forEach1",
+                                "$date1"
+                            ],
+                            "annotations": [
+                                { "count": 13, "index": 1, "kind": "idref" },
+                                { "count": 9, "index": 31, "kind": "idref" },
+                                { "count": 6, "index": 89, "kind": "idref" }
+                            ],
+                            "code": "($messageValue.result += \"\\n\" + $forEach1.item.Title + \" requires update. Last updated \" + $date1.local)",
+                            "source": "($messageValue.result += \"\\n\" +$forEach1.item.Title + \" requires update. Last updated \" +$date1.local)"
+                        }
+                    },
+                    "name": "evaluate1",
+                    "position": "-360,500",
+                    "title": "Evaluate Expression"
+                },
+                {
+                    "id": 76,
+                    "inputs": {},
+                    "position": "0,0",
+                    "purpose": "start",
+                    "title": "For Each",
+                    "transitions": [
+                        {
+                            "id": 92,
+                            "inputs": {},
+                            "position": "90,60 90,90",
+                            "sourceConnector": "bottom",
+                            "target": { "id": 78 }
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::If",
+                    "description": "area downloaded",
+                    "id": 78,
+                    "inputs": {
+                        "condition": {
+                            "accessors": ["$forEach1", "$forEach1"],
+                            "annotations": [
+                                { "count": 9, "index": 2, "kind": "idref" },
+                                { "count": 9, "index": 46, "kind": "idref" }
+                            ],
+                            "code": "(($forEach1.item.currentState & 2) == 2) || (($forEach1.item.currentState & 4) == 4)",
+                            "source": "(($forEach1.item.currentState & 2) == 2) || (($forEach1.item.currentState & 4) == 4)"
+                        }
+                    },
+                    "name": "if_areaDownloaded",
+                    "position": "-30,90",
+                    "title": "If",
+                    "transitions": [
+                        {
+                            "branch": "true",
+                            "id": 96,
+                            "inputs": {},
+                            "position": "-30,145 -90,145 -90,220",
+                            "target": { "id": 80 }
+                        },
+                        {
+                            "branch": "false",
+                            "id": 98,
+                            "inputs": {},
+                            "position": "210,145 270,145 270,220",
+                            "sourceConnector": "right",
+                            "target": { "id": 84 },
+                            "targetConnector": "top"
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::FormatDate",
+                    "description": "Format last update date from map area",
+                    "id": 80,
+                    "inputs": {
+                        "date": {
+                            "accessors": ["$forEach1"],
+                            "annotations": [
+                                { "count": 9, "index": 0, "kind": "idref" }
+                            ],
+                            "code": "$forEach1.item.UpdatedOn",
+                            "source": "$forEach1.item.UpdatedOn"
+                        }
+                    },
+                    "name": "date1",
+                    "position": "-210,220",
+                    "title": "Format Date",
+                    "transitions": [
+                        {
+                            "id": 50,
+                            "inputs": {},
+                            "position": "-210,270 -270,270",
+                            "sourceConnector": "left",
+                            "target": { "id": 82 },
+                            "targetConnector": "right"
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::Log",
+                    "description": "log last updated date (debug message)",
+                    "id": 82,
+                    "inputs": {
+                        "level": "debug",
+                        "message": {
+                            "accessors": ["$forEach1", "$date1"],
+                            "annotations": [
+                                { "count": 9, "index": 3, "kind": "idref" },
+                                { "count": 6, "index": 48, "kind": "idref" }
+                            ],
+                            "code": "\"\" + $forEach1.item.title + \" was last updated \" + $date1.local",
+                            "source": "\"\"+$forEach1.item.title + \" was last updated \" +$date1.local"
+                        }
+                    },
+                    "position": "-510,230",
+                    "title": "Log",
+                    "transitions": [
+                        {
+                            "id": 48,
+                            "inputs": {},
+                            "position": "-510,270 -530,270 -530,385 -410,385",
+                            "sourceConnector": "left",
+                            "target": { "id": 86 },
+                            "targetConnector": "left"
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::Log",
+                    "description": "Not downloaded - ignore (debug message)",
+                    "id": 84,
+                    "inputs": {
+                        "level": "debug",
+                        "message": {
+                            "accessors": ["$forEach1"],
+                            "annotations": [
+                                { "count": 9, "index": 3, "kind": "idref" }
+                            ],
+                            "code": "\"\" + $forEach1.item.title + \" is not downloaded.\"",
+                            "source": "\"\"+$forEach1.item.title + \" is not downloaded.\""
+                        }
+                    },
+                    "position": "150,220",
+                    "title": "Log"
+                },
+                {
+                    "action": "gcx:wf:core::FormatDate",
+                    "description": "Get - and format - current datetime",
+                    "id": 86,
+                    "inputs": {
+                        "date": {
+                            "accessors": ["Date"],
+                            "annotations": [
+                                { "count": 4, "index": 0, "kind": "idref" }
+                            ],
+                            "code": "Date.now()",
+                            "source": "Date.now()"
+                        }
+                    },
+                    "name": "date2",
+                    "position": "-410,340",
+                    "title": "Format Date",
+                    "transitions": [
+                        {
+                            "id": 49,
+                            "inputs": {},
+                            "position": "-170,385 30,385 30,410",
+                            "sourceConnector": "right",
+                            "target": { "id": 88 },
+                            "targetConnector": "top"
+                        }
+                    ]
+                },
+                {
+                    "action": "gcx:wf:core::If",
+                    "description": "check how old update is",
+                    "id": 88,
+                    "inputs": {
+                        "condition": {
+                            "accessors": ["$date2", "$date1"],
+                            "annotations": [
+                                { "count": 6, "index": 0, "kind": "idref" },
+                                { "count": 6, "index": 14, "kind": "idref" }
+                            ],
+                            "code": "$date2.unix - $date1.unix > 604800000",
+                            "source": "$date2.unix - $date1.unix > 604_800_000"
+                        }
+                    },
+                    "name": "if_staleUpdate",
+                    "position": "-90,410",
+                    "title": "If",
+                    "transitions": [
+                        {
+                            "branch": "true",
+                            "id": 102,
+                            "inputs": {},
+                            "position": "-90,465 -240,465 -240,500",
+                            "sourceConnector": "left",
+                            "target": { "id": 74 },
+                            "targetConnector": "top"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "deploymentConfig": { "supportedApps": { "VSM": true } },
+    "designerVersion": "5.48.2+1",
+    "licenseInfo": { "licenseeId": "88cb61d6-af47-9b3e-5181-ed674c4c0815" },
+    "start": { "id": 2 },
+    "transitions": [
+        {
+            "branch": "try",
+            "id": 58,
+            "inputs": {},
+            "source": { "id": 54 },
+            "target": { "id": 57 }
+        },
+        {
+            "branch": "catch",
+            "id": 67,
+            "inputs": {},
+            "source": { "id": 54 },
+            "target": { "id": 65 }
+        },
+        {
+            "branch": "loop",
+            "id": 116,
+            "inputs": {},
+            "source": { "id": 108 },
+            "target": { "id": 76 }
+        }
+    ]
+}

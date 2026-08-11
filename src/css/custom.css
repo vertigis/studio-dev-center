@@ -70,12 +70,53 @@
     font-size: 0.75rem;
 }
 
+html[data-theme="dark"] article > div {
+    background-color: var(--ifm-background-color);
+}
+
+article > div {
+    background-color: var(--ifm-background-surface-color);
+}
+
+/**
+ * This rule makes the document fragment links push the
+ * fragment down the page by the height of this invisible element, thus
+ * accounting for the fixed header without otherwise affecting layout.
+ */
+.messaging-definition-header::before {
+    display: block;
+    content: " ";
+    margin-top: -8rem;
+    height: 8rem;
+    visibility: hidden;
+}
+
 .messaging-definition-subheader {
     font-family: monospace;
 }
 
 .footer .footer__links {
     margin-bottom: 3rem;
+}
+
+.markdown-alert {
+    background-color: var(--ifm-color-danger-contrast-background);
+    padding: 1rem;
+    border-radius: 1rem;
+    margin-bottom: 1rem;
+}
+
+.markdown-alert-title {
+    display: flex;
+}
+
+.markdown-alert svg {
+    margin-right: 1rem;
+    margin-top: 0.375rem;
+}
+
+.markdown-alert path {
+    fill: var(--docsearch-error-color);
 }
 
 /**

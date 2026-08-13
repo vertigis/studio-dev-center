@@ -127,52 +127,14 @@ Then, add a `Create Feature` activity and fill out the inputs as follows:
 
 :::
 
-## 4 - Updating the Mobile app JSON and overriding the Search functionality
+## 4 - Updating the Mobile app to override the Search functionality
 
-To use this Workflow we've created in Mobile, launch the SuDo editor in Designer using `Ctrl+Shift+E` and scroll to the bottom. There, add a new entry to reference the `Search Override` Workflow we created earlier. You may use the following template and replace `portalItem` with your Workflow's ArcGIS portal link:
+To use this Workflow we've created in Mobile, open your app in Designer. Find your Search component, and scroll down to the Events portion of the configuration. Click the edit icon to modify the `Search` event's behaviour.
 
-```json
-{
-    "id": "search-override-workflow",
-    "title": "Search Override Workflow",
-    "target": "auto",
-    "portalItem": "<Replace me>",
-    "commandArgumentInput": "context",
-    "$type": "workflow"
-}
-```
+<img src={useBaseUrl("img/mobile-edit-search-button.png")} />
 
-When done correctly, the app JSON should look like the following:
+In the dialog which opens, select the Workflow you just created. If your Workflow does not need to display any UI (e.g. no Workflow Form involved), set the Target to `None` to indicate that it does not need to open a panel.
 
-<img
-    src={useBaseUrl("img/mobile-adding-workflow-via-sudo-editor.png")}
-/>
+<img src={useBaseUrl("img/mobile-search-workflow-target-none.png")} />
 
-Lastly, look up the search object in Designer, which you can find by searching (`Ctrl+F`) for `"$type": "search"`. Change it from
-
-```json
-{
-    "id": "search-config-1",
-    "$type": "search"
-},
-```
-
-To
-
-```json
-{
-    "id": "search-config-1",
-    "onSearch": "workflow.run-XXXX-XXX-XX-XXXXX-XXXXXX",
-    "$type": "search"
-},
-```
-
-Where you replace the `XXX...` with the value of the `id` field you typed in the previous step. So it looks like the following:
-
-<img
-    src={useBaseUrl(
-        "img/mobile-overriding-search-using-workflow.png"
-    )}
-/>
-
-After that is done, click on the `Apply, I know what I'm doing` button and wait for Designer to load, then save the app. Launch the app in Go and attempt to search for a feature that doesn't exist in the visible extent. If you've done everything correctly, the search should go through with the configured extent.
+Save the app. Now you can launch the app in Go and attempt to search for a feature that doesn't exist in the visible extent. If you've done everything correctly, the search should go through with the configured extent.
